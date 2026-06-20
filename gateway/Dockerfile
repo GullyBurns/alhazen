@@ -19,13 +19,17 @@ ENV PATH="/root/.local/bin:$PATH"
 # ==============================================================================
 FROM python-base AS deps
 WORKDIR /app
+# build-essential lets the semantic extra's compiled deps (hdbscan) build from
+# source. This stage is discarded — the runtime image only copies /app/.venv.
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential \
+    && rm -rf /var/lib/apt/lists/*
 COPY pyproject.toml uv.lock README.md ./
 # Source needed for the dynamic version (pyproject reads src/.../__init__.py)
 COPY src/skillful_alhazen/__init__.py ./src/skillful_alhazen/
-# Skill runtime deps + the gateway's own. pipeline (sf-hamilton) is needed at
-# import time by tech_recon.py. semantic (umap/hdbscan/voyage) is added when
-# scilit's lib migrates to the gateway.
-RUN uv sync --extra typedb --extra skills --extra skilllog --extra qdrant --extra pipeline --extra gateway --no-dev
+# Skill runtime deps + the gateway's own. pipeline (sf-hamilton) for tech_recon.py;
+# semantic (umap/hdbscan/voyage) for scilit map/cluster/embed. No torch — pymde
+# stays in the embedding-map extra.
+RUN uv sync --extra typedb --extra skills --extra skilllog --extra qdrant --extra pipeline --extra semantic --extra gateway --no-dev
 
 # ==============================================================================
 # Stage 3: Runtime
