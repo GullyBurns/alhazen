@@ -59,7 +59,8 @@ def _skill_root(skill: str) -> Path:
 def _primary_entrypoint(skill: str, root: Path) -> str:
     """Determine a skill's default script stem from its skill.yaml.
 
-    Handles both ``cli: agentic_memory.py`` and ``scripts: [jobhunt.py, ...]``.
+    Skills declare the entrypoint three different ways: ``cli: agentic_memory.py``,
+    ``script: skill_builder.py`` (singular), or ``scripts: [jobhunt.py, ...]``.
     Falls back to the skill name with dashes converted to underscores.
     """
     manifest = root / "skill.yaml"
@@ -67,6 +68,8 @@ def _primary_entrypoint(skill: str, root: Path) -> str:
         data = yaml.safe_load(manifest.read_text(encoding="utf-8")) or {}
         if data.get("cli"):
             return Path(data["cli"]).stem
+        if data.get("script"):
+            return Path(data["script"]).stem
         scripts = data.get("scripts")
         if isinstance(scripts, list) and scripts:
             return Path(scripts[0]).stem

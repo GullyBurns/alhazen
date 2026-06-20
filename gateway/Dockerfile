@@ -22,9 +22,10 @@ WORKDIR /app
 COPY pyproject.toml uv.lock README.md ./
 # Source needed for the dynamic version (pyproject reads src/.../__init__.py)
 COPY src/skillful_alhazen/__init__.py ./src/skillful_alhazen/
-# Mirror the dashboard's proven extra set (skills' heavy semantic deps are
-# imported lazily inside commands) plus the gateway's own deps.
-RUN uv sync --extra typedb --extra skills --extra skilllog --extra qdrant --extra gateway --no-dev
+# Skill runtime deps + the gateway's own. pipeline (sf-hamilton) is needed at
+# import time by tech_recon.py. semantic (umap/hdbscan/voyage) is added when
+# scilit's lib migrates to the gateway.
+RUN uv sync --extra typedb --extra skills --extra skilllog --extra qdrant --extra pipeline --extra gateway --no-dev
 
 # ==============================================================================
 # Stage 3: Runtime

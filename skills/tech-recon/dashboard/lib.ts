@@ -1,6 +1,7 @@
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
+import { runSkill, gatewayConfigured } from '@/lib/skill-gateway';
 
 const execFileAsync = promisify(execFile);
 
@@ -15,7 +16,10 @@ const TECH_RECON_SCRIPT = SKILL_ROOT
 
 const CWD = SKILL_ROOT || PROJECT_ROOT;
 
+// Prefer the warm gateway (no per-request Python cold-start); fall back to
+// spawning the CLI directly for host dev where no gateway is running.
 async function runTechRecon(args: string[]): Promise<unknown> {
+  if (gatewayConfigured()) return runSkill('tech-recon', args);
   const { stdout } = await execFileAsync(
     'uv',
     ['run', 'python', TECH_RECON_SCRIPT, ...args],
