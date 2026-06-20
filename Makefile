@@ -676,6 +676,11 @@ skills-validate: ## Validate all resolved skills have SKILL.md with name: field
 		echo "$(RED)✗ Validation failed$(NC)"; exit 1; \
 	fi
 
+.PHONY: skills-check
+skills-check: ## Fail if any local_skills/ copy has edits not in upstream (guards skills-update)
+	@echo "$(BLUE)Checking local_skills/ against upstream...$(NC)"
+	@uv run python scripts/check_skills_upstream.py
+
 define SKILLS_INSTALL_PY
 import os, subprocess, sys, shutil
 from pathlib import Path
@@ -853,6 +858,12 @@ skills-install: ## Resolve skills-registry.yaml into local_skills/ (path: symlin
 
 .PHONY: skills-update
 skills-update: ## Re-resolve all skills from registry (re-links core, re-clones external) and redeploy
+	@if [ "$(FORCE)" != "1" ]; then \
+		uv run python scripts/check_skills_upstream.py || { \
+			echo "$(RED)✗ Aborting skills-update — local edits in local_skills/ would be lost.$(NC)"; \
+			echo "$(YELLOW)  Push the changes upstream, or run: FORCE=1 make skills-update$(NC)"; \
+			exit 1; }; \
+	fi
 	@echo "$(BLUE)Updating all skills...$(NC)"
 	@$(if $(SKILL_LIBRARY),ALHAZEN_SKILL_LIBRARY=$(SKILL_LIBRARY)) uv run python -c "$$SKILLS_UPDATE_PY"
 	$(MAKE) --no-print-directory deploy-claude
