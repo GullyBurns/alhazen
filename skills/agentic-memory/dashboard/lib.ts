@@ -1,6 +1,7 @@
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
+import { runSkill, gatewayConfigured } from '@/lib/skill-gateway';
 
 const execFileAsync = promisify(execFile);
 
@@ -11,7 +12,10 @@ const AGENTIC_MEMORY_SCRIPT = path.join(
   '.claude/skills/agentic-memory/agentic_memory.py'
 );
 
+// Prefer the warm gateway (no per-request Python cold-start); fall back to
+// spawning the CLI directly for host dev where no gateway is running.
 async function runAgenticMemory(args: string[]): Promise<unknown> {
+  if (gatewayConfigured()) return runSkill('agentic-memory', args);
   const { stdout } = await execFileAsync(
     'uv',
     ['run', 'python', AGENTIC_MEMORY_SCRIPT, ...args],

@@ -1,13 +1,17 @@
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
+import { runSkill, gatewayConfigured } from '@/lib/skill-gateway';
 
 const execFileAsync = promisify(execFile);
 
 const PROJECT_ROOT = process.env.PROJECT_ROOT || path.resolve(process.cwd());
 const SCRIPT = path.join(PROJECT_ROOT, '.claude/skills/curation-skill-builder/skill_builder.py');
 
+// Prefer the warm gateway (no per-request Python cold-start); fall back to
+// spawning the CLI directly for host dev where no gateway is running.
 async function runDomainModeling(args: string[]): Promise<unknown> {
+  if (gatewayConfigured()) return runSkill('curation-skill-builder', args);
   const { stdout } = await execFileAsync(
     'uv',
     ['run', 'python', SCRIPT, ...args],
