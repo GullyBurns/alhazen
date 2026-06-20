@@ -18,6 +18,11 @@ TYPEDB_SCHEMAS_DIR := $(PROJECT_ROOT)/local_resources/typedb
 LOCAL_SKILLS_DIR := $(PROJECT_ROOT)/local_skills
 SKILLS_REGISTRY := $(PROJECT_ROOT)/skills-registry.yaml
 SKILL_LIBRARY ?=  # override: make build-skills SKILL_LIBRARY=https://github.com/MyOrg/fork
+# Authoritative full git clones of external skill repos live here (one per repo).
+# local_skills/<skill> symlinks into <repo>/<subdir>. Override per machine.
+ALHAZEN_SKILL_SOURCES ?= $(HOME)/Documents/GitHub
+# Symlink-free copy of resolved skills, mounted read-only into containers.
+STAGED_SKILLS_DIR := $(PROJECT_ROOT)/.skills-build
 CLAUDE_AGENTS_DIR := $(PROJECT_ROOT)/.claude/agents
 AGENTS_REGISTRY := $(PROJECT_ROOT)/agents-registry.yaml
 
@@ -88,7 +93,7 @@ build-env: ## Install Python dependencies
 	@echo "$(GREEN)✓ Python dependencies installed$(NC)"
 
 .PHONY: build-skills
-build-skills: skills-install deploy-claude ## Resolve skills-registry.yaml → local_skills/ + wire .claude/skills/
+build-skills: skills-install deploy-claude stage-skills ## Resolve skills-registry.yaml → local_skills/ + wire .claude/skills/ + stage for containers
 	@echo "$(BLUE)Compiling schema map...$(NC)"
 	@uv run python scripts/compile_schema_map.py --registry $(SKILLS_REGISTRY)
 	@echo "$(GREEN)✓ Skills built$(NC)"
@@ -685,58 +690,61 @@ define SKILLS_INSTALL_PY
 import os, subprocess, sys, shutil
 from pathlib import Path
 import yaml
+def repo_name(url):
+    return url.rstrip('/').split('/')[-1].removesuffix('.git')
 registry = Path('skills-registry.yaml')
 if not registry.exists():
     print('No skills-registry.yaml found'); sys.exit(0)
 cfg = yaml.safe_load(registry.read_text()) or {}
 defaults = cfg.get('defaults') or {}
-# Allow env var or make-var override of the skill library URL
 skill_library = os.environ.get('ALHAZEN_SKILL_LIBRARY') or defaults.get('git', '')
 default_ref = defaults.get('ref', 'main')
+sources_root = Path(os.environ.get('ALHAZEN_SKILL_SOURCES') or os.path.expanduser('~/Documents/GitHub'))
 skills = list(cfg.get('skills') or [])
-# Merge local registry if present (private/client skills not committed to git)
 local_reg = Path('skills-registry-local.yaml')
 if local_reg.exists():
-    local_cfg = yaml.safe_load(local_reg.read_text()) or {}
-    skills.extend(local_cfg.get('skills') or [])
+    skills.extend((yaml.safe_load(local_reg.read_text()) or {}).get('skills') or [])
 if not skills:
     print('No skills registered in skills-registry.yaml'); sys.exit(0)
 local_skills = Path('local_skills'); local_skills.mkdir(exist_ok=True)
+sources_root.mkdir(parents=True, exist_ok=True)
+cloned = {}  # repo_name -> ref (guard against the same repo pinned at two refs)
 for skill in skills:
     name = skill['name']
     target = local_skills / name
     if 'path' in skill:
-        # Path skill: absolute paths symlink directly; relative paths get ../ prefix
+        # Core/local skill: symlink directly (absolute path, or ../ for in-repo)
         src = Path(skill['path'])
-        if target.is_symlink():
-            target.unlink()
-        elif target.exists():
-            print(f'  Skipping {name} (real directory exists at local_skills/{name})'); continue
+        if target.is_symlink(): target.unlink()
+        elif target.exists(): shutil.rmtree(target)
         link_target = str(src) if src.is_absolute() else f'../{src}'
         target.symlink_to(link_target)
-        kind = 'local' if src.is_absolute() else 'core'
-        print(f'  ✓ Linked ({kind}): {name}')
+        print(f"  ✓ Linked ({'local' if src.is_absolute() else 'core'}): {name}")
         continue
-    # External skill: clone from git
+    # External skill: one full clone per repo under sources_root; symlink the subdir.
     git_url = skill.get('git') or skill_library
     ref = skill.get('ref') or default_ref
     subdir = skill.get('subdir', '.')
     if not git_url:
         print(f'  ✗ No git URL for {name} and no defaults.git set', file=sys.stderr); continue
-    if target.exists() and not target.is_symlink():
-        print(f'  Skipping {name} (already installed -- run make skills-update to refresh)'); continue
-    if target.is_symlink():
-        target.unlink()
-    print(f'  Installing {name} from {git_url}@{ref}...')
-    tmp = local_skills / f'_tmp_{name}'
-    try:
-        subprocess.run(['git', 'clone', '--depth=1', '--branch', ref, git_url, str(tmp)], check=True, capture_output=True)
-        src = tmp / subdir if subdir != '.' else tmp; src.rename(target)
-        print(f'  ✓ Installed {name}')
-    except subprocess.CalledProcessError as e:
-        print(f'  ✗ Failed to install {name}: {e}', file=sys.stderr)
-    finally:
-        if tmp.exists(): shutil.rmtree(tmp, ignore_errors=True)
+    rn = repo_name(git_url)
+    if rn in cloned and cloned[rn] != ref:
+        print(f'  ✗ {name}: repo {rn} requested at refs {cloned[rn]} and {ref} -- unsupported', file=sys.stderr); continue
+    clone = sources_root / rn
+    if not (clone / '.git').exists():
+        print(f'  Cloning {rn} from {git_url}@{ref}...')
+        r = subprocess.run(['git', 'clone', git_url, str(clone)], capture_output=True, text=True)
+        if r.returncode:
+            print(f'  ✗ Failed to clone {rn}: {r.stderr.strip()[:140]}', file=sys.stderr); continue
+        subprocess.run(['git', '-C', str(clone), 'checkout', ref], capture_output=True, text=True)
+    cloned[rn] = ref
+    src = clone / subdir if subdir != '.' else clone
+    if not src.exists():
+        print(f'  ✗ Subdir not found in {rn}: {subdir}', file=sys.stderr); continue
+    if target.is_symlink(): target.unlink()
+    elif target.exists(): shutil.rmtree(target)  # migrate a leftover detached dir
+    target.symlink_to(str(src.resolve()))
+    print(f'  ✓ Linked (external): {name} -> {rn}/{subdir}')
 endef
 export SKILLS_INSTALL_PY
 
@@ -744,6 +752,10 @@ define SKILLS_UPDATE_PY
 import os, subprocess, sys, shutil
 from pathlib import Path
 import yaml
+def repo_name(url):
+    return url.rstrip('/').split('/')[-1].removesuffix('.git')
+def git(*args):
+    return subprocess.run(['git', *args], capture_output=True, text=True)
 registry = Path('skills-registry.yaml')
 if not registry.exists():
     print('No skills-registry.yaml found'); sys.exit(0)
@@ -751,52 +763,64 @@ cfg = yaml.safe_load(registry.read_text()) or {}
 defaults = cfg.get('defaults') or {}
 skill_library = os.environ.get('ALHAZEN_SKILL_LIBRARY') or defaults.get('git', '')
 default_ref = defaults.get('ref', 'main')
+sources_root = Path(os.environ.get('ALHAZEN_SKILL_SOURCES') or os.path.expanduser('~/Documents/GitHub'))
 skills = list(cfg.get('skills') or [])
-# Merge local registry if present (private/client skills not committed to git)
 local_reg = Path('skills-registry-local.yaml')
 if local_reg.exists():
-    local_cfg = yaml.safe_load(local_reg.read_text()) or {}
-    skills.extend(local_cfg.get('skills') or [])
+    skills.extend((yaml.safe_load(local_reg.read_text()) or {}).get('skills') or [])
 if not skills:
     print('No skills registered'); sys.exit(0)
 local_skills = Path('local_skills'); local_skills.mkdir(exist_ok=True)
+sources_root.mkdir(parents=True, exist_ok=True)
+# 1) Pull each unique external clone (ff-only; never touch a dirty working tree).
+pulled = set()
+for skill in skills:
+    if 'path' in skill: continue
+    git_url = skill.get('git') or skill_library
+    ref = skill.get('ref') or default_ref
+    if not git_url: continue
+    rn = repo_name(git_url)
+    if rn in pulled: continue
+    pulled.add(rn)
+    clone = sources_root / rn
+    if not (clone / '.git').exists():
+        print(f'  Cloning {rn}...')
+        r = git('clone', git_url, str(clone))
+        if r.returncode: print(f'  ✗ clone {rn} failed: {r.stderr.strip()[:120]}', file=sys.stderr); continue
+        git('-C', str(clone), 'checkout', ref); continue
+    if git('-C', str(clone), 'status', '--porcelain').stdout.strip():
+        print(f'  ⚠ {rn}: uncommitted changes -- skipping pull (your work is safe)'); continue
+    git('-C', str(clone), 'fetch', 'origin', ref)
+    r = git('-C', str(clone), 'pull', '--ff-only', 'origin', ref)
+    if r.returncode:
+        print(f'  ⚠ {rn}: pull --ff-only failed (diverged?) -- skipping. {r.stderr.strip()[:90]}')
+    else:
+        print(f'  ✓ Pulled {rn}')
+# 2) Re-link every skill (core/local path symlinks + external subdir symlinks).
 for skill in skills:
     name = skill['name']
     target = local_skills / name
     if 'path' in skill:
-        # Path skill: re-link (absolute paths symlink directly; relative get ../ prefix)
         src = Path(skill['path'])
         if target.is_symlink(): target.unlink()
         elif target.exists(): shutil.rmtree(target)
         link_target = str(src) if src.is_absolute() else f'../{src}'
         target.symlink_to(link_target)
-        kind = 'local' if src.is_absolute() else 'core'
-        print(f'  ✓ Re-linked ({kind}): {name}')
+        print(f"  ✓ Re-linked ({'local' if src.is_absolute() else 'core'}): {name}")
         continue
-    # External skill: re-clone from git
     git_url = skill.get('git') or skill_library
     ref = skill.get('ref') or default_ref
     subdir = skill.get('subdir', '.')
     if not git_url:
-        print(f'  ✗ No git URL for {name} and no defaults.git set', file=sys.stderr); continue
-    print(f'  Updating {name}...')
+        print(f'  ✗ No git URL for {name}', file=sys.stderr); continue
+    clone = sources_root / repo_name(git_url)
+    src = clone / subdir if subdir != '.' else clone
+    if not src.exists():
+        print(f'  ✗ Subdir not found for {name}: {subdir}', file=sys.stderr); continue
     if target.is_symlink(): target.unlink()
     elif target.exists(): shutil.rmtree(target)
-    tmp = local_skills / f'_tmp_{name}'
-    try:
-        subprocess.run(['git', 'clone', '--depth=1', '--branch', ref, git_url, str(tmp)], check=True, capture_output=True)
-        src = tmp / subdir if subdir != '.' else tmp
-        if not src.exists():
-            print(f'  ✗ Subdir not found in {name} clone: {subdir}', file=sys.stderr)
-        else:
-            src.rename(target)
-            print(f'  ✓ Updated {name}')
-    except subprocess.CalledProcessError as e:
-        print(f'  ✗ Failed to clone {name}: {e}', file=sys.stderr)
-    except Exception as e:
-        print(f'  ✗ Failed to install {name}: {e}', file=sys.stderr)
-    finally:
-        if tmp.exists(): shutil.rmtree(tmp, ignore_errors=True)
+    target.symlink_to(str(src.resolve()))
+    print(f'  ✓ Re-linked (external): {name}')
 endef
 export SKILLS_UPDATE_PY
 
@@ -853,8 +877,21 @@ export AGENTS_INSTALL_PY
 .PHONY: skills-install
 skills-install: ## Resolve skills-registry.yaml into local_skills/ (path: symlinks, git: clones)
 	@echo "$(BLUE)Resolving skills from registry...$(NC)"
-	@$(if $(SKILL_LIBRARY),ALHAZEN_SKILL_LIBRARY=$(SKILL_LIBRARY)) uv run python -c "$$SKILLS_INSTALL_PY"
+	@ALHAZEN_SKILL_SOURCES="$(ALHAZEN_SKILL_SOURCES)" $(if $(SKILL_LIBRARY),ALHAZEN_SKILL_LIBRARY=$(SKILL_LIBRARY)) uv run python -c "$$SKILLS_INSTALL_PY"
 	@echo "$(GREEN)✓ Skills resolved to local_skills/$(NC)"
+
+.PHONY: stage-skills
+stage-skills: ## Materialize a symlink-free skill tree into ./.skills-build for container mounts
+	@echo "$(BLUE)Staging skills into .skills-build/ ...$(NC)"
+	@rm -rf "$(STAGED_SKILLS_DIR)" && mkdir -p "$(STAGED_SKILLS_DIR)"
+	@for skill_dir in $(LOCAL_SKILLS_DIR)/*/; do \
+		[ -e "$$skill_dir" ] || continue; \
+		name=$$(basename "$$skill_dir"); \
+		cp -RL "$$skill_dir" "$(STAGED_SKILLS_DIR)/$$name" 2>/dev/null \
+			|| echo "  $(YELLOW)⚠ skipped $$name (broken link?)$(NC)"; \
+	done
+	@find "$(STAGED_SKILLS_DIR)" -type d \( -name __pycache__ -o -name .venv -o -name node_modules \) -prune -exec rm -rf {} + 2>/dev/null || true
+	@echo "$(GREEN)✓ Skills staged: $$(ls -1 $(STAGED_SKILLS_DIR) | wc -l | tr -d ' ')$(NC)"
 
 .PHONY: skills-update
 skills-update: ## Re-resolve all skills from registry (re-links core, re-clones external) and redeploy
@@ -865,8 +902,9 @@ skills-update: ## Re-resolve all skills from registry (re-links core, re-clones 
 			exit 1; }; \
 	fi
 	@echo "$(BLUE)Updating all skills...$(NC)"
-	@$(if $(SKILL_LIBRARY),ALHAZEN_SKILL_LIBRARY=$(SKILL_LIBRARY)) uv run python -c "$$SKILLS_UPDATE_PY"
+	@ALHAZEN_SKILL_SOURCES="$(ALHAZEN_SKILL_SOURCES)" $(if $(SKILL_LIBRARY),ALHAZEN_SKILL_LIBRARY=$(SKILL_LIBRARY)) uv run python -c "$$SKILLS_UPDATE_PY"
 	$(MAKE) --no-print-directory deploy-claude
+	$(MAKE) --no-print-directory stage-skills
 	@echo "$(GREEN)✓ All skills updated$(NC)"
 
 .PHONY: skills-sync

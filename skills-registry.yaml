@@ -100,11 +100,11 @@ schema_map:
   namespaces:
     aos:
       skill: agent-os
-      schema: skills/agent-os/schema.tql
+      schema: local_skills/agent-os/schema.tql
       depends_on: []
     nbmem:
       skill: agentic-memory
-      schema: skills/agentic-memory/schema.tql
+      schema: local_skills/agentic-memory/schema.tql
       depends_on: []
     coach:
       skill: coach
@@ -112,7 +112,7 @@ schema_map:
       depends_on: []
     dm:
       skill: curation-skill-builder
-      schema: skills/curation-skill-builder/schema.tql
+      schema: local_skills/curation-skill-builder/schema.tql
       depends_on: []
     jhunt:
       skill: jobhunt
@@ -128,6 +128,6 @@ schema_map:
       depends_on: []
     trec:
       skill: tech-recon
-      schema: skills/tech-recon/schema.tql
+      schema: local_skills/tech-recon/schema.tql
       depends_on:
       - scientific-literature

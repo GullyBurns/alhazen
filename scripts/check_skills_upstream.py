@@ -1,73 +1,44 @@
 #!/usr/bin/env python3
-"""Guard against local_skills/ edits being silently overwritten by skills-update.
+"""Guard against local skill edits being silently overwritten by skills-update.
 
-For every EXTERNAL skill in skills-registry.yaml (and skills-registry-local.yaml)
-this clones the skill's upstream at its pinned ref and compares the upstream
-subdir against the installed copy in local_skills/<name>/.
+External skills are symlinks into per-repo git clones under
+`$ALHAZEN_SKILL_SOURCES` (default `~/Documents/GitHub`). `make skills-update`
+pulls those clones (`--ff-only`). This check fails when a clone holds local work
+that a pull/overwrite would endanger:
 
-`make skills-update` deletes and re-clones external skills, so any edit made
-directly in local_skills/ is lost. This check fails when the installed copy holds
-content that an update would DESTROY:
+  - uncommitted changes (`git status --porcelain` non-empty), or
+  - commits ahead of `origin/<ref>` (committed but not pushed).
 
-  - "modified": a file exists in both but differs (a likely local edit)
-  - "local-only": a file exists only in local_skills/ (added locally)
+A clone that is merely BEHIND origin (no local work) is reported but does NOT
+fail — pulling it is the whole point of an update. The check distinguishes a
+real local edit from merely-stale, using git provenance instead of a content
+diff against a fresh clone.
 
-Being merely BEHIND upstream ("upstream-only" files) is reported but does NOT
-fail — pulling those is the whole point of an update and loses nothing.
-
-Exit code: 0 if no skill has modified/local-only content, 1 otherwise.
-
-Core skills (registry `path:` entries) are symlinks to in-repo sources and are
-skipped — they have no separate upstream to drift from.
+Exit 0 if every external clone is clean & pushed (or just behind); 1 otherwise.
+Core / `path:` skills are skipped — they have no separate upstream.
 """
 
 from __future__ import annotations
 
-import hashlib
 import os
-import shutil
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
 import yaml
 
-# Generated / environment artifacts that are never meaningful "local edits".
-IGNORE_DIRS = {
-    ".git", "__pycache__", ".venv", "node_modules", ".next", ".build",
-    ".pytest_cache", ".ruff_cache", ".mypy_cache", "dist", "build", ".turbo",
-}
-IGNORE_SUFFIXES = (".pyc", ".pyo", ".egg-info")
-IGNORE_NAMES = {".DS_Store", "uv.lock", "package-lock.json"}
-
-GREEN, RED, YELLOW, BLUE, NC = "\033[32m", "\033[31m", "\033[33m", "\033[34m", "\033[0m"
+GREEN, RED, YELLOW, NC = "\033[32m", "\033[31m", "\033[33m", "\033[0m"
 
 
-def _ignored(rel: Path) -> bool:
-    if any(part in IGNORE_DIRS for part in rel.parts):
-        return True
-    if rel.name in IGNORE_NAMES:
-        return True
-    return rel.name.endswith(IGNORE_SUFFIXES)
+def repo_name(url: str) -> str:
+    return url.rstrip("/").split("/")[-1].removesuffix(".git")
 
 
-def _hash_tree(root: Path) -> dict[str, str]:
-    """Map relative-path -> sha256 for every non-ignored file under root."""
-    out: dict[str, str] = {}
-    for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if d not in IGNORE_DIRS]
-        for fn in filenames:
-            abs_path = Path(dirpath) / fn
-            rel = abs_path.relative_to(root)
-            if _ignored(rel):
-                continue
-            h = hashlib.sha256(abs_path.read_bytes()).hexdigest()
-            out[str(rel)] = h
-    return out
+def git(clone: Path, *args: str) -> subprocess.CompletedProcess:
+    return subprocess.run(["git", "-C", str(clone), *args], capture_output=True, text=True)
 
 
-def _load_skills() -> list[dict]:
+def load_skills() -> list[dict]:
     skills: list[dict] = []
     reg = Path("skills-registry.yaml")
     if reg.exists():
@@ -87,87 +58,56 @@ def main() -> int:
     defaults = cfg.get("defaults") or {}
     default_git = os.environ.get("ALHAZEN_SKILL_LIBRARY") or defaults.get("git", "")
     default_ref = defaults.get("ref", "main")
+    sources_root = Path(
+        os.environ.get("ALHAZEN_SKILL_SOURCES") or os.path.expanduser("~/Documents/GitHub")
+    )
 
-    skills = _load_skills()
-    clone_cache: dict[tuple[str, str], Path] = {}
-    tmp_root = Path(tempfile.mkdtemp(prefix="skills-check-"))
+    # Group external skills by their backing clone (the examples repo backs several).
+    repos: dict[str, dict] = {}
+    for skill in load_skills():
+        if "path" in skill:
+            continue
+        url = skill.get("git") or default_git
+        if not url:
+            continue
+        rn = repo_name(url)
+        entry = repos.setdefault(rn, {"ref": skill.get("ref") or default_ref, "skills": []})
+        entry["skills"].append(skill["name"])
+
     drifted: list[str] = []
-    behind: list[str] = []
+    for rn, info in sorted(repos.items()):
+        clone = sources_root / rn
+        backs = ", ".join(sorted(info["skills"]))
+        ref = info["ref"]
+        if not (clone / ".git").exists():
+            print(f"{YELLOW}  ? {rn}: not cloned at {clone} — run make skills-install ({backs}){NC}")
+            continue
 
-    try:
-        for skill in skills:
-            name = skill["name"]
-            if "path" in skill:
-                continue  # core/local symlink — no separate upstream
-            git_url = skill.get("git") or default_git
-            ref = skill.get("ref") or default_ref
-            subdir = skill.get("subdir", ".")
-            if not git_url:
-                print(f"{YELLOW}  ? {name}: no git URL and no defaults.git — skipped{NC}")
-                continue
+        git(clone, "fetch", "origin", ref)  # best-effort; offline → ahead/behind may be stale
+        dirty = git(clone, "status", "--porcelain").stdout.strip()
+        lr = git(clone, "rev-list", "--left-right", "--count", f"origin/{ref}...HEAD").stdout.split()
+        behind = int(lr[0]) if len(lr) == 2 else 0
+        ahead = int(lr[1]) if len(lr) == 2 else 0
 
-            local = Path("local_skills") / name
-            if not local.exists():
-                print(f"{YELLOW}  ? {name}: not installed in local_skills/ — skipped{NC}")
-                continue
-
-            key = (git_url, ref)
-            clone = clone_cache.get(key)
-            if clone is None:
-                clone = tmp_root / f"clone_{len(clone_cache)}"
-                try:
-                    subprocess.run(
-                        ["git", "clone", "--depth=1", "--branch", ref, git_url, str(clone)],
-                        check=True, capture_output=True,
-                    )
-                except subprocess.CalledProcessError as e:
-                    print(f"{RED}  ✗ {name}: failed to clone {git_url}@{ref}: "
-                          f"{e.stderr.decode()[:120]}{NC}")
-                    drifted.append(name)
-                    continue
-                clone_cache[key] = clone
-
-            upstream = clone / subdir if subdir != "." else clone
-            if not upstream.exists():
-                print(f"{RED}  ✗ {name}: subdir '{subdir}' not found in upstream{NC}")
-                drifted.append(name)
-                continue
-
-            local_h, up_h = _hash_tree(local), _hash_tree(upstream)
-            modified = sorted(p for p in local_h.keys() & up_h.keys() if local_h[p] != up_h[p])
-            local_only = sorted(local_h.keys() - up_h.keys())
-            upstream_only = sorted(up_h.keys() - local_h.keys())
-
-            if modified or local_only:
-                drifted.append(name)
-                print(f"{RED}  ✗ {name}: local content would be LOST on update{NC}")
-                for p in modified:
-                    print(f"      ~ modified:   {p}")
-                for p in local_only:
-                    print(f"      + local-only: {p}")
-                if upstream_only:
-                    print(f"      ({len(upstream_only)} file(s) also behind upstream)")
-            elif upstream_only:
-                behind.append(name)
-                print(f"{YELLOW}  ↑ {name}: behind upstream by {len(upstream_only)} "
-                      f"file(s) (safe to update){NC}")
-            else:
-                print(f"{GREEN}  ✓ {name}: matches upstream{NC}")
-    finally:
-        shutil.rmtree(tmp_root, ignore_errors=True)
+        if dirty or ahead:
+            drifted.append(rn)
+            print(f"{RED}  ✗ {rn}: local work at risk ({backs}){NC}")
+            for line in dirty.splitlines()[:10]:
+                print(f"      ~ {line.strip()}")
+            if ahead:
+                print(f"      ↑ {ahead} commit(s) ahead of origin/{ref} (unpushed)")
+        elif behind:
+            print(f"{YELLOW}  ↑ {rn}: {behind} commit(s) behind origin/{ref} — safe to update ({backs}){NC}")
+        else:
+            print(f"{GREEN}  ✓ {rn}: clean & in sync ({backs}){NC}")
 
     print()
     if drifted:
-        print(f"{RED}✗ Upstream check FAILED — local edits would be overwritten: "
+        print(f"{RED}✗ Upstream check FAILED — uncommitted or unpushed work in: "
               f"{', '.join(drifted)}{NC}")
-        print(f"{RED}  Push these changes upstream first, or re-run with "
-              f"FORCE=1 to overwrite them.{NC}")
+        print(f"{RED}  Commit & push it from the clone, or re-run with FORCE=1 to overwrite.{NC}")
         return 1
-    if behind:
-        print(f"{YELLOW}✓ No local edits at risk ({len(behind)} skill(s) behind "
-              f"upstream — update will refresh them).{NC}")
-    else:
-        print(f"{GREEN}✓ All external skills match upstream.{NC}")
+    print(f"{GREEN}✓ All external skill clones are clean & pushed.{NC}")
     return 0
 
 

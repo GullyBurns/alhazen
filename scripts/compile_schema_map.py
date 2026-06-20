@@ -121,7 +121,10 @@ def main():
         schema_skills[name] = {
             "namespace": namespace,
             "depends_on": depends_on,
-            "schema_path": str(schema_tql.relative_to(Path.cwd())) if schema_tql.is_relative_to(Path.cwd()) else str(schema_tql),
+            # Stable, machine-independent path via the local_skills symlink (which
+            # resolves to the source clone at load time). Never the resolved
+            # absolute path — that would hardcode a per-machine location.
+            "schema_path": f"local_skills/{name}/{schema_tql.name}",
         }
 
     if not schema_skills:
