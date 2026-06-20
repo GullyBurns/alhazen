@@ -205,3 +205,9 @@ cd dashboard && npm install && npm run dev
 ```
 
 For a full guide to building a new skill dashboard, see [`docs/dashboard-guide.md`](dashboard-guide.md).
+
+**Skill data access:** dashboard libs currently run skill commands by spawning
+`uv run python <skill>.py` per request. The [skill query gateway](gateway.md) is
+a warm Python service (`gateway` container) that runs those commands in-process
+instead; libs adopt it by swapping their `execFile` helper for
+`runSkill()` (`dashboard/src/lib/skill-gateway.ts`).

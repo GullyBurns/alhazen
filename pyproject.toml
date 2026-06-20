@@ -68,6 +68,11 @@ they-said-whaaa = [
 qdrant = [
     "qdrant-client>=1.14.0",
 ]
+gateway = [
+    "typedb-driver>=3.8.0",
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0",
+]
 semantic = [
     "voyageai>=0.3.0",
     "qdrant-client>=1.14.0",
@@ -80,7 +85,7 @@ pipeline = [
     "sf-hamilton>=1.75.0",
 ]
 all = [
-    "skillful-alhazen[typedb,dev,skills,skilllog,semantic,pipeline]",
+    "skillful-alhazen[typedb,dev,skills,skilllog,semantic,pipeline,gateway]",
 ]
 
 [project.scripts]
