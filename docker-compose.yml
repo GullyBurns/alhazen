@@ -63,6 +63,31 @@ services:
     restart: "no"
 
   # ============================================
+  # Skill Query Gateway - warm Python service that runs skill commands
+  # ============================================
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: alhazen-gateway
+    depends_on:
+      typedb:
+        condition: service_healthy
+    environment:
+      - TYPEDB_HOST=typedb
+      - TYPEDB_PORT=1729
+      - TYPEDB_DATABASE=alhazen_notebook
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+    # Internal service — executes skill commands incl. writes. Bind to localhost
+    # only; other containers reach it via http://gateway:8900 on alhazen-network.
+    ports:
+      - "127.0.0.1:8900:8900"
+    restart: unless-stopped
+    networks:
+      - alhazen-network
+
+  # ============================================
   # Dashboard
   # ============================================
   dashboard:
@@ -80,6 +105,9 @@ services:
       - PROJECT_ROOT=/app
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
+      # Available for dashboard libs to adopt the gateway (see docs/gateway.md).
+      # Unused until a lib's runX() helper switches from execFile to runSkill().
+      - SKILL_GATEWAY_URL=http://gateway:8900
     volumes:
       - ${HOME}/.alhazen/cache:/root/.alhazen/cache:ro
     ports:
