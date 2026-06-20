@@ -47,6 +47,24 @@ uv run python local_resources/skilllog/skill_logger.py file-slog-schema-gap \
   (commit `6b41acf` in alhazen-skill-examples). If a schema fails on `make build-db` with a
   syntax error near `sub attribute`, the upstream source likely still has 2.x syntax.
 
+### Safeguard: `make skills-check`
+
+`make skills-update` now runs `scripts/check_skills_upstream.py` first and
+**aborts if any `local_skills/` copy holds content not in upstream** — i.e. a
+file that differs (a likely local edit) or exists only locally. This prevents
+the re-clone from silently destroying an un-pushed fix.
+
+```bash
+make skills-check          # report drift; exits non-zero if any local edits at risk
+make skills-update         # blocked when skills-check fails
+FORCE=1 make skills-update # bypass the guard and overwrite local edits anyway
+```
+
+Being merely *behind* upstream (files only present upstream) is reported but does
+not block — the update simply refreshes them. When the check fails, push the edit
+upstream (so the copy matches), then re-run; or use `FORCE=1` if you intend to
+discard the local change.
+
 ## Dashboard Design Conventions
 
 - **Overview-first layout**: Main entity pages (investigations, systems) show a high-level orientation summary at the top. All detail sections are click-through — do not render full content inline.
