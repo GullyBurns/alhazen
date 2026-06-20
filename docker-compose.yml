@@ -44,7 +44,10 @@ services:
         condition: service_healthy
     volumes:
       - ./local_resources/typedb:/schema:ro
-      - ./local_skills:/local_skills:ro
+      # Staged, symlink-free skill tree (real dirs — bind mounts can't follow the
+      # out-of-repo symlinks in local_skills/). Also gives db_init a real
+      # alhazen-core to import.
+      - ./.skills-build:/skills:ro
       - ./scripts:/scripts:ro
     networks:
       - alhazen-network
@@ -55,11 +58,11 @@ services:
     entrypoint: ["/bin/bash", "-c"]
     command:
       - |
-        pip install typedb-driver -q
+        pip install 'typedb-driver==3.8.0' -q
         python /scripts/db_init.py \
           /schema/alhazen_notebook.tql \
           /schema/namespaces/*.tql \
-          /local_skills/*/schema.tql
+          /skills/*/schema.tql
     restart: "no"
 
   # ============================================
@@ -79,6 +82,11 @@ services:
       - TYPEDB_DATABASE=alhazen_notebook
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
+      - SKILL_ROOT=/app/skills-mounted
+    # Skill code is mounted (not baked): a skill update = re-stage + restart, no
+    # rebuild. SKILL_ROOT points the dispatcher at this mount.
+    volumes:
+      - ./.skills-build:/app/skills-mounted:ro
     # Internal service — executes skill commands incl. writes. Bind to localhost
     # only; other containers reach it via http://gateway:8900 on alhazen-network.
     ports:

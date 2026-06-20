@@ -167,6 +167,8 @@ dist/
 
 # External skills (installed via skills-registry.yaml)
 local_skills/
+# Symlink-free staged skill tree (built by `make stage-skills`, mounted into containers)
+.skills-build/
 
 # Deployment secrets
 deploy/deploy.env

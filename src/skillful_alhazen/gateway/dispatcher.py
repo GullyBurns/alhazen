@@ -21,6 +21,7 @@ import contextlib
 import importlib.util
 import io
 import json
+import os
 import sys
 import threading
 from pathlib import Path
@@ -29,8 +30,13 @@ import yaml
 
 # dispatcher.py -> gateway -> skillful_alhazen -> src -> <repo root>
 _REPO_ROOT = Path(__file__).resolve().parents[3]
-_LOCAL_SKILLS = _REPO_ROOT / "local_skills"
-_SKILLS = _REPO_ROOT / "skills"
+# Skill roots. In containers SKILL_ROOT points at the mounted, symlink-free
+# staged tree (.skills-build) and is used exclusively; on the host we fall back
+# to the in-repo local_skills (symlinks into the source clones) + skills.
+if os.environ.get("SKILL_ROOT"):
+    _SKILL_ROOTS = (Path(os.environ["SKILL_ROOT"]),)
+else:
+    _SKILL_ROOTS = (_REPO_ROOT / "local_skills", _REPO_ROOT / "skills")
 
 _lock = threading.Lock()
 _module_cache: dict[tuple[str, str], object] = {}
@@ -42,7 +48,7 @@ class DispatchError(Exception):
 
 def _skill_root(skill: str) -> Path:
     """Resolve a skill name to its full source directory."""
-    for base in (_LOCAL_SKILLS, _SKILLS):
+    for base in _SKILL_ROOTS:
         candidate = base / skill
         if candidate.exists():
             # resolve() follows the local_skills/<core-skill> -> ../skills symlink
@@ -70,7 +76,7 @@ def _primary_entrypoint(skill: str, root: Path) -> str:
 def list_skills() -> list[str]:
     """List installed skills that expose a Python entrypoint."""
     names: set[str] = set()
-    for base in (_LOCAL_SKILLS, _SKILLS):
+    for base in _SKILL_ROOTS:
         if not base.exists():
             continue
         for d in base.iterdir():

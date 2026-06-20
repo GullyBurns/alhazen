@@ -34,13 +34,14 @@ WORKDIR /app
 
 COPY --from=deps /app/.venv /app/.venv
 COPY pyproject.toml uv.lock README.md ./
-# Full Python source + the skill trees the gateway imports at runtime.
+# Only the package is baked. Skill code is NOT copied — it is mounted at runtime
+# from the staged tree (compose mounts ./.skills-build at $SKILL_ROOT), so a skill
+# update is a re-stage + `docker compose restart gateway`, never an image rebuild.
 COPY src/ ./src/
-COPY skills/ ./skills/
-COPY local_skills/ ./local_skills/
 
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
+ENV SKILL_ROOT=/app/skills-mounted
 ENV GATEWAY_HOST=0.0.0.0
 ENV GATEWAY_PORT=8900
 ENV TYPEDB_HOST=typedb

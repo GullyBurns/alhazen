@@ -57,9 +57,11 @@ RUN cd dashboard && ELECTRON_SKIP_BINARY_DOWNLOAD=1 npm ci
 # they'll be overwritten by ln -sfn below)
 COPY dashboard/ ./dashboard/
 
-# Copy all skill dashboard code (broad copy picks up any skill with a dashboard/ subdir)
-COPY local_skills/ ./local_skills/
-COPY skills/ ./skills/
+# Skill code comes from the staged tree (.skills-build = real dirs of every
+# resolved skill, incl. core). local_skills/ itself is now out-of-repo symlinks
+# that Docker can't follow, so we copy the staged bundle instead.
+# Requires `make stage-skills` (run by build-skills) before `docker compose build`.
+COPY .skills-build/ ./local_skills/
 
 # Inject generated skills-config.json into the public dir
 COPY --from=skills-config-gen /app/skills-config.json ./dashboard/public/skills-config.json
@@ -116,10 +118,8 @@ COPY pyproject.toml uv.lock README.md ./
 # Full package — skill commands (embed/map/cluster) import skillful_alhazen.utils
 # (vector_store etc.), not just the version __init__.py.
 COPY src/ ./src/
-# Copy all skills so the loop below can discover them (symlinks in local_skills/ resolve
-# correctly once both trees are present in the container)
-COPY skills/ ./skills/
-COPY local_skills/ ./local_skills/
+# Skill code from the staged, symlink-free tree (real dirs of every skill).
+COPY .skills-build/ ./local_skills/
 COPY local_resources/ ./local_resources/
 # Auto-discover all skill Python scripts and wire them into .claude/skills/<skill>/
 # This replaces hard-coded COPY lines — new skills are picked up automatically.
