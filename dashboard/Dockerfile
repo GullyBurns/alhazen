@@ -14,10 +14,17 @@ ENV PATH="/root/.local/bin:$PATH"
 # ==============================================================================
 FROM python-base AS python-deps
 WORKDIR /app
+# build-essential lets the semantic extra's compiled deps (hdbscan) build from
+# source when no wheel is available. This stage is discarded — the runtime image
+# only copies /app/.venv — so it does not bloat the final image.
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential \
+    && rm -rf /var/lib/apt/lists/*
 COPY pyproject.toml uv.lock README.md ./
 # Copy source for version detection (pyproject.toml uses dynamic version from __init__.py)
 COPY src/skillful_alhazen/__init__.py ./src/skillful_alhazen/
-RUN uv sync --extra typedb --extra skills --extra skilllog --extra qdrant --no-dev
+# semantic = umap-learn + hdbscan + numpy — required by the `map`/`cluster`
+# commands the dashboard's embedding-map view calls.
+RUN uv sync --extra typedb --extra skills --extra skilllog --extra qdrant --extra semantic --no-dev
 
 # ==============================================================================
 # Stage 2b: Generate skills-config.json from skills-registry.yaml
@@ -106,7 +113,9 @@ WORKDIR /app
 # Copy Python environment and project files
 COPY --from=python-deps /app/.venv /app/.venv
 COPY pyproject.toml uv.lock README.md ./
-COPY src/skillful_alhazen/__init__.py ./src/skillful_alhazen/
+# Full package — skill commands (embed/map/cluster) import skillful_alhazen.utils
+# (vector_store etc.), not just the version __init__.py.
+COPY src/ ./src/
 # Copy all skills so the loop below can discover them (symlinks in local_skills/ resolve
 # correctly once both trees are present in the container)
 COPY skills/ ./skills/
