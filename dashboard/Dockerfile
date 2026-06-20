@@ -74,15 +74,18 @@ WORKDIR /app/dashboard
 RUN npm run build
 
 # ==============================================================================
-# Stage 3: Final runtime (Node only — no Python)
+# Stage 3: Final runtime (Node only — Next.js standalone server)
 # ==============================================================================
 FROM node:20-slim AS runner
 WORKDIR /app
 
-COPY --from=node-builder /app/dashboard/.next ./.next
+# next.config has output: 'standalone' — ship the traced minimal server + its
+# ~88MB node_modules instead of the full 1.5GB build node_modules (which carries
+# Electron/electron-builder + build tooling the server never runs). standalone
+# does NOT include public/ or .next/static — copy those two explicitly.
+COPY --from=node-builder /app/dashboard/.next/standalone ./
+COPY --from=node-builder /app/dashboard/.next/static ./.next/static
 COPY --from=node-builder /app/dashboard/public ./public
-COPY --from=node-builder /app/dashboard/package*.json ./
-COPY --from=node-builder /app/dashboard/node_modules ./node_modules
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -90,4 +93,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
