@@ -3463,7 +3463,6 @@ dependencies = [
     { name = "matplotlib" },
     { name = "pdfplumber" },
     { name = "pydantic" },
-    { name = "pymde" },
     { name = "python-docx" },
     { name = "python-dotenv" },
     { name = "pyyaml" },
@@ -3478,6 +3477,7 @@ all = [
     { name = "hdbscan" },
     { name = "matplotlib" },
     { name = "numpy" },
+    { name = "pymde" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
@@ -3497,6 +3497,9 @@ dev = [
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
     { name = "ruff" },
+]
+embedding-map = [
+    { name = "pymde" },
 ]
 gateway = [
     { name = "fastapi" },
@@ -3555,7 +3558,8 @@ requires-dist = [
     { name = "numpy", marker = "extra == 'semantic'", specifier = ">=1.26.0" },
     { name = "pdfplumber", specifier = ">=0.11.0" },
     { name = "pydantic", specifier = ">=2.5.0" },
-    { name = "pymde", specifier = ">=0.3.0" },
+    { name = "pymde", marker = "extra == 'all'", specifier = ">=0.3.0" },
+    { name = "pymde", marker = "extra == 'embedding-map'", specifier = ">=0.3.0" },
     { name = "pytest", marker = "extra == 'all'" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-asyncio", marker = "extra == 'all'" },
@@ -3592,7 +3596,7 @@ requires-dist = [
     { name = "voyageai", marker = "extra == 'semantic'", specifier = ">=0.3.0" },
     { name = "youtube-transcript-api", marker = "extra == 'they-said-whaaa'", specifier = ">=0.6" },
 ]
-provides-extras = ["all", "dev", "gateway", "mcp", "pipeline", "qdrant", "semantic", "skilllog", "skills", "they-said-whaaa", "typedb"]
+provides-extras = ["all", "dev", "embedding-map", "gateway", "mcp", "pipeline", "qdrant", "semantic", "skilllog", "skills", "they-said-whaaa", "typedb"]
 
 [[package]]
 name = "sniffio"
