@@ -144,7 +144,7 @@ build-dashboard: build-skills ## Wire skill dashboard pages/routes/components in
 	for f in dashboard/src/lib/*.ts; do \
 	  [ -f "$$f" ] || [ -L "$$f" ] || continue; \
 	  skill_name=$$(basename "$$f" .ts); \
-	  [ "$$skill_name" = "utils" ] && continue; \
+	  case "$$skill_name" in utils|skill-gateway) continue;; esac; \
 	  echo " $$PUBLIC_SKILLS " | grep -q " $$skill_name " || { \
 	    echo "  Removing stale lib file: $$f"; rm -f "$$f"; }; \
 	done; \
