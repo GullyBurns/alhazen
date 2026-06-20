@@ -22,8 +22,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends build-essential
 COPY pyproject.toml uv.lock README.md ./
 # Copy source for version detection (pyproject.toml uses dynamic version from __init__.py)
 COPY src/skillful_alhazen/__init__.py ./src/skillful_alhazen/
-# semantic = umap-learn + hdbscan + numpy — required by the `map`/`cluster`
-# commands the dashboard's embedding-map view calls.
+# semantic = umap-learn + hdbscan + numpy (scilit map/cluster). No torch: the
+# only torch user (jobhunt's embedding map, via pymde) is not a registered skill.
 RUN uv sync --extra typedb --extra skills --extra skilllog --extra qdrant --extra semantic --no-dev
 
 # ==============================================================================

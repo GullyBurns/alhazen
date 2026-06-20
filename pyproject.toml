@@ -37,7 +37,6 @@ dependencies = [
     "sf-hamilton>=1.75.0",
     "anthropic>=0.97.0",
     "matplotlib>=3.10.8",
-    "pymde>=0.3.0",
 ]
 
 [project.optional-dependencies]
@@ -84,8 +83,15 @@ semantic = [
 pipeline = [
     "sf-hamilton>=1.75.0",
 ]
+# PyMDE pulls torch (+ ~2.8GB of NVIDIA CUDA wheels on Linux). Only jobhunt's
+# embedding_map.py uses it, so it is opt-in — containers that don't need it
+# (e.g. the gateway) skip the entire torch stack. Install CPU torch with
+# UV_TORCH_BACKEND=cpu to avoid the CUDA wheels.
+embedding-map = [
+    "pymde>=0.3.0",
+]
 all = [
-    "skillful-alhazen[typedb,dev,skills,skilllog,semantic,pipeline,gateway]",
+    "skillful-alhazen[typedb,dev,skills,skilllog,semantic,pipeline,gateway,embedding-map]",
 ]
 
 [project.scripts]

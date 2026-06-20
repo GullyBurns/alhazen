@@ -12,6 +12,11 @@
     "badge": "OS",
     "color": "rust"
   },
+  "aos": {
+    "badge": "SKILL",
+    "color": "blue",
+    "skill": "agent-os"
+  },
   "coach": {
     "badge": "SKILL",
     "color": "blue",
@@ -22,10 +27,10 @@
     "color": "blue",
     "skill": "curation-skill-builder"
   },
-  "jhunt": {
+  "myth": {
     "badge": "SKILL",
     "color": "blue",
-    "skill": "jobhunt"
+    "skill": "mythras-gm"
   },
   "scilit": {
     "badge": "SKILL",

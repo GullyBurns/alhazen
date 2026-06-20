@@ -39,16 +39,6 @@ skills:
     url_path: /scientific-literature
     icon: BookOpen
     color: cyan
-- name: jobhunt
-  subdir: skills/demo/jobhunt
-  dashboard:
-    enabled: true
-    name: Jobhunt
-    description: Track job applications, analyze skill gaps, and manage your career
-      search.
-    url_path: /jobhunt
-    icon: Briefcase
-    color: indigo
 - name: tech-recon
   path: skills/tech-recon
   dashboard:
@@ -93,7 +83,6 @@ schema_map:
   - coach
   - curation-skill-builder
   - dismech-notebook
-  - jobhunt
   - mythras-gm
   - scientific-literature
   - tech-recon
@@ -113,10 +102,6 @@ schema_map:
     dm:
       skill: curation-skill-builder
       schema: local_skills/curation-skill-builder/schema.tql
-      depends_on: []
-    jhunt:
-      skill: jobhunt
-      schema: local_skills/jobhunt/schema.tql
       depends_on: []
     myth:
       skill: mythras-gm
