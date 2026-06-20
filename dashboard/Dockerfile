@@ -1,35 +1,14 @@
 # Dashboard Dockerfile for Skillful-Alhazen
-# Multi-stage build with Node.js + Python + uv for running skill scripts
+#
+# Node-only runtime. Skill commands are NOT run here — the dashboard's data libs
+# call the warm gateway over HTTP (SKILL_GATEWAY_URL), so the image needs no
+# Python, venv, uv, or skill code at runtime. (A small Python build stage only
+# generates skills-config.json.)
 
 # ==============================================================================
-# Stage 1: Python base with uv
+# Stage 1: Generate skills-config.json from skills-registry.yaml (build-time only)
 # ==============================================================================
-FROM python:3.11-slim AS python-base
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/root/.local/bin:$PATH"
-
-# ==============================================================================
-# Stage 2: Install Python dependencies
-# ==============================================================================
-FROM python-base AS python-deps
-WORKDIR /app
-# build-essential lets the semantic extra's compiled deps (hdbscan) build from
-# source when no wheel is available. This stage is discarded — the runtime image
-# only copies /app/.venv — so it does not bloat the final image.
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential \
-    && rm -rf /var/lib/apt/lists/*
-COPY pyproject.toml uv.lock README.md ./
-# Copy source for version detection (pyproject.toml uses dynamic version from __init__.py)
-COPY src/skillful_alhazen/__init__.py ./src/skillful_alhazen/
-# semantic = umap-learn + hdbscan + numpy (scilit map/cluster). No torch: the
-# only torch user (jobhunt's embedding map, via pymde) is not a registered skill.
-RUN uv sync --extra typedb --extra skills --extra skilllog --extra qdrant --extra semantic --no-dev
-
-# ==============================================================================
-# Stage 2b: Generate skills-config.json from skills-registry.yaml
-# ==============================================================================
-FROM python-base AS skills-config-gen
+FROM python:3.11-slim AS skills-config-gen
 WORKDIR /app
 RUN pip install --quiet pyyaml
 COPY skills-registry.yaml ./
@@ -41,7 +20,7 @@ json.dump(configs, open('/app/skills-config.json', 'w'), indent=2) \
 "
 
 # ==============================================================================
-# Stage 3: Node.js build
+# Stage 2: Node.js build
 # ==============================================================================
 FROM node:20-slim AS node-builder
 
@@ -54,12 +33,12 @@ COPY dashboard/package*.json ./dashboard/
 RUN cd dashboard && ELECTRON_SKIP_BINARY_DOWNLOAD=1 npm ci
 
 # Copy dashboard source (host symlinks for skill dashboards are dangling in Docker;
-# they'll be overwritten by ln -sfn below)
+# they'll be overwritten by the cp below)
 COPY dashboard/ ./dashboard/
 
-# Skill code comes from the staged tree (.skills-build = real dirs of every
-# resolved skill, incl. core). local_skills/ itself is now out-of-repo symlinks
-# that Docker can't follow, so we copy the staged bundle instead.
+# Skill DASHBOARD UI (components/lib/pages/routes) comes from the staged tree
+# (.skills-build = real dirs of every resolved skill). This is build-time only —
+# the compiled Next app needs no skill code at runtime.
 # Requires `make stage-skills` (run by build-skills) before `docker compose build`.
 COPY .skills-build/ ./local_skills/
 
@@ -95,55 +74,19 @@ WORKDIR /app/dashboard
 RUN npm run build
 
 # ==============================================================================
-# Stage 4: Final runtime
+# Stage 3: Final runtime (Node only — no Python)
 # ==============================================================================
-FROM python:3.11-slim AS runner
-
-# Install Node.js and curl (for uv)
-RUN apt-get update && \
-    apt-get install -y curl && \
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install uv
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/root/.local/bin:$PATH"
-
+FROM node:20-slim AS runner
 WORKDIR /app
 
-# Copy Python environment and project files
-COPY --from=python-deps /app/.venv /app/.venv
-COPY pyproject.toml uv.lock README.md ./
-# Full package — skill commands (embed/map/cluster) import skillful_alhazen.utils
-# (vector_store etc.), not just the version __init__.py.
-COPY src/ ./src/
-# Skill code from the staged, symlink-free tree (real dirs of every skill).
-COPY .skills-build/ ./local_skills/
-COPY local_resources/ ./local_resources/
-# Auto-discover all skill Python scripts and wire them into .claude/skills/<skill>/
-# This replaces hard-coded COPY lines — new skills are picked up automatically.
-RUN for skill_dir in local_skills/*/; do \
-      skill_name=$(basename "$skill_dir"); \
-      mkdir -p ".claude/skills/${skill_name}"; \
-      find "$skill_dir" -maxdepth 1 -name "*.py" -exec cp {} ".claude/skills/${skill_name}/" \; ; \
-    done
-# Copy Node.js build and dependencies
 COPY --from=node-builder /app/dashboard/.next ./.next
 COPY --from=node-builder /app/dashboard/public ./public
 COPY --from=node-builder /app/dashboard/package*.json ./
 COPY --from=node-builder /app/dashboard/node_modules ./node_modules
 
-# Environment configuration
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PROJECT_ROOT=/app
-ENV TYPEDB_HOST=typedb
-ENV TYPEDB_PORT=1729
-ENV TYPEDB_DATABASE=alhazen_notebook
-
 EXPOSE 3000
-
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
