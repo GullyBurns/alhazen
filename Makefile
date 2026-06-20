@@ -883,7 +883,10 @@ skills-install: ## Resolve skills-registry.yaml into local_skills/ (path: symlin
 .PHONY: stage-skills
 stage-skills: ## Materialize a symlink-free skill tree into ./.skills-build for container mounts
 	@echo "$(BLUE)Staging skills into .skills-build/ ...$(NC)"
-	@rm -rf "$(STAGED_SKILLS_DIR)" && mkdir -p "$(STAGED_SKILLS_DIR)"
+	@# Clear contents in place (keep the directory inode) so a running container's
+	@# bind mount of ./.skills-build is not invalidated by re-staging.
+	@mkdir -p "$(STAGED_SKILLS_DIR)"
+	@find "$(STAGED_SKILLS_DIR)" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
 	@for skill_dir in $(LOCAL_SKILLS_DIR)/*/; do \
 		[ -e "$$skill_dir" ] || continue; \
 		name=$$(basename "$$skill_dir"); \
