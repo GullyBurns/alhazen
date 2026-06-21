@@ -1,6 +1,6 @@
 # Troubleshooting: SessionStart Hook Failures on `/clear`
 
-**Date:** 2026-06-20 · **Status:** fixed (core fix committed to `skillful-alhazen` `main`; external-skill + jobhunt hook fixes in upstream `alhazen-skill-examples` / `alhazen-skill-dismech` working trees — see "Second pass")
+**Date:** 2026-06-20 · **Status:** core + external hook *wiring* fixed (passes 1–2). **But** a third root cause was found the same evening: the harness was firing hooks from **stale on-disk copies of the repo** (`.skills-build/` container-mount staging dir + an iCloud-synced clone), not from the fixed working tree — so the symptom survived correct, committed fixes. See "Third root cause" below; this is the one to check first if `/clear` still shows failures.
 
 If, on `startup` / `clear` / `compact`, you see a stack of:
 
@@ -89,6 +89,88 @@ hooks, and 6 were untouched — `/clear` still showed a stack of failures:
   permanent one.
 
 After this pass, all **13** hooks exit 0 with clean stderr.
+
+## Third root cause (2026-06-20, evening) — the fix was real but the harness wasn't reading the fixed repo
+
+After the two passes above, `/clear` **still** showed ~10 `SessionStart:clear … No stderr output`
+failures — even though every `skills/*/hooks/hooks.json` on disk was correct and ran clean
+(`exit 0`) both sequentially and concurrently. The fixes were committed (`ac3e392`, 21:53);
+the `/clear` was at 22:07; the failures persisted. **The fix landed in a repo the harness
+doesn't read for these hooks.**
+
+### How it was diagnosed (do this first next time — don't theorize)
+
+The session transcript records every hook result. Pull them directly instead of guessing:
+
+```bash
+F=~/.claude/projects/-Users-gullyburns-skillful-alhazen/<session-id>.jsonl
+python3 - "$F" <<'PY'
+import json,sys
+for line in open(sys.argv[1]):
+    o=json.loads(line); a=o.get('attachment',{})
+    if a.get('type')=='hook_non_blocking_error' and a.get('hookEvent')=='SessionStart':
+        print(a['exitCode'], repr(a.get('stdout','')[:80]), '|', a['command'][:120])
+PY
+```
+
+The fired commands were the **old `find → echo → exit 1` wiring** (no fallback, no
+`unset VIRTUAL_ENV`) — i.e. pre-fix text. Two giveaways:
+
+- The `stdout` was `alhazen-core plugin required…` and `exitCode` was `1` → that's the old
+  `echo "…" && exit 1` branch printing to **stdout** (hence "No stderr output").
+- A **single `/clear` fired a mix of two historical eras at once**: 4 hooks said
+  `…@alhazen-core` (the May 22–Jun 13 text) and 6 said `…@skillful-alhazen` (Jun 13–Jun 20
+  text). One in-memory snapshot can't hold two eras → the hooks were being read from **two
+  different stale on-disk copies of the repo**, not from the working tree.
+
+Then content-match each distinct fired command against every `hooks.json` on the machine:
+
+```bash
+# the fired command text is unique enough to pin its source file exactly
+find ~ -name hooks.json -not -path '*/node_modules/*' 2>/dev/null | while read f; do
+  grep -q "find ~/.claude/plugins/cache -path '\*/alhazen-core" "$f" && grep -q '&& exit 1' "$f" \
+    && echo "STALE: $f"
+done
+```
+
+### The two stale sources (both proven by byte-exact content match)
+
+1. **`./.skills-build/`** — the **container-mount staging dir** (Makefile `stage-skills`, a
+   symlink-free `cp -RL` copy of the skills for Docker bind-mounts). It was staged *before* the
+   21:53 hook fix, so its copy was frozen at the stale era. **Claude Code's skill discovery
+   scans the project working tree and picks up `.skills-build/*/SKILL.md` + `hooks/hooks.json`
+   as additional skill sources.** Source of the 6 `@skillful-alhazen` failures (incl. the only
+   on-disk match for `typedb-notebook`/`web-search` init-only).
+2. **An iCloud-synced clone** — `~/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/skillful-alhazen`
+   — a *divergent* checkout frozen at the older `@alhazen-core` era (HEAD `d644eef`, already an
+   ancestor of canonical `main`, so it holds no unique committed work). Source of the 4
+   `@alhazen-core` failures. (Discovery vector: a runtime skill scan that reaches it — **not** a
+   registered project and **not** under `ALHAZEN_SKILL_SOURCES` (`~/Documents/GitHub`, which is
+   *local* on this machine). Resolution is dynamic per-startup, not a persisted path: the
+   `~/.claude/plugins/data/*-skills-dir` markers predate `.skills-build`'s creation yet
+   `.skills-build` content still fired.)
+
+Why earlier passes missed it: they edited `skills/*/hooks/hooks.json` (correct, committed) and
+the upstream working trees. None of that touches `.skills-build/` (gitignored build artifact)
+or a separate iCloud checkout. **Editing the working repo's hooks does nothing if the live hook
+source is a stale copy elsewhere.**
+
+### The fix
+
+- **`.skills-build/`** — re-stage so the copy carries the *current* fixed hooks (clears in place,
+  keeps running container mounts valid):
+  ```bash
+  make stage-skills          # then verify:
+  grep -rl '&& exit 1' .skills-build/*/hooks/hooks.json   # must print nothing
+  ```
+  (Better long-term: stop Claude's skill discovery from descending into `.skills-build/` at all
+  — see origin branch `feat/skills-mounted-sources`.)
+- **iCloud clone** — its committed work is already in canonical `main`; retire it (move it out of
+  any scanned location, or `git pull` it current) so its stale hooks stop being discovered. Verify
+  first that nothing unique is uncommitted.
+- **Restart Claude Code fully** (quit the process — `/clear` re-runs the *same* startup scan
+  result for the session; a fresh process re-scans the now-clean sources) and re-run the
+  transcript check above to confirm 0 failures.
 
 ## Verify it's working
 
