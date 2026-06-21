@@ -2,10 +2,10 @@
 name = "alhazen-core"
 version = "0.1.0"
 description = "Core infrastructure plugin for Alhazen skills — sets up TypeDB and loads the base schema"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.14"
 dependencies = [
     "typedb-driver>=3.8.0",
 ]
 
-[tool.uv]
-dev-dependencies = []
+[dependency-groups]
+dev = []

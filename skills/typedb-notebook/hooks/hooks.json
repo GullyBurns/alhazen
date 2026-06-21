@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "CORE=$(find ~/.claude/plugins/cache -path '*/alhazen-core/*/alhazen_core.py' 2>/dev/null | head -1); if [ -z \"$CORE\" ]; then echo \"alhazen-core plugin required. Run: /plugin install alhazen-core@skillful-alhazen\" && exit 1; fi; CORE_DIR=$(dirname \"$CORE\"); uv run --project \"$CORE_DIR\" python \"$CORE\" init",
+            "command": "unset VIRTUAL_ENV; export PYTHONWARNINGS=ignore::SyntaxWarning; CORE=$(find ~/.claude/plugins/cache -path '*/alhazen-core/*/alhazen_core.py' 2>/dev/null | head -1); [ -z \"$CORE\" ] && [ -f \"${CLAUDE_PLUGIN_ROOT}/../alhazen-core/alhazen_core.py\" ] && CORE=\"${CLAUDE_PLUGIN_ROOT}/../alhazen-core/alhazen_core.py\"; if [ -z \"$CORE\" ]; then echo \"alhazen-core not found; skipping (install: /plugin install alhazen-core@skillful-alhazen)\" && exit 0; fi; CORE_DIR=$(dirname \"$CORE\"); uv run --project \"$CORE_DIR\" python \"$CORE\" init",
             "timeout": 90000
           }
         ]
