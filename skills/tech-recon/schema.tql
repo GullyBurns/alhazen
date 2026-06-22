@@ -125,7 +125,7 @@ entity trec-analysis sub alh-artifact,
 # ENTITY TYPES - Tech-Recon Notes
 # -----------------------------------------------------------------------------
 
-entity trec-note sub alh-note,
+entity trec-note sub alh-sensemaking-note,
     owns trec-topic,
     owns trec-tag,
     owns trec-iteration-number;

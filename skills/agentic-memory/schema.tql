@@ -68,7 +68,7 @@ entity nbmem-operator-role sub alh-role,
 # Inherits from alh-identifiable-entity: valid-from, valid-until, created-at
 # Subject link:  (note: $n, subject: $e)  isa alh-aboutness    -- existing core relation
 # Provenance:    (derived: $n, source: $src) isa nbmem-fact-evidence -- new relation above
-entity nbmem-memory-claim-note sub alh-note,
+entity nbmem-memory-claim-note sub alh-sensemaking-note,
     owns alh-fact-type,
     plays nbmem-fact-evidence:derived,
     plays nbmem-fact-evidence:source;

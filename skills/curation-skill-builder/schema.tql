@@ -155,7 +155,7 @@ entity dm-design-decision sub alh-domain-thing,
 
 # Claude's reasoning for a design decision.
 # Inherits content, confidence, cache-path from note -> information-content-entity.
-entity dm-design-rationale sub alh-note,
+entity dm-design-rationale sub alh-analysis-note,
     plays dm-rationale-for:rationale;
 
 # A test of a design hypothesis.
@@ -168,7 +168,7 @@ entity dm-experiment sub alh-domain-thing,
 
 # Quantitative or qualitative observation from an experiment.
 # Inherits content from note -> information-content-entity.
-entity dm-experiment-result sub alh-note,
+entity dm-experiment-result sub alh-sensemaking-note,
     owns dm-metric-name,
     owns dm-metric-value,
     plays dm-result-of:result;
@@ -289,7 +289,7 @@ entity dm-analysis-skill sub alh-domain-thing,
     plays dm-phase-depends-on:dependency;
 
 # Spec note (forward-looking requirement - TypeQL, API spec, function signature, etc.)
-entity dm-phase-spec sub alh-note,
+entity dm-phase-spec sub alh-reporting-note,
     owns dm-feasibility,
     owns dm-phase-number,
     plays dm-phase-artifact:phase-spec;

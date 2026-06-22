@@ -71,6 +71,11 @@ attribute alh-evidence-type-attr, value string;
 attribute alh-pipeline-script, value string;   # full Hamilton module source
 attribute alh-pipeline-config, value string;   # JSON: outputs / inputs / output_attr_map (+ hamilton opts)
 
+# Curation notes (sensemaking / analysis / reporting) - shared role markers.
+# STARTER set - expect to iterate (audience, analysis-method, source-role, etc.).
+attribute alh-curation-method, value string;   # manual | llm | pipeline | mixed
+attribute alh-curation-model, value string;    # model/agent id that produced the note
+
 # Person identity
 attribute alh-given-name, value string;
 attribute alh-family-name, value string;
@@ -216,11 +221,39 @@ entity alh-note sub alh-information-content-entity,
     plays alh-evidence-chain:evidence;
 
 
+# -----------------------------------------------------------------------------
+# CURATION NOTE SUBTYPES - the epistemic pipeline (sensemaking -> analysis -> reporting)
+# Concrete base types so any skill's curation notes are listable/searchable cross-skill
+# (e.g. `match $n isa alh-reporting-note;`). Skills subtype these for specialization,
+# or instantiate them directly. They are pure-ish role markers + a small shared attr set.
+# Source linkage (a note about an artifact/fragment) uses the inherited alh-aboutness
+# (semantic "about") and alh-derivation (provenance "derived-from") relations - no new
+# relation needed yet.
+# -----------------------------------------------------------------------------
+
+# SENSEMAKING-NOTE - interpretation of INDIVIDUAL source material
+# (summaries, classifications, extractions, observations, findings).
+entity alh-sensemaking-note sub alh-note,
+    owns alh-curation-method,
+    owns alh-curation-model;
+
+# ANALYSIS-NOTE - cross-source structured reasoning / computation
+# (synthesis, critique, claims/evidence assessment, faceting pipelines).
+entity alh-analysis-note sub alh-note,
+    owns alh-curation-method,
+    owns alh-curation-model;
+
+# REPORTING-NOTE - audience-facing synthesized narrative (reports, briefs, specs).
+entity alh-reporting-note sub alh-note,
+    owns alh-curation-method,
+    owns alh-curation-model;
+
+
 # ANALYSIS-PIPELINE-NOTE - A re-runnable analysis pipeline stored as a note.
 # Stores a Hamilton module source (alh-pipeline-script) + JSON config (alh-pipeline-config);
 # a generic runner reloads & executes the DAG and writes terminal outputs back (default -> content).
 # Linked to its source collections (the input data) via alh-aboutness.
-entity alh-analysis-pipeline-note sub alh-note,
+entity alh-analysis-pipeline-note sub alh-analysis-note,
     owns alh-pipeline-script,
     owns alh-pipeline-config;
 
