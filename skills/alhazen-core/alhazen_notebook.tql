@@ -331,19 +331,24 @@ entity alh-interaction sub alh-domain-thing,
 # ENTITY TYPES - External Vocabulary Classification
 # -----------------------------------------------------------------------------
 
-# VOCABULARY - A alh-classification system (schema.org, Wikidata, UMLS, etc.)
+# VOCABULARY - A alh-classification system (schema.org, Wikidata, UMLS, OBI, etc.)
 entity alh-vocabulary,
     owns id @key,
     owns name,
     owns iri,
     owns description,
+    owns alh-vocabulary-source,
     plays alh-vocabulary-membership:vocab;
 
 
-# VOCABULARY-TYPE - A type from an external vocabulary
+# VOCABULARY-TYPE - A type/term from a vocabulary.
+# provenance is multi-valued plain text: a term may cite several sources.
 entity alh-vocabulary-type,
     owns id @key,
     owns name,
+    owns iri,
+    owns source-uri @card(0..),
+    owns provenance @card(0..),
     owns alh-schema-org-uri,
     owns alh-wikidata-qid,
     owns description,
