@@ -100,7 +100,52 @@ Read these **before** the relevant task — they are NOT auto-loaded:
 | [`docs/conventions.md`](docs/conventions.md) | Audit process, dashboard work, external skill fixes |
 | [`docs/dashboard-guide.md`](docs/dashboard-guide.md) | Building a new skill dashboard (Python CLI → lib → API → pages) |
 | [`docs/deployment.md`](docs/deployment.md) | Deploying to Mac Mini or VPS |
+| [`docs/troubleshooting-sessionstart-hooks.md`](docs/troubleshooting-sessionstart-hooks.md) | `SessionStart:clear hook Failed` errors, typedb-driver segfaults on Python 3.14 |
 | `local_resources/typedb/llms.txt` | Full TypeDB 3.x query reference (load on demand) |
+
+## Skill Loading: Registry-Only (no local plugin tooling)
+
+**Every skill loads through ONE path: the registry.** `skills-registry.yaml` (committed) + `skills-registry-local.yaml` (gitignored local overrides) → `make build-skills` → `local_skills/<name>` symlinks → `.claude/skills/<name>`. Skills load with **bare names** (`tech-recon`, `jobhunt`). External skills point at upstream clones via `subdir:` (default git) or absolute `path:`.
+
+**This repo is NOT a Claude Code plugin marketplace.** There is no `.claude-plugin/marketplace.json`, no `validate_plugins.py`, and the repo must NOT be registered in `~/.claude/settings.json` `extraKnownMarketplaces`. The plugin/marketplace architecture (per-skill `plugin.json` + `hooks/`, marketplace manifest) lives in each skill's **upstream repo** — when you change a skill, reproduce the fix upstream and publish it there. Do not enable alhazen skills as plugins locally; the plugin cache pins to an old commit and will shadow the live registry copy with stale code (this is what broke `jobhunt` against the migrated `jhunt-*` data).
+
+**TypeDB autostart** is delivered at the project level: `make deploy-claude-settings` writes a `SessionStart` hook into `.claude/settings.json` that runs `local_skills/alhazen-core/alhazen_core.py init`. It does NOT depend on any plugin being installed.
+
+## Parallel Work-Thread Worktrees
+
+Run multiple work-threads in parallel, each isolated on its own branch + git worktree of THIS repo. Each thread should target a different skill so they don't collide at the skill level; branch-per-thread keeps shared main-repo setup edits (registries, `Makefile`, core schema, dashboard wiring, `.claude/settings.json`) from stepping on each other.
+
+### What a worktree isolates vs. shares
+- **Isolated per worktree:** working tree + branch, `local_skills/`, `.claude/` symlinks, `dashboard/src/` generated copies, `.venv`.
+- **Shared across ALL worktrees (single instance, NOT branched):** the TypeDB container + `alhazen_notebook` DB, `~/.alhazen/cache`, the external skill repos (symlinked, each on its own `main`), and Docker ports.
+
+### Setup (per thread) — branches named `wt/<short-task>`; `.worktrees/` is already gitignored
+1. **Back up the shared DB first:** `make db-export`, verify the zip in `~/.alhazen/cache/typedb/`.
+2. From the repo root (separate Bash call — **NEVER chain `rm -rf` + `make`**):
+   `git worktree add .worktrees/<slug> -b wt/<slug>`
+3. Inside the worktree, run the **NON-DESTRUCTIVE build subset** (everything except `build-db`):
+   `cd .worktrees/<slug> && make build-env build-skills build-agents build-dashboard`
+   **Do NOT run `make build` / `make build-db` in a worktree** — `build-db` → `db-init` reloads every skill schema into the SHARED DB from your branch. The shared DB already has all schemas; reloading from a branch is unnecessary and risky. `db-start` is idempotent and the container is already running.
+   **Pin Python 3.12 for the venv:** `pyproject.toml` has `requires-python = ">=3.11"` with no upper cap, so a fresh worktree's `make build-env` can create a **Python 3.14** `.venv` — and **`typedb-driver` segfaults on 3.14** (`exit 139` on any query). After build-env, force the proven-good interpreter:
+   `uv sync --all-extras --python 3.12` (recreates `.venv` on 3.12.12; `--all-extras` is required — `typedb-driver` lives in the `[typedb]` extra). Verify with `uv run python -c "import sys,typedb; print(sys.version)"`.
+
+### Per-tree dashboard (local `next dev`, no docker; distinct port, avoid docker's `:3001`)
+```
+cd .worktrees/<slug>/dashboard && npm install   # first time
+PROJECT_ROOT=<absolute-worktree-root> TYPEDB_DATABASE=alhazen_notebook npx next dev -p <port>
+```
+`PROJECT_ROOT` is **required**: `dashboard/src/lib/*.ts` defaults it to `process.cwd()` (= `dashboard/` under `next dev`), so without it the API routes resolve `.claude/skills/...` against the wrong directory. Suggested ports: 3010, 3011, 3012, …
+
+### Coordination rules
+- **Core `alhazen-core` schema: ONE THREAD AT A TIME**; other threads stay skill-namespaced. Always `make db-export` before any schema delta.
+- **Skill schemas must be namespaced & disjoint** (`scilit-`, `jhunt-`, …) — this is what makes parallel data-layer work safe on the one shared DB.
+- **External skill-repo edits are globally visible and NOT branch-isolated**; push upstream from the thread, and give the external repo its own branch/worktree if a thread must change it.
+
+### Teardown
+```
+git worktree remove .worktrees/<slug>   # --force if it holds build artifacts
+git branch -d wt/<slug>                  # -D if intentionally discarding unmerged work
+```
 
 ## Critical Safety Rules
 
