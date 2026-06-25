@@ -103,13 +103,17 @@ Read these **before** the relevant task — they are NOT auto-loaded:
 | [`docs/troubleshooting-sessionstart-hooks.md`](docs/troubleshooting-sessionstart-hooks.md) | `SessionStart:clear hook Failed` errors, typedb-driver segfaults on Python 3.14 |
 | `local_resources/typedb/llms.txt` | Full TypeDB 3.x query reference (load on demand) |
 
-## Skill Loading: Registry-Only (no local plugin tooling)
+## Skill Loading: Dual-Mode (publishable marketplace + registry-only local dev)
 
-**Every skill loads through ONE path: the registry.** `skills-registry.yaml` (committed) + `skills-registry-local.yaml` (gitignored local overrides) → `make build-skills` → `local_skills/<name>` symlinks → `.claude/skills/<name>`. Skills load with **bare names** (`tech-recon`, `jobhunt`). External skills point at upstream clones via `subdir:` (default git) or absolute `path:`.
+This repo has **two non-overlapping loading paths**. They never mix — that separation is the whole design.
 
-**This repo is NOT a Claude Code plugin marketplace.** There is no `.claude-plugin/marketplace.json`, no `validate_plugins.py`, and the repo must NOT be registered in `~/.claude/settings.json` `extraKnownMarketplaces`. The plugin/marketplace architecture (per-skill `plugin.json` + `hooks/`, marketplace manifest) lives in each skill's **upstream repo** — when you change a skill, reproduce the fix upstream and publish it there. Do not enable alhazen skills as plugins locally; the plugin cache pins to an old commit and will shadow the live registry copy with stale code (this is what broke `jobhunt` against the migrated `jhunt-*` data).
+**1. LOCAL DEV (how you, the maintainer, work) — registry-only.** Every skill loads through ONE path: the registry. `skills-registry.yaml` (committed) + `skills-registry-local.yaml` (gitignored local overrides) → `make build-skills` → `local_skills/<name>` symlinks → `.claude/skills/<name>`. Skills load with **bare names** (`tech-recon`, `jobhunt`). External skills point at upstream clones via `subdir:` (default git) or absolute `path:`. **TypeDB autostart** is delivered at the project level: `make deploy-claude-settings` writes a `SessionStart` hook into `.claude/settings.json` that runs `local_skills/alhazen-core/alhazen_core.py init` — it does NOT depend on any plugin being installed.
 
-**TypeDB autostart** is delivered at the project level: `make deploy-claude-settings` writes a `SessionStart` hook into `.claude/settings.json` that runs `local_skills/alhazen-core/alhazen_core.py init`. It does NOT depend on any plugin being installed.
+**2. EXTERNAL USERS — this repo IS a publishable Claude Code marketplace.** `.claude-plugin/marketplace.json` (repo root) publishes the **7 in-repo core skills** (`alhazen-core`, `agentic-memory`, `typedb-notebook`, `web-search`, `curation-skill-builder`, `tech-recon`, `agent-os`). External users run `/plugin marketplace add sciknow-io/skillful-alhazen` → `/plugin install <skill>@skillful-alhazen`. On that path TypeDB autostart comes from `alhazen-core`'s OWN `hooks/hooks.json` SessionStart hook (`${CLAUDE_PLUGIN_ROOT}/alhazen_core.py init`). Keep the manifest correct with `make validate-plugins` (`scripts/validate_plugins.py`). External (non-core) skills — `scientific-literature`, `jobhunt`, `dismech-notebook`, etc. — self-publish from their own upstream marketplaces; this manifest is core-only.
+
+**NEVER let the local clone act like a marketplace.** Do NOT `/plugin marketplace add` this repo locally, and do NOT enable any alhazen skill as a plugin in `~/.claude/settings.json` / project `.claude/settings.json`. The plugin cache pins an old commit and **shadows the live registry copy with stale code** (this is what broke `jobhunt` against the migrated `jhunt-*` data). The active guard `scripts/check_no_local_marketplace.py` (run automatically by `make build-skills`) warns loudly if it ever detects this repo in `extraKnownMarketplaces` or a core skill in `enabledPlugins`. The marketplace manifest is *inert* — it does nothing until someone explicitly registers it — so it sits in the repo harmlessly while you develop via the registry.
+
+> When you change an external skill, still reproduce the fix in its **upstream repo** and publish there; `make skills-update` pulls it back. Only the 7 core skills live-and-publish from THIS repo.
 
 ## Parallel Work-Thread Worktrees
 
