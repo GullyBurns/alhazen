@@ -1,0 +1,101 @@
+{
+  "name": "skillful-alhazen",
+  "owner": {
+    "name": "Gully Burns"
+  },
+  "metadata": {
+    "description": "Core skills for Skillful Alhazen — TypeDB-powered agentic knowledge notebook",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "alhazen-core",
+      "source": "./skills/alhazen-core",
+      "description": "TypeDB infrastructure -- auto-starts via Docker, creates database, loads base schema. Install this first before any other Alhazen skill.",
+      "version": "0.1.0",
+      "license": "Apache-2.0",
+      "keywords": [
+        "typedb",
+        "infrastructure",
+        "setup"
+      ]
+    },
+    {
+      "name": "agentic-memory",
+      "source": "./skills/agentic-memory",
+      "description": "TypeDB-backed knowledge graph memory — schema browser, entity explorer, session episodes, memory claims",
+      "version": "0.1.0",
+      "license": "Apache-2.0",
+      "keywords": [
+        "typedb",
+        "knowledge-graph",
+        "memory",
+        "agentic"
+      ]
+    },
+    {
+      "name": "typedb-notebook",
+      "source": "./skills/typedb-notebook",
+      "description": "Store and retrieve knowledge in the Alhazen TypeDB knowledge graph — remember, recall, organize notes and collections",
+      "version": "1.0.0",
+      "license": "Apache-2.0",
+      "keywords": [
+        "typedb",
+        "knowledge-graph",
+        "memory",
+        "notes"
+      ]
+    },
+    {
+      "name": "web-search",
+      "source": "./skills/web-search",
+      "description": "Search the web using SearXNG (self-hosted metasearch — no API key needed)",
+      "version": "1.0.0",
+      "license": "Apache-2.0",
+      "keywords": [
+        "search",
+        "web",
+        "searxng"
+      ]
+    },
+    {
+      "name": "curation-skill-builder",
+      "source": "./skills/curation-skill-builder",
+      "description": "Design and implement TypeDB-backed curation skills using the Skillful Alhazen 6-phase methodology",
+      "version": "1.0.0",
+      "license": "Apache-2.0",
+      "keywords": [
+        "typedb",
+        "skill-design",
+        "curation",
+        "meta-skill"
+      ]
+    },
+    {
+      "name": "tech-recon",
+      "source": "./skills/tech-recon",
+      "description": "Goal-driven technology investigation — interview, discover, ingest, analyze, and visualize competing systems against user-defined success criteria",
+      "version": "0.1.0",
+      "license": "MIT",
+      "keywords": [
+        "research",
+        "technology",
+        "visualization",
+        "investigation"
+      ]
+    },
+    {
+      "name": "agent-os",
+      "source": "./skills/agent-os",
+      "description": "Large-scale operator context dataset -- ingests Gmail, Calendar, GitHub, LinkedIn, Drive, and HealthKit into TypeDB for rich structured personal context.",
+      "version": "0.1.0",
+      "license": "MIT",
+      "keywords": [
+        "typedb",
+        "context",
+        "operator",
+        "agentic"
+      ]
+    }
+  ]
+}

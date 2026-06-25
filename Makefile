@@ -96,6 +96,7 @@ build-env: ## Install Python dependencies
 build-skills: skills-install deploy-claude stage-skills ## Resolve skills-registry.yaml → local_skills/ + wire .claude/skills/ + stage for containers
 	@echo "$(BLUE)Compiling schema map...$(NC)"
 	@uv run python scripts/compile_schema_map.py --registry $(SKILLS_REGISTRY)
+	@python3 scripts/check_no_local_marketplace.py || true
 	@echo "$(GREEN)✓ Skills built$(NC)"
 
 .PHONY: build-agents
@@ -425,7 +426,7 @@ endif
 
 .PHONY: deploy-claude-settings
 deploy-claude-settings: ## Write .claude/settings.json with portable PostToolUse hook
-	@printf '{\n  "hooks": {\n    "PostToolUse": [\n      {\n        "matcher": "Bash",\n        "hooks": [\n          {\n            "type": "command",\n            "command": "REPO=$$(git rev-parse --show-toplevel 2>/dev/null) && [ -f \\"$$REPO/local_resources/skilllog/skill_logger.py\\" ] && cd \\"$$REPO\\" && uv run python \\"$$REPO/local_resources/skilllog/skill_logger.py\\""\n          }\n        ]\n      }\n    ]\n  }\n}\n' > $(PROJECT_ROOT)/.claude/settings.json
+	@printf '{\n  "hooks": {\n    "SessionStart": [\n      {\n        "hooks": [\n          {\n            "type": "command",\n            "command": "REPO=$$(git rev-parse --show-toplevel 2>/dev/null) && CORE=\\"$$REPO/local_skills/alhazen-core/alhazen_core.py\\" && [ -f \\"$$CORE\\" ] && cd \\"$$REPO\\" && unset VIRTUAL_ENV && uv run --project \\"$$REPO/local_skills/alhazen-core\\" python \\"$$CORE\\" init",\n            "timeout": 90000\n          }\n        ]\n      }\n    ],\n    "PostToolUse": [\n      {\n        "matcher": "Bash",\n        "hooks": [\n          {\n            "type": "command",\n            "command": "REPO=$$(git rev-parse --show-toplevel 2>/dev/null) && [ -f \\"$$REPO/local_resources/skilllog/skill_logger.py\\" ] && cd \\"$$REPO\\" && uv run python \\"$$REPO/local_resources/skilllog/skill_logger.py\\""\n          }\n        ]\n      }\n    ]\n  }\n}\n' > $(PROJECT_ROOT)/.claude/settings.json
 	@echo "$(GREEN)  ✓ Wrote .claude/settings.json$(NC)"
 
 .PHONY: deploy-claude
@@ -999,8 +1000,8 @@ lint: ## Run ruff linter
 	@echo "$(GREEN)✓ Linting completed$(NC)"
 
 .PHONY: validate-plugins
-validate-plugins: ## Check every marketplace plugin against the plugin-architecture bar
-	@echo "$(BLUE)Validating plugins...$(NC)"
+validate-plugins: ## Validate the published marketplace (.claude-plugin/marketplace.json)
+	@echo "$(BLUE)Validating marketplace plugins...$(NC)"
 	python3 scripts/validate_plugins.py
 	@echo "$(GREEN)✓ Plugins valid$(NC)"
 
