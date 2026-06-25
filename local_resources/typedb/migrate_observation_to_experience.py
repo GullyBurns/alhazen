@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 """Migrate scilit-observation-note -> scilit-experience-note (KQED reconciliation).
 
-Idempotent. Run from the worktree root with the project venv:
+Idempotent / re-runnable: if scilit-observation-note no longer exists in the schema
+(i.e. the migration has already been applied), read_notes() returns [] and the script
+reports "0 to migrate" cleanly instead of raising [INF2] type-not-found.
+
+Run from the worktree root with the project venv:
     uv run python local_resources/typedb/migrate_observation_to_experience.py --dry-run
     uv run python local_resources/typedb/migrate_observation_to_experience.py --apply
 """
@@ -31,12 +35,21 @@ entity scilit-session plays scilit-hinge:hinged-to;
 
 def type_exists(tx, label):
     # variable-bound (never `match X sub Y;` with two concrete labels)
-    rows = list(tx.query(f"match $t sub {label}; fetch {{ \"l\": $t }};").resolve())
-    return len(rows) > 0
+    # [INF2] is raised when the label is absent from the schema; treat as False.
+    try:
+        rows = list(tx.query(f"match $t sub {label}; fetch {{ \"l\": $t }};").resolve())
+        return len(rows) > 0
+    except Exception as e:
+        if "INF2" in str(e) or "not found" in str(e).lower():
+            return False
+        raise
 
 def read_notes(drv):
     notes = {}
     with drv.transaction(DB, TransactionType.READ) as tx:
+        # Guard: if the old type no longer exists (migration already applied), return empty.
+        if not type_exists(tx, "scilit-observation-note"):
+            return []
         for r in tx.query(
             'match $n isa scilit-observation-note, has id $id, has content $c;'
             ' try { $n has name $nm; }; try { $n has created-at $ca; };'
