@@ -9,15 +9,5 @@
     "curation",
     "meta-skill"
   ],
-  "requires": {
-    "plugins": [
-      "alhazen-core"
-    ],
-    "system": {
-      "bins": [
-        "uv",
-        "docker"
-      ]
-    }
-  }
+  "dependencies": ["alhazen-core", "typedb-notebook"]
 }

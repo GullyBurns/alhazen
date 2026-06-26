@@ -31,7 +31,9 @@ skills:
     icon: Layers
     color: violet
 - name: scientific-literature
-  subdir: skills/biomed/scientific-literature
+  git: https://github.com/sciknow-io/alhazen-skill-deep-research
+  ref: main
+  subdir: skills/scientific-literature
   dashboard:
     enabled: true
     name: Scientific Literature
@@ -40,7 +42,9 @@ skills:
     icon: BookOpen
     color: cyan
 - name: tech-recon
-  path: skills/tech-recon
+  git: https://github.com/sciknow-io/alhazen-skill-deep-research
+  ref: main
+  subdir: skills/tech-recon
   dashboard:
     enabled: true
     name: Tech Recon
@@ -50,7 +54,7 @@ skills:
     icon: Search
     color: cyan
 - name: dismech-notebook
-  git: https://github.com/sciknow-io/alhazen-skill-dismech
+  git: https://github.com/sciknow-io/alhazen-skill-deep-research
   ref: main
   subdir: skills/dismech-notebook
   dashboard:
@@ -61,13 +65,17 @@ skills:
     icon: Dna
     color: teal
 - name: literature-trends
-  subdir: skills/biomed/literature-trends
+  git: https://github.com/sciknow-io/alhazen-skill-deep-research
+  ref: main
+  subdir: skills/literature-trends
 - name: mythras-gm
   git: https://github.com/fourth-wall-gaming/mythras-gm
   ref: main
   subdir: skills/mythras-gm
 - name: coach
-  subdir: skills/health/coach
+  git: https://github.com/sciknow-io/alhazen-skill-personal-assistant
+  ref: main
+  subdir: skills/coach
   dashboard:
     enabled: true
     name: Health Coach
@@ -76,6 +84,17 @@ skills:
     url_path: /coach
     icon: Heart
     color: teal
+- name: jobhunt
+  git: https://github.com/sciknow-io/alhazen-skill-personal-assistant
+  ref: main
+  subdir: skills/jobhunt
+  dashboard:
+    enabled: true
+    name: Job Hunt Dashboard
+    description: Pipeline kanban, skills matrix, learning plan, and candidate triage.
+    url_path: /jobhunt
+    icon: Briefcase
+    color: blue
 schema_map:
   load_order:
   - agent-os
@@ -83,6 +102,7 @@ schema_map:
   - coach
   - curation-skill-builder
   - dismech-notebook
+  - jobhunt
   - mythras-gm
   - scientific-literature
   - tech-recon
@@ -102,6 +122,10 @@ schema_map:
     dm:
       skill: curation-skill-builder
       schema: local_skills/curation-skill-builder/schema.tql
+      depends_on: []
+    jhunt:
+      skill: jobhunt
+      schema: local_skills/jobhunt/schema.tql
       depends_on: []
     myth:
       skill: mythras-gm

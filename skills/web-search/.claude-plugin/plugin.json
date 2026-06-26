@@ -8,15 +8,5 @@
     "web",
     "searxng"
   ],
-  "requires": {
-    "plugins": [
-      "alhazen-core"
-    ],
-    "system": {
-      "bins": [
-        "uv",
-        "docker"
-      ]
-    }
-  }
+  "dependencies": ["alhazen-core"]
 }

@@ -9,16 +9,5 @@
     "visualization",
     "investigation"
   ],
-  "requires": {
-    "plugins": [
-      "alhazen-core",
-      "typedb-notebook"
-    ],
-    "system": {
-      "bins": [
-        "uv",
-        "docker"
-      ]
-    }
-  }
+  "dependencies": ["alhazen-core", "typedb-notebook"]
 }

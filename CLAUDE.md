@@ -115,6 +115,8 @@ This repo has **two non-overlapping loading paths**. They never mix — that sep
 
 > When you change an external skill, still reproduce the fix in its **upstream repo** and publish there; `make skills-update` pulls it back. Only the 7 core skills live-and-publish from THIS repo.
 
+> **Plugin dependencies (base pair).** Use Claude Code's official **`dependencies`** field in `plugin.json` (NOT the old advisory `requires.plugins`, which Claude Code ignores — `validate_plugins.py` now flags any leftover `requires`). `alhazen-core` + `typedb-notebook` are the inseparable **base pair**: `typedb-notebook` declares `dependencies: ["alhazen-core"]`, and any skill that uses the notebook CRUD engine declares `typedb-notebook` (which transitively pulls core). `alhazen-core` itself depends on nothing — **never make alhazen-core depend on typedb-notebook** (Claude Code does not support dependency cycles). There is no official manifest field for system bins (`uv`/`docker`) — document those in SKILL.md. Cross-marketplace deps (a skill in another repo depending on this marketplace's core/notebook) need `allowCrossMarketplaceDependenciesOn` in the *root* marketplace plus a `marketplace` key on the dependency entry.
+
 ## Parallel Work-Thread Worktrees
 
 Run multiple work-threads in parallel, each isolated on its own branch + git worktree of THIS repo. Each thread should target a different skill so they don't collide at the skill level; branch-per-thread keeps shared main-repo setup edits (registries, `Makefile`, core schema, dashboard wiring, `.claude/settings.json`) from stepping on each other.
