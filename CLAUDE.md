@@ -58,6 +58,24 @@ Read an agent's `AGENT.md` before dispatching to understand its capabilities and
 - **Notebook**: `skills/typedb-notebook/typedb_notebook.py` — collections, notes, tagging, aboutness
 - **Verification**: `local_resources/skilllog/skill_logger.py` — invocation logging, quality labels, schema gap detection
 
+## Database Architecture — per-repo split (Jun 2026)
+
+Data is split across **one TypeDB database per repo** (the old single `alhazen_notebook` is being retired). Each skill's `TYPEDB_DATABASE` default points at its repo's DB; skills outside `alh_core` carry a `.standalone-db` marker (skipped by `make db-init`) and provision their own DB via a per-skill SessionStart hook.
+
+| Database | Repo | Skills |
+|----------|------|--------|
+| `alh_core` | skillful-alhazen | alhazen-core, typedb-notebook, agentic-memory, curation-skill-builder, agent-os, web-search |
+| `alh_deep_research` | `sciknow-io/alhazen-skill-deep-research` | scientific-literature (schema base), literature-trends, tech-recon, dismech-notebook |
+| `alh_personal` | `sciknow-io/alhazen-skill-personal-assistant` | jobhunt, coach |
+| `alh_mythras` | `fourth-wall-gaming/mythras-gm` | mythras-gm |
+| `alh_biorodeo` | alhazen-skill-biorodeo | biorodeo-workbench |
+| `dismech` | alhazen-skill-dismech | dismech (Monarch ingest source; GLAV source for dismech-notebook) |
+
+Rules:
+- **Shared reference data** (`alh-vocabulary`, `alh-vocabulary-type`, `alh-tag`) is **replicated** into each DB so classification/tagging/vocab relations resolve locally.
+- **No cross-database relations** (TypeDB limitation). A skill that references another DB's entity uses a soft reference (an id/DOI attribute resolved in the app layer) — e.g. jobhunt's `jhunt-cited-paper-id` → `scilit-paper` in `alh_deep_research`. Skills that need TypeDB-level links (tech-recon/dismech-notebook → `scilit-paper`) must be **co-located in the same DB**.
+- **Migration tool**: `src/skillful_alhazen/utils/subgraph_migrator.py` (`copy`/`verify`) — id-preserving, scope by `--prefix`/`--types`, `--also-types` for shared refs, `--closure-notes` for aboutness-owned bare notes.
+
 ## First-Run Check
 
 > Before doing any work, check whether the project has been built. If `local_skills/` does not exist, run `make build` from the project root. The build is idempotent — safe to re-run.
