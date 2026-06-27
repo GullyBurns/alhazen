@@ -3,15 +3,5 @@
   "description": "TypeDB-backed ontological memory with schema-driven retrieval. Introspects the live knowledge graph schema, composes TypeQL queries dynamically, and combines graph traversal with embedding-based semantic search for three-stage retrieval (plan, execute, organize with provenance).",
   "version": "0.1.0",
   "license": "Apache-2.0",
-  "requires": {
-    "plugins": [
-      "alhazen-core"
-    ],
-    "system": {
-      "bins": [
-        "uv",
-        "docker"
-      ]
-    }
-  }
+  "dependencies": ["alhazen-core"]
 }

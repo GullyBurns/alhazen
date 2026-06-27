@@ -22,7 +22,7 @@ async function runAgenticMemory(args: string[]): Promise<unknown> {
     {
       cwd: PROJECT_ROOT,
       maxBuffer: 5 * 1024 * 1024,
-      env: { ...process.env, TYPEDB_DATABASE: 'alhazen_notebook' },
+      env: { ...process.env, TYPEDB_DATABASE: 'alh_core' },
     }
   );
   return JSON.parse(stdout);

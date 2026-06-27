@@ -9,7 +9,8 @@ For each plugin listed in `.claude-plugin/marketplace.json`, check:
   - if `hooks/hooks.json` initializes alhazen-core (calls `alhazen_core.py`):
       * the install hint uses `alhazen-core@skillful-alhazen`
         (fail on `@alhazen-core` / `@alhazen-skills`)
-      * `plugin.json` `requires.plugins` includes `alhazen-core`
+      * `plugin.json` `dependencies` resolves to include `alhazen-core`
+        (directly, or transitively via `typedb-notebook`)
       * every `load-schema "${CLAUDE_PLUGIN_ROOT}/<f>"` target file exists
 
 Exit non-zero with a readable list on any failure. Run: `python scripts/validate_plugins.py`.
@@ -28,6 +29,24 @@ ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 MARKETPLACE = os.path.join(ROOT, ".claude-plugin", "marketplace.json")
 
 BAD_HINTS = ("alhazen-core@alhazen-core", "alhazen-core@alhazen-skills")
+
+# Plugins that transitively pull in alhazen-core via their own `dependencies`.
+# Depending on any of these satisfies the "must reach alhazen-core" rule.
+PULLS_IN_CORE = {"alhazen-core", "typedb-notebook"}
+
+
+def _dep_names(pj: dict) -> list[str]:
+    """Extract dependency plugin names from the official `dependencies` field.
+
+    Entries may be bare strings or objects ({"name": ..., "version"?, "marketplace"?}).
+    """
+    names: list[str] = []
+    for dep in pj.get("dependencies") or []:
+        if isinstance(dep, str):
+            names.append(dep)
+        elif isinstance(dep, dict) and dep.get("name"):
+            names.append(dep["name"])
+    return names
 
 
 def _hook_commands(hooks_path: str) -> list[str]:
@@ -62,7 +81,9 @@ def validate(root: str = ROOT) -> list[str]:
             err("missing .claude-plugin/plugin.json")
         else:
             pj = json.load(open(plugin_json, encoding="utf-8"))
-            reqs = (pj.get("requires") or {}).get("plugins") or []
+            reqs = _dep_names(pj)
+            if pj.get("requires"):
+                err("legacy `requires` field present — migrate to official `dependencies`")
             if entry.get("version") and pj.get("version") and entry["version"] != pj["version"]:
                 err(f"version mismatch: marketplace {entry['version']} != plugin.json {pj['version']}")
 
@@ -80,8 +101,9 @@ def validate(root: str = ROOT) -> list[str]:
                 for bad in BAD_HINTS:
                     if bad in cmds:
                         err(f"hook install hint uses '{bad}' (want 'alhazen-core@skillful-alhazen')")
-                if "alhazen-core" not in reqs:
-                    err("hook initializes alhazen-core but requires.plugins lacks 'alhazen-core'")
+                if not (set(reqs) & PULLS_IN_CORE):
+                    err("hook initializes alhazen-core but `dependencies` does not reach "
+                        "'alhazen-core' (directly or via 'typedb-notebook')")
                 for tgt in re.findall(r'load-schema "\$\{CLAUDE_PLUGIN_ROOT\}/([^"]+)"', cmds):
                     if not os.path.isfile(os.path.join(pdir, tgt)):
                         err(f"hook load-schema target missing: {tgt}")

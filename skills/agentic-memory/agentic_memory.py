@@ -83,7 +83,7 @@ except ImportError:
 
 TYPEDB_HOST = os.getenv("TYPEDB_HOST", "localhost")
 TYPEDB_PORT = int(os.getenv("TYPEDB_PORT", "1729"))
-TYPEDB_DATABASE = os.getenv("TYPEDB_DATABASE", "alhazen_notebook")
+TYPEDB_DATABASE = os.getenv("TYPEDB_DATABASE", "alh_core")
 TYPEDB_USERNAME = os.getenv("TYPEDB_USERNAME", "admin")
 TYPEDB_PASSWORD = os.getenv("TYPEDB_PASSWORD", "password")
 
@@ -1003,9 +1003,22 @@ def _run_namespace_audit(entities, relations):
     return audit
 
 
+def _decode_unicode_escapes(q: str) -> str:
+    r"""Decode \uXXXX escape sequences to real UTF-8 characters.
+
+    TypeDB 3.8's TypeQL parser PANICS (crashing the whole server) on \uXXXX
+    escape sequences in string literals — but it handles raw UTF-8 fine. The
+    dashboard / JS JSON round-trips can re-introduce \u escapes into raw TypeQL
+    sent to the `query` command, so decode them here before execution.
+    """
+    import re
+    return re.sub(r"\\u([0-9a-fA-F]{4})",
+                  lambda m: chr(int(m.group(1), 16)), q or "")
+
+
 def query_typeql(args):
     """Execute a raw TypeQL query and return results."""
-    typeql = args.typeql
+    typeql = _decode_unicode_escapes(args.typeql)
     mode = getattr(args, "mode", "read") or "read"
     limit = int(getattr(args, "limit", 50) or 50)
 

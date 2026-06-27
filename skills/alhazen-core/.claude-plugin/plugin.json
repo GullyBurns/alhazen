@@ -3,11 +3,5 @@
   "display_name": "Alhazen Core",
   "description": "Sets up TypeDB and loads the Alhazen base schema. Install and run /alhazen-core:init before any other Alhazen skill.",
   "version": "0.1.0",
-  "license": "Apache-2.0",
-  "requires": {
-    "system": {
-      "bins": ["uv", "docker"],
-      "description": "Docker must be running to start TypeDB. Run: uv run --project <skill-path> python alhazen_core.py init"
-    }
-  }
+  "license": "Apache-2.0"
 }

@@ -4,7 +4,7 @@
     "name": "Gully Burns"
   },
   "metadata": {
-    "description": "Core skills for Skillful Alhazen — TypeDB-powered agentic knowledge notebook",
+    "description": "Core skills for Skillful Alhazen \u2014 TypeDB-powered agentic knowledge notebook",
     "version": "0.1.0"
   },
   "plugins": [
@@ -23,7 +23,7 @@
     {
       "name": "agentic-memory",
       "source": "./skills/agentic-memory",
-      "description": "TypeDB-backed knowledge graph memory — schema browser, entity explorer, session episodes, memory claims",
+      "description": "TypeDB-backed knowledge graph memory \u2014 schema browser, entity explorer, session episodes, memory claims",
       "version": "0.1.0",
       "license": "Apache-2.0",
       "keywords": [
@@ -36,7 +36,7 @@
     {
       "name": "typedb-notebook",
       "source": "./skills/typedb-notebook",
-      "description": "Store and retrieve knowledge in the Alhazen TypeDB knowledge graph — remember, recall, organize notes and collections",
+      "description": "Store and retrieve knowledge in the Alhazen TypeDB knowledge graph \u2014 remember, recall, organize notes and collections",
       "version": "1.0.0",
       "license": "Apache-2.0",
       "keywords": [
@@ -49,7 +49,7 @@
     {
       "name": "web-search",
       "source": "./skills/web-search",
-      "description": "Search the web using SearXNG (self-hosted metasearch — no API key needed)",
+      "description": "Search the web using SearXNG (self-hosted metasearch \u2014 no API key needed)",
       "version": "1.0.0",
       "license": "Apache-2.0",
       "keywords": [
@@ -69,19 +69,6 @@
         "skill-design",
         "curation",
         "meta-skill"
-      ]
-    },
-    {
-      "name": "tech-recon",
-      "source": "./skills/tech-recon",
-      "description": "Goal-driven technology investigation — interview, discover, ingest, analyze, and visualize competing systems against user-defined success criteria",
-      "version": "0.1.0",
-      "license": "MIT",
-      "keywords": [
-        "research",
-        "technology",
-        "visualization",
-        "investigation"
       ]
     },
     {

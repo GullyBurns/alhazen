@@ -9,15 +9,5 @@
     "memory",
     "notes"
   ],
-  "requires": {
-    "plugins": [
-      "alhazen-core"
-    ],
-    "system": {
-      "bins": [
-        "uv",
-        "docker"
-      ]
-    }
-  }
+  "dependencies": ["alhazen-core"]
 }
