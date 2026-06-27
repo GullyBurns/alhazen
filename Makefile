@@ -12,8 +12,14 @@ CLAUDE_SKILLS_DIR := $(PROJECT_ROOT)/.claude/skills
 OPENCLAW_SKILLS_DIR := $(OPENCLAW_WORKSPACE)/skills
 OPENCLAW_CONFIG := $(HOME)/.openclaw/openclaw.json
 TYPEDB_CONTAINER := alhazen-typedb
-TYPEDB_DATABASE := alhazen_notebook
+TYPEDB_DATABASE := alh_core
 TYPEDB_COMPOSE_PROJECT := skillful-alhazen
+# Per-repo TypeDB databases (see CLAUDE.md "Database Architecture"). Used by db-export-all.
+DATABASES := alh_core alh_deep_research alh_personal alh_mythras alh_biorodeo dismech
+# Which database(s) db-export/db-import act on. Space-separated; overridable on the command line:
+#   make db-export DB=alh_deep_research
+#   make db-export DB="alh_core alh_personal"
+DB ?= $(TYPEDB_DATABASE)
 TYPEDB_SCHEMAS_DIR := $(PROJECT_ROOT)/local_resources/typedb
 LOCAL_SKILLS_DIR := $(PROJECT_ROOT)/local_skills
 SKILLS_REGISTRY := $(PROJECT_ROOT)/skills-registry.yaml
@@ -287,10 +293,21 @@ empty = [ns for ns,i in audit.items() if i['status']=='empty']; \
 print(); print('Empty namespaces: ' + (', '.join(empty) if empty else 'NONE'))"
 
 .PHONY: db-export
-db-export: ## Export database to timestamped zip
-	@echo "$(BLUE)Exporting database...$(NC)"
-	uv run python $(CLAUDE_SKILLS_DIR)/typedb-notebook/typedb_notebook.py export-db --database $(TYPEDB_DATABASE)
-	@echo "$(GREEN)✓ Database exported$(NC)"
+db-export: ## Export database(s) to timestamped zip (DB="db1 db2 ..."; default alh_core)
+	@for db in $(DB); do \
+		echo "$(BLUE)Exporting database '$$db'...$(NC)"; \
+		uv run python $(CLAUDE_SKILLS_DIR)/typedb-notebook/typedb_notebook.py export-db --database $$db || exit 1; \
+	done
+	@echo "$(GREEN)✓ Exported: $(DB)$(NC)"
+
+.PHONY: db-export-all
+db-export-all: ## Export every per-repo database (skips any that don't exist)
+	@for db in $(DATABASES); do \
+		echo "$(BLUE)Exporting database '$$db'...$(NC)"; \
+		uv run python $(CLAUDE_SKILLS_DIR)/typedb-notebook/typedb_notebook.py export-db --database $$db \
+			|| echo "$(YELLOW)  skipped '$$db' (not found)$(NC)"; \
+	done
+	@echo "$(GREEN)✓ Export-all complete$(NC)"
 
 .PHONY: package-skill
 package-skill: ## Bundle a skill as a distributable zip (requires SKILL=name)
@@ -411,13 +428,13 @@ d.close()" 2>/dev/null
 	@echo "$(GREEN)✓ Test databases cleaned up$(NC)"
 
 .PHONY: db-import
-db-import: ## Import database from zip (requires ZIP=/path/to/export.zip)
+db-import: ## Import database from zip (requires ZIP=...; DB=target-db, default alh_core)
 ifndef ZIP
-	@echo "$(RED)Error: ZIP variable required. Usage: make db-import ZIP=/path/to/export.zip$(NC)"
+	@echo "$(RED)Error: ZIP variable required. Usage: make db-import ZIP=/path/to/export.zip DB=alh_deep_research$(NC)"
 	@exit 1
 endif
-	@echo "$(BLUE)Importing database from $(ZIP)...$(NC)"
-	uv run python $(CLAUDE_SKILLS_DIR)/typedb-notebook/typedb_notebook.py import-db --zip $(ZIP) --database $(TYPEDB_DATABASE)
+	@echo "$(BLUE)Importing $(ZIP) into database '$(firstword $(DB))'...$(NC)"
+	uv run python $(CLAUDE_SKILLS_DIR)/typedb-notebook/typedb_notebook.py import-db --zip $(ZIP) --database $(firstword $(DB))
 	@echo "$(GREEN)✓ Database imported$(NC)"
 
 # =============================================================================
@@ -517,7 +534,7 @@ deploy-openclaw-config: ## Merge skills.entries into openclaw.json (requires jq)
 			[ -d "$$skill_dir" ] || continue; \
 			skill_name=$$(basename $$skill_dir); \
 			patch=$$(echo "$$patch" | jq --arg name "$$skill_name" --arg root "$(PROJECT_ROOT)" \
-				'. + {($$name): {"env": {"ALHAZEN_PROJECT_ROOT": $$root, "TYPEDB_DATABASE": "alhazen_notebook"}}}'); \
+				'. + {($$name): {"env": {"ALHAZEN_PROJECT_ROOT": $$root}}}'); \
 		done; \
 	fi; \
 	jq --argjson entries "$$patch" '.skills.entries = $$entries' "$(OPENCLAW_CONFIG)" > "$(OPENCLAW_CONFIG).tmp" && \
