@@ -447,8 +447,23 @@ deploy-claude-settings: ## Write .claude/settings.json with portable PostToolUse
 	@echo "$(GREEN)  ✓ Wrote .claude/settings.json$(NC)"
 
 .PHONY: deploy-claude
-deploy-claude: deploy-claude-settings ## Symlink external skills from local_skills/ into .claude/skills/ (for Claude Code)
-	@echo "$(BLUE)Deploying external skills to Claude Code...$(NC)"
+deploy-claude: deploy-claude-settings ## Mirror skills from local_skills/ into .claude/skills/ as per-item symlinks, with a dependency-stripped plugin.json (registry-only local dev — see below)
+	@# Each .claude/skills/<name> is a REAL directory of per-item symlinks into
+	@# local_skills/<name>. The one exception is .claude-plugin/plugin.json: instead
+	@# of symlinking the upstream manifest we write a LOCAL COPY with the
+	@# `dependencies` field stripped out.
+	@#
+	@# Why: Claude Code auto-loads any .claude/skills/<name> that has a
+	@# .claude-plugin/plugin.json as a plugin under a synthetic "skills-dir"
+	@# marketplace. We WANT that — it is how each skill's hooks/hooks.json
+	@# SessionStart hook (which provisions the skill's TypeDB schema via
+	@# ${CLAUDE_PLUGIN_ROOT}) gets registered in local dev. But Claude Code also
+	@# validates the manifest's cross-marketplace `dependencies`
+	@# (e.g. alhazen-core@skillful-alhazen), which fail locally because we never
+	@# install the alhazen marketplace as plugins. Stripping `dependencies` from the
+	@# local copy keeps the hooks working while silencing the dependency errors. The
+	@# upstream manifest keeps its full `dependencies` for the marketplace publish path.
+	@echo "$(BLUE)Deploying skills to Claude Code (per-item, dependency-stripped manifests)...$(NC)"
 	@mkdir -p $(CLAUDE_SKILLS_DIR)
 	@if [ ! -d "$(LOCAL_SKILLS_DIR)" ]; then \
 		echo "$(YELLOW)→ No local_skills/ directory — run 'make skills-install' first$(NC)"; \
@@ -457,25 +472,30 @@ deploy-claude: deploy-claude-settings ## Symlink external skills from local_skil
 			[ -d "$$skill_dir" ] || continue; \
 			skill_name=$$(basename $$skill_dir); \
 			target=$(CLAUDE_SKILLS_DIR)/$$skill_name; \
-			if [ -L "$$target" ]; then \
-				rm "$$target"; \
-			elif [ -d "$$target" ]; then \
-				echo "$(YELLOW)  → Skipping $$skill_name (real directory exists, not a symlink)$(NC)"; \
-				continue; \
+			rm -rf "$$target"; \
+			mkdir -p "$$target"; \
+			for item in "$$skill_dir".[!.]* "$$skill_dir"*; do \
+				[ -e "$$item" ] || continue; \
+				base=$$(basename "$$item"); \
+				[ "$$base" = ".claude-plugin" ] && continue; \
+				ln -sfn "$$item" "$$target/$$base"; \
+			done; \
+			if [ -f "$$skill_dir.claude-plugin/plugin.json" ]; then \
+				mkdir -p "$$target/.claude-plugin"; \
+				python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); d.pop("dependencies",None); json.dump(d,open(sys.argv[2],"w"),indent=2)' \
+					"$$skill_dir.claude-plugin/plugin.json" "$$target/.claude-plugin/plugin.json"; \
 			fi; \
-			ln -sfn ../../local_skills/$$skill_name "$$target"; \
 			echo "$(GREEN)  ✓ Linked: $$skill_name$(NC)"; \
 		done; \
-		for target in $(CLAUDE_SKILLS_DIR)/*/; do \
-			link=$${target%/}; \
-			[ -L "$$link" ] || continue; \
-			skill_name=$$(basename "$$link"); \
+		for entry in $(CLAUDE_SKILLS_DIR)/*; do \
+			[ -e "$$entry" ] || continue; \
+			skill_name=$$(basename "$$entry"); \
 			[ -d "$(LOCAL_SKILLS_DIR)/$$skill_name" ] && continue; \
-			echo "$(YELLOW)  → Removing stale symlink: $$skill_name$(NC)"; \
-			rm "$$link"; \
+			echo "$(YELLOW)  → Removing stale skill dir: $$skill_name$(NC)"; \
+			rm -rf "$$entry"; \
 		done; \
 	fi
-	@echo "$(GREEN)✓ External skills deployed to .claude/skills/$(NC)"
+	@echo "$(GREEN)✓ Skills deployed to .claude/skills/$(NC)"
 
 .PHONY: deploy-openclaw
 deploy-openclaw: deploy-openclaw-skills deploy-openclaw-config deploy-openclaw-docs deploy-openclaw-identity ## Symlink skills + configure OpenClaw + update workspace docs + render identity
