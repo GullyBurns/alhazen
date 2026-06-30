@@ -12,8 +12,14 @@ CLAUDE_SKILLS_DIR := $(PROJECT_ROOT)/.claude/skills
 OPENCLAW_SKILLS_DIR := $(OPENCLAW_WORKSPACE)/skills
 OPENCLAW_CONFIG := $(HOME)/.openclaw/openclaw.json
 TYPEDB_CONTAINER := alhazen-typedb
-TYPEDB_DATABASE := alhazen_notebook
+TYPEDB_DATABASE := alh_core
 TYPEDB_COMPOSE_PROJECT := skillful-alhazen
+# Per-repo TypeDB databases (see CLAUDE.md "Database Architecture"). Used by db-export-all.
+DATABASES := alh_core alh_deep_research alh_personal alh_mythras alh_biorodeo dismech
+# Which database(s) db-export/db-import act on. Space-separated; overridable on the command line:
+#   make db-export DB=alh_deep_research
+#   make db-export DB="alh_core alh_personal"
+DB ?= $(TYPEDB_DATABASE)
 TYPEDB_SCHEMAS_DIR := $(PROJECT_ROOT)/local_resources/typedb
 LOCAL_SKILLS_DIR := $(PROJECT_ROOT)/local_skills
 SKILLS_REGISTRY := $(PROJECT_ROOT)/skills-registry.yaml
@@ -287,10 +293,21 @@ empty = [ns for ns,i in audit.items() if i['status']=='empty']; \
 print(); print('Empty namespaces: ' + (', '.join(empty) if empty else 'NONE'))"
 
 .PHONY: db-export
-db-export: ## Export database to timestamped zip
-	@echo "$(BLUE)Exporting database...$(NC)"
-	uv run python $(CLAUDE_SKILLS_DIR)/typedb-notebook/typedb_notebook.py export-db --database $(TYPEDB_DATABASE)
-	@echo "$(GREEN)✓ Database exported$(NC)"
+db-export: ## Export database(s) to timestamped zip (DB="db1 db2 ..."; default alh_core)
+	@for db in $(DB); do \
+		echo "$(BLUE)Exporting database '$$db'...$(NC)"; \
+		uv run python $(CLAUDE_SKILLS_DIR)/typedb-notebook/typedb_notebook.py export-db --database $$db || exit 1; \
+	done
+	@echo "$(GREEN)✓ Exported: $(DB)$(NC)"
+
+.PHONY: db-export-all
+db-export-all: ## Export every per-repo database (skips any that don't exist)
+	@for db in $(DATABASES); do \
+		echo "$(BLUE)Exporting database '$$db'...$(NC)"; \
+		uv run python $(CLAUDE_SKILLS_DIR)/typedb-notebook/typedb_notebook.py export-db --database $$db \
+			|| echo "$(YELLOW)  skipped '$$db' (not found)$(NC)"; \
+	done
+	@echo "$(GREEN)✓ Export-all complete$(NC)"
 
 .PHONY: package-skill
 package-skill: ## Bundle a skill as a distributable zip (requires SKILL=name)
@@ -411,13 +428,13 @@ d.close()" 2>/dev/null
 	@echo "$(GREEN)✓ Test databases cleaned up$(NC)"
 
 .PHONY: db-import
-db-import: ## Import database from zip (requires ZIP=/path/to/export.zip)
+db-import: ## Import database from zip (requires ZIP=...; DB=target-db, default alh_core)
 ifndef ZIP
-	@echo "$(RED)Error: ZIP variable required. Usage: make db-import ZIP=/path/to/export.zip$(NC)"
+	@echo "$(RED)Error: ZIP variable required. Usage: make db-import ZIP=/path/to/export.zip DB=alh_deep_research$(NC)"
 	@exit 1
 endif
-	@echo "$(BLUE)Importing database from $(ZIP)...$(NC)"
-	uv run python $(CLAUDE_SKILLS_DIR)/typedb-notebook/typedb_notebook.py import-db --zip $(ZIP) --database $(TYPEDB_DATABASE)
+	@echo "$(BLUE)Importing $(ZIP) into database '$(firstword $(DB))'...$(NC)"
+	uv run python $(CLAUDE_SKILLS_DIR)/typedb-notebook/typedb_notebook.py import-db --zip $(ZIP) --database $(firstword $(DB))
 	@echo "$(GREEN)✓ Database imported$(NC)"
 
 # =============================================================================
@@ -430,8 +447,23 @@ deploy-claude-settings: ## Write .claude/settings.json with portable PostToolUse
 	@echo "$(GREEN)  ✓ Wrote .claude/settings.json$(NC)"
 
 .PHONY: deploy-claude
-deploy-claude: deploy-claude-settings ## Symlink external skills from local_skills/ into .claude/skills/ (for Claude Code)
-	@echo "$(BLUE)Deploying external skills to Claude Code...$(NC)"
+deploy-claude: deploy-claude-settings ## Mirror skills from local_skills/ into .claude/skills/ as per-item symlinks, with a dependency-stripped plugin.json (registry-only local dev — see below)
+	@# Each .claude/skills/<name> is a REAL directory of per-item symlinks into
+	@# local_skills/<name>. The one exception is .claude-plugin/plugin.json: instead
+	@# of symlinking the upstream manifest we write a LOCAL COPY with the
+	@# `dependencies` field stripped out.
+	@#
+	@# Why: Claude Code auto-loads any .claude/skills/<name> that has a
+	@# .claude-plugin/plugin.json as a plugin under a synthetic "skills-dir"
+	@# marketplace. We WANT that — it is how each skill's hooks/hooks.json
+	@# SessionStart hook (which provisions the skill's TypeDB schema via
+	@# ${CLAUDE_PLUGIN_ROOT}) gets registered in local dev. But Claude Code also
+	@# validates the manifest's cross-marketplace `dependencies`
+	@# (e.g. alhazen-core@skillful-alhazen), which fail locally because we never
+	@# install the alhazen marketplace as plugins. Stripping `dependencies` from the
+	@# local copy keeps the hooks working while silencing the dependency errors. The
+	@# upstream manifest keeps its full `dependencies` for the marketplace publish path.
+	@echo "$(BLUE)Deploying skills to Claude Code (per-item, dependency-stripped manifests)...$(NC)"
 	@mkdir -p $(CLAUDE_SKILLS_DIR)
 	@if [ ! -d "$(LOCAL_SKILLS_DIR)" ]; then \
 		echo "$(YELLOW)→ No local_skills/ directory — run 'make skills-install' first$(NC)"; \
@@ -440,25 +472,30 @@ deploy-claude: deploy-claude-settings ## Symlink external skills from local_skil
 			[ -d "$$skill_dir" ] || continue; \
 			skill_name=$$(basename $$skill_dir); \
 			target=$(CLAUDE_SKILLS_DIR)/$$skill_name; \
-			if [ -L "$$target" ]; then \
-				rm "$$target"; \
-			elif [ -d "$$target" ]; then \
-				echo "$(YELLOW)  → Skipping $$skill_name (real directory exists, not a symlink)$(NC)"; \
-				continue; \
+			rm -rf "$$target"; \
+			mkdir -p "$$target"; \
+			for item in "$$skill_dir".[!.]* "$$skill_dir"*; do \
+				[ -e "$$item" ] || continue; \
+				base=$$(basename "$$item"); \
+				[ "$$base" = ".claude-plugin" ] && continue; \
+				ln -sfn "$$item" "$$target/$$base"; \
+			done; \
+			if [ -f "$$skill_dir.claude-plugin/plugin.json" ]; then \
+				mkdir -p "$$target/.claude-plugin"; \
+				python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); d.pop("dependencies",None); json.dump(d,open(sys.argv[2],"w"),indent=2)' \
+					"$$skill_dir.claude-plugin/plugin.json" "$$target/.claude-plugin/plugin.json"; \
 			fi; \
-			ln -sfn ../../local_skills/$$skill_name "$$target"; \
 			echo "$(GREEN)  ✓ Linked: $$skill_name$(NC)"; \
 		done; \
-		for target in $(CLAUDE_SKILLS_DIR)/*/; do \
-			link=$${target%/}; \
-			[ -L "$$link" ] || continue; \
-			skill_name=$$(basename "$$link"); \
+		for entry in $(CLAUDE_SKILLS_DIR)/*; do \
+			[ -e "$$entry" ] || continue; \
+			skill_name=$$(basename "$$entry"); \
 			[ -d "$(LOCAL_SKILLS_DIR)/$$skill_name" ] && continue; \
-			echo "$(YELLOW)  → Removing stale symlink: $$skill_name$(NC)"; \
-			rm "$$link"; \
+			echo "$(YELLOW)  → Removing stale skill dir: $$skill_name$(NC)"; \
+			rm -rf "$$entry"; \
 		done; \
 	fi
-	@echo "$(GREEN)✓ External skills deployed to .claude/skills/$(NC)"
+	@echo "$(GREEN)✓ Skills deployed to .claude/skills/$(NC)"
 
 .PHONY: deploy-openclaw
 deploy-openclaw: deploy-openclaw-skills deploy-openclaw-config deploy-openclaw-docs deploy-openclaw-identity ## Symlink skills + configure OpenClaw + update workspace docs + render identity
@@ -517,7 +554,7 @@ deploy-openclaw-config: ## Merge skills.entries into openclaw.json (requires jq)
 			[ -d "$$skill_dir" ] || continue; \
 			skill_name=$$(basename $$skill_dir); \
 			patch=$$(echo "$$patch" | jq --arg name "$$skill_name" --arg root "$(PROJECT_ROOT)" \
-				'. + {($$name): {"env": {"ALHAZEN_PROJECT_ROOT": $$root, "TYPEDB_DATABASE": "alhazen_notebook"}}}'); \
+				'. + {($$name): {"env": {"ALHAZEN_PROJECT_ROOT": $$root}}}'); \
 		done; \
 	fi; \
 	jq --argjson entries "$$patch" '.skills.entries = $$entries' "$(OPENCLAW_CONFIG)" > "$(OPENCLAW_CONFIG).tmp" && \

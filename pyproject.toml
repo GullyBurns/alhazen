@@ -47,10 +47,10 @@ dev = [
     "ruff>=0.4.0",
 ]
 typedb = [
-    "typedb-driver>=3.8.0",
+    "typedb-driver>=3.8.0,<3.11",
 ]
 mcp = [
-    "typedb-driver>=3.8.0",
+    "typedb-driver>=3.8.0,<3.11",
     "mcp>=1.0.0",
 ]
 skills = [
@@ -68,7 +68,7 @@ qdrant = [
     "qdrant-client>=1.14.0",
 ]
 gateway = [
-    "typedb-driver>=3.8.0",
+    "typedb-driver>=3.8.0,<3.11",
     "fastapi>=0.104.0",
     "uvicorn>=0.24.0",
 ]
