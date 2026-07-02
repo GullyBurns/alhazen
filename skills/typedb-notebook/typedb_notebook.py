@@ -342,6 +342,43 @@ def get_schema_model():
     return _SCHEMA_MODEL
 
 
+# Per-skill probe entity type: a representative type whose presence in a database means
+# that skill's dashboard is relevant there. Used by scan-databases for the hub DB switcher.
+# (Data query only — never a variable-free schema match, which panics TypeDB 3.8.)
+DASHBOARD_PROBES = {
+    "agentic-memory": "nbmem-memory-claim-note",
+    "scientific-literature": "scilit-paper",
+    "tech-recon": "trec-system",
+    "dismech-notebook": "dm-disease",
+    "coach": "coach-metric-series",
+    "jobhunt": "jhunt-position",
+}
+
+
+def scan_databases(args):
+    """List every TypeDB database and, per skill, whether its dashboard is available there.
+    For each (database, skill) it probes a representative entity type: status is
+    'data' (rows exist), 'schema' (type defined, no rows), or 'absent' (type not defined).
+    Powers the hub database switcher — selecting a DB reveals the dashboards valid for it."""
+    out = []
+    with get_driver() as driver:
+        names = sorted(db.name for db in driver.databases.all())
+        for name in names:
+            skills = {}
+            for slug, probe in DASHBOARD_PROBES.items():
+                status = "absent"
+                try:
+                    with driver.transaction(name, TransactionType.READ) as tx:
+                        rows = list(tx.query(
+                            f'match $x isa {probe}; limit 1; select $x;').resolve())
+                        status = "data" if rows else "schema"
+                except Exception:
+                    status = "absent"
+                skills[slug] = status
+            out.append({"name": name, "skills": skills})
+    print(json.dumps({"success": True, "databases": out}, indent=2))
+
+
 def describe_schema(args):
     """Inspect the parsed schema: a single type's detail, or a global summary."""
     sm = get_schema_model()
@@ -1516,6 +1553,10 @@ def main():
                               help="Inspect the parsed schema (a single type, or a global summary)")
     p.add_argument("--type", help="Type to describe (entity, relation, or attribute)")
 
+    # scan-databases (hub DB switcher: per-DB availability of each skill dashboard)
+    subparsers.add_parser("scan-databases",
+                          help="List databases and, per skill, whether its dashboard is available")
+
     # create-entity
     p = subparsers.add_parser("create-entity", help="Create (or upsert) a typed entity")
     p.add_argument("--type", required=True, help="Concrete entity type (e.g. scilit-evidence)")
@@ -1598,6 +1639,7 @@ def main():
         "show-pipeline-note": show_pipeline_note,
         "list-pipeline-notes": list_pipeline_notes,
         "describe-schema": describe_schema,
+        "scan-databases": scan_databases,
         "create-entity": create_entity,
         "set-attr": set_attr,
         "delete-attr": delete_attr,

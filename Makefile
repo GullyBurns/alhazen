@@ -138,7 +138,7 @@ build-dashboard: build-skills ## Wire skill dashboard pages/routes/components in
 	done < <(find dashboard/src/app -maxdepth 1 -mindepth 1 -name '(*' 2>/dev/null); \
 	while IFS= read -r d; do \
 	  skill_name=$$(basename "$$d"); \
-	  [ "$$skill_name" = "typedb-status" ] && continue; \
+	  case "$$skill_name" in typedb-status|databases) continue;; esac; \
 	  echo " $$PUBLIC_SKILLS " | grep -q " $$skill_name " || { \
 	    echo "  Removing stale API route: $$d"; rm -rf "$$d"; }; \
 	done < <(find dashboard/src/app/api -maxdepth 1 -mindepth 1 2>/dev/null); \
