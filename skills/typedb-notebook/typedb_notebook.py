@@ -1408,11 +1408,31 @@ def run_pipeline_note(args):
                 written[output_name] = {"attr": attr_name, "chars": len(value)}
             tx.commit()
 
+        # Observable-Plot support: a note may carry a `plot_code` (JS expression string) and a
+        # `plot_data_output` naming which output holds the row data; the dashboard evals plot_code
+        # against `data`. Fall back to the first list-of-dicts output when unnamed.
+        plot_code = config.get("plot_code")
+        plot_data = None
+        data_output = config.get("plot_data_output")
+        if data_output and data_output in results_map:
+            plot_data = results_map[data_output]
+        else:
+            for v in results_map.values():
+                if isinstance(v, list) and v and isinstance(v[0], dict):
+                    plot_data = v
+                    break
+        try:
+            json.dumps(plot_data)
+        except (TypeError, ValueError):
+            plot_data = None
+
         print(json.dumps({
             "success": True,
             "note_id": args.id,
             "outputs_written": written,
             "outputs_not_persisted": non_persisted,
+            "plot_code": plot_code,
+            "data": plot_data,
         }))
 
 
@@ -1433,13 +1453,16 @@ def show_pipeline_note(args):
 
     r = results[0]
     config_str = r.get("config")
+    config = json.loads(config_str) if config_str else None
     out = {
         "success": True,
         "note_id": args.id,
         "name": r.get("name"),
         "script": r.get("script"),
-        "config": json.loads(config_str) if config_str else None,
+        "config": config,
         "content": r.get("content"),
+        # convenience for the dashboard Plot renderer (also inside config)
+        "plot_code": (config or {}).get("plot_code"),
     }
     print(json.dumps(out, indent=2))
 
