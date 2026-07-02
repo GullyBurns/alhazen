@@ -52,7 +52,6 @@ const SKILL_TO_NAMESPACE: Record<string, string> = {
   'literature-trends': 'sltrend',
   'dismech': 'dm',
   'web-search': 'alh',
-  'skilllog': 'slog',
 };
 
 function skillToNamespace(skill: string | undefined): string {

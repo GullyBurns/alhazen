@@ -26,7 +26,6 @@ Moving `alhazen_notebook.tql` into a skill directory would make it a peer of the
 | File | Purpose |
 |------|---------|
 | `alhazen_notebook.tql` | Core schema — the foundation loaded first by `make build-db` |
-| `namespaces/skilllog.tql` | Skill invocation logging types — infrastructure with no skill home |
 | `llms.txt` | TypeDB 3.x cheat sheet — read on demand before writing queries |
 | `typedb-3x-reference.md` | Full TypeDB 3.x reference (generated from official docs) |
 | `generate_schema_docs.py` | Regenerates `docs/` from the loaded schema |
@@ -66,9 +65,7 @@ Do not load schemas manually via TypeDB console — the Makefile handles orderin
 
 ## namespaces/ — Stopgap schemas
 
-Files in `namespaces/` are schemas that lack a proper skill home:
-
-- **`skilllog.tql`** — skill invocation logging; no external skill repo, lives here permanently.
+`namespaces/` holds schemas that lack a proper skill home. It is currently empty; `make db-init` still globs `namespaces/*.tql` so any future stopgap schema dropped here is picked up automatically.
 
 ---
 

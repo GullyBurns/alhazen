@@ -103,7 +103,7 @@ identifiable-entity (abstract root)
 
 Each skill extends this hierarchy with domain-specific types. A gene or disease is a `domain-thing`. A paper ingested from PubMed is an `artifact`. The agent's synthesis of a paper's key claims is a `note`. Collections group domain objects into research corpora.
 
-**Schema gaps** — when the agent tries to represent something that has no place in the current schema — are the primary signal for knowledge graph evolution. The skilllog system detects gaps automatically (via a PostToolUse hook), files them as GitHub issues, and provides a local fix workflow. See [Gap Architecture](https://github.com/GullyBurns/skillful-alhazen/wiki/Gap-Architecture).
+**Schema gaps** — when the agent tries to represent something that has no place in the current schema — are the primary signal for knowledge graph evolution. Gaps are filed as GitHub issues (labelled `gap:open`) and triaged through the `curation-skill-builder` gap-review workflow. See [Gap Architecture](https://github.com/GullyBurns/skillful-alhazen/wiki/Gap-Architecture).
 
 ---
 

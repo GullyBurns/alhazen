@@ -22,7 +22,6 @@ const factTypeColors: Record<string, string> = {
   goal: '#5b8ab8',
   preference: '#5b8ab8',
   'schema-gap': '#c87a4a',
-  'slog-schema-gap': '#c87a4a',
 };
 
 function getFactTypeColor(factType?: string): string {

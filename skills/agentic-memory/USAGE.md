@@ -7,7 +7,7 @@ Implements a two-tier memory architecture:
 1. **Short-term** — MEMORY.md files, context window (fast, ephemeral, file-based)
 2. **Long-term** — TypeDB knowledge graph (structured, typed, reasoned over, persistent)
 
-**Consolidation** is explicit: Claude judges when something is worth crystallizing, then calls `consolidate` to create a `memory-claim-note` entity. The quality signal from skilllog (`evaluation-label: golden`) IS the consolidation trigger.
+**Consolidation** is explicit: Claude judges when something is worth crystallizing, then calls `consolidate` to create a `memory-claim-note` entity.
 
 ---
 
@@ -54,7 +54,7 @@ identifiable-entity (abstract)
 | `decision` | Architectural or design decisions made |
 | `goal` | Objectives and priorities |
 | `preference` | User preferences and working style constraints |
-| `schema-gap` | Missing TypeDB schema elements (connects to skilllog gap workflow) |
+| `schema-gap` | Missing TypeDB schema elements (connects to the GitHub gap-review workflow) |
 
 ---
 
@@ -165,11 +165,11 @@ uv run python .claude/skills/agentic-memory/agentic_memory.py list-claims \
 uv run python .claude/skills/agentic-memory/agentic_memory.py create-episode \
   --summary "Narrative: what happened in this session" \
   [--skill agentic-memory] \
-  [--session-id <skilllog-session-id>]
+  [--session-id <session-id>]
 ```
 Returns: `{"success": true, "id": "ep-<hex>", "session_id": "..."}`
 
-The `session-id` is shared with `skilllog-session.session-id` to link performance spine (skilllog) with semantic spine (episode).
+The `session-id` is stored as `alh-session-id` on the episode, tying it to the Claude Code session it came from.
 
 #### `link-episode`
 ```bash
@@ -194,29 +194,16 @@ uv run python .claude/skills/agentic-memory/agentic_memory.py list-episodes \
 
 ---
 
-## Reconciliation with Skilllog
-
-| Skilllog concept | Agentic-memory concept | Relationship |
-|---|---|---|
-| `skilllog-session` (collection) | `episode` (ICE) | Same `session-id`. Session = performance spine. Episode = semantic spine. |
-| `evaluation-label: golden` | `consolidate` trigger | **Unified**: golden label IS the memory trigger. |
-| `schema-gap` (domain-thing) | `memory-claim-note` (fact-type: schema-gap) | memory-claim-note generalizes schema-gap |
-| `skill-model` (domain-thing) | target of `tool-familiarity` | operator-users linked to skill-models they use |
-| `agent-id` + `model-name` attrs | `ai-agent sub agent` | ai-agent gives typed identity to AI actors |
-
----
-
 ## Trigger Flow
 
-1. `PostToolUse` hook fires → `skill_logger.py` records invocation
-2. Claude marks invocation `golden` → hook prints `[CONSOLIDATION-HINT]` → call `consolidate`
-3. At session close → call `create-episode`, then `link-episode` with key entities touched
+1. When Claude judges a finding worth crystallizing → call `consolidate`
+2. At session close → call `create-episode`, then `link-episode` with key entities touched
 
 ---
 
 ## TypeDB Notes
 
 - `memory-claim-note sub note` — inherits `content`, `confidence`, `valid-from`, `valid-until`, `created-at` from core
-- `episode sub information-content-entity` — `content` holds the narrative; `session-id` links to skilllog
+- `episode sub information-content-entity` — `content` holds the narrative; `session-id` (stored as `alh-session-id`) ties it to the Claude Code session
 - `episode-mention` relation: `(session: $ep, subject: $e)` — any `identifiable-entity` can be a subject
 - Queries: use `isa identifiable-entity, has id "..."` to match any entity by id regardless of concrete type

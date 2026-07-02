@@ -23,7 +23,7 @@ Commands:
     Design decisions:
         add-decision        Record a schema design decision
         add-rationale       Add reasoning for a decision
-        link-gap            Link a slog-schema-gap as motivation for a decision
+        link-gap            Link a schema-gap ID as motivation for a decision
         list-decisions      List decisions for a domain
 
     Experiments:
@@ -302,7 +302,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: n,
-              body: 'Gap filed. To fix locally:\\n```bash\\n# Start the fix (creates branch, updates labels)\\nuv run python local_resources/skilllog/skill_logger.py fix-gap --issue ' + n + ' --repo ' + repo + '\\n\\n# After implementing and validating against TypeDB, open a draft PR\\nuv run python local_resources/skilllog/skill_logger.py submit-gap-pr --issue ' + n + ' --repo ' + repo + '\\n```'
+              body: 'Gap filed. To fix locally:\\n```bash\\n# Create a branch, implement + validate the fix against TypeDB, then open a draft PR\\ngit checkout -b fix/gap-' + n + '\\ngit commit -am "fix: <description> (closes #' + n + ')"\\ngit push -u origin fix/gap-' + n + '\\ngh pr create --draft --title "fix: <description>" --body "Closes #' + n + '"\\n```'
             });
 """
 
@@ -414,15 +414,6 @@ jobs:
                 '',
                 'This gap requires a local fix (schema changes need a running TypeDB instance for validation).',
                 '',
-                '```bash',
-                '# 1. Start the fix (creates branch, updates labels, posts comment)',
-                'uv run python local_resources/skilllog/skill_logger.py fix-gap --issue ' + n + ' --repo ' + repo,
-                '',
-                '# 2. Implement the fix, validate against TypeDB, then open a draft PR',
-                'uv run python local_resources/skilllog/skill_logger.py submit-gap-pr --issue ' + n + ' --repo ' + repo + ' --decisions "describe your key decisions here"',
-                '```',
-                '',
-                'Or manually:',
                 '```bash',
                 'git checkout -b ' + branch,
                 '# ... implement fix, validate against TypeDB ...',
@@ -1115,7 +1106,7 @@ def cmd_add_rationale(args):
 
 
 def cmd_link_gap(args):
-    """Link a slog-schema-gap ID to a design decision (stored as dm-linked-gap-id attribute)."""
+    """Link a schema-gap ID to a design decision (stored as dm-linked-gap-id attribute)."""
     if not TYPEDB_AVAILABLE:
         out({"success": False, "error": "typedb-driver not installed"})
         return
@@ -3105,9 +3096,9 @@ def main():
     p.add_argument("--rationale", required=True, help="Reasoning text")
     p.add_argument("--alternatives", help="Why alternatives were rejected")
 
-    p = subparsers.add_parser("link-gap", help="Link a slog-schema-gap as motivation for a decision")
+    p = subparsers.add_parser("link-gap", help="Link a schema-gap ID as motivation for a decision")
     p.add_argument("--decision-id", required=True, help="Decision ID")
-    p.add_argument("--gap-id", required=True, help="Schema-gap ID from skilllog")
+    p.add_argument("--gap-id", required=True, help="Schema-gap ID")
 
     p = subparsers.add_parser("list-decisions", help="List decisions for a domain")
     p.add_argument("--domain-id", required=True, help="Domain ID")

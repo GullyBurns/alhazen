@@ -247,14 +247,6 @@
     group: staff
     mode: '0600'
 
-- name: Copy LiteLLM Token Logging Callback
-  copy:
-    src: "{{ role_path }}/../../../local_resources/skilllog/litellm_callback.py"
-    dest: "{{ openclaw_home }}/litellm_callback.py"
-    owner: "{{ openclaw_user }}"
-    group: staff
-    mode: '0644'
-
 - name: Create LiteLLM Env (API keys)
   template:
     src: litellm.env.j2

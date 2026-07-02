@@ -17,12 +17,8 @@ Environment Variables:
 
 import json
 import os
-import uuid
-from datetime import datetime
 
 from mcp.server.fastmcp import FastMCP
-from starlette.requests import Request
-from starlette.responses import JSONResponse
 
 from .typedb_client import TypeDBClient
 
@@ -429,72 +425,6 @@ def alhazen_search(query: str, num_results: int = 5) -> str:
         )
     except Exception as e:
         return json.dumps({"success": False, "error": str(e)})
-
-
-# -----------------------------------------------------------------------------
-# LiteLLM Token Logging Endpoint
-# -----------------------------------------------------------------------------
-
-@mcp.custom_route("/log-llm-call", methods=["POST"])
-async def log_llm_call(request: Request) -> JSONResponse:
-    """
-    Receives LLM call data from the LiteLLM CustomLogger (litellm_callback.py)
-    and persists it as a skilllog-llm-call entity in TypeDB.
-
-    Expected JSON body:
-        model, session_id, input_tokens, output_tokens,
-        cache_creation_tokens, cache_read_tokens,
-        cost_usd, duration_ms, success (bool)
-    """
-    try:
-        data = await request.json()
-    except Exception as exc:
-        return JSONResponse({"success": False, "error": f"Invalid JSON: {exc}"}, status_code=400)
-
-    def _esc(s: str) -> str:
-        return s.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
-
-    model        = _esc(str(data.get("model", "unknown")))
-    session_id   = _esc(str(data.get("session_id", "unknown")))
-    input_tok    = int(data.get("input_tokens", 0))
-    output_tok   = int(data.get("output_tokens", 0))
-    cache_create = int(data.get("cache_creation_tokens", 0))
-    cache_read   = int(data.get("cache_read_tokens", 0))
-    cost_usd     = float(data.get("cost_usd", 0.0))
-    duration_ms  = int(data.get("duration_ms", 0))
-    success      = bool(data.get("success", True))
-    call_id      = f"skilllog-llm-{uuid.uuid4().hex[:12]}"
-    ts           = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
-
-    try:
-        from typedb.driver import TypeDB, Credentials, DriverOptions, TransactionType
-        driver = TypeDB.driver(
-            f"{TYPEDB_HOST}:{TYPEDB_PORT}",
-            Credentials(TYPEDB_USERNAME, TYPEDB_PASSWORD),
-            DriverOptions(is_tls_enabled=False),
-        )
-        with driver.transaction(TYPEDB_DATABASE, TransactionType.WRITE) as tx:
-            tx.query(f"""
-                insert $c isa skilllog-llm-call,
-                    has id "{call_id}",
-                    has name "llm:{model}:{ts}",
-                    has llm-model "{model}",
-                    has session-id "{session_id}",
-                    has input-tokens-estimate {input_tok},
-                    has output-tokens-estimate {output_tok},
-                    has cache-creation-tokens {cache_create},
-                    has cache-read-tokens {cache_read},
-                    has cost-usd {cost_usd:.8f},
-                    has duration-ms {duration_ms},
-                    has exit-code {0 if success else 1},
-                    has created-at {ts},
-                    has provenance "litellm-callback";
-            """).resolve()
-            tx.commit()
-        driver.close()
-        return JSONResponse({"success": True, "id": call_id})
-    except Exception as exc:
-        return JSONResponse({"success": False, "error": str(exc)}, status_code=500)
 
 
 # -----------------------------------------------------------------------------

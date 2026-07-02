@@ -57,10 +57,6 @@ skills = [
     "beautifulsoup4>=4.12.0",
     "tqdm>=4.66.0",
 ]
-skilllog = [
-    "tiktoken>=0.7.0",
-    "pyyaml>=6.0.0",
-]
 they-said-whaaa = [
     "youtube-transcript-api>=0.6",
 ]
@@ -91,7 +87,7 @@ embedding-map = [
     "pymde>=0.3.0",
 ]
 all = [
-    "skillful-alhazen[typedb,dev,skills,skilllog,semantic,pipeline,gateway,embedding-map]",
+    "skillful-alhazen[typedb,dev,skills,semantic,pipeline,gateway,embedding-map]",
 ]
 
 [project.scripts]

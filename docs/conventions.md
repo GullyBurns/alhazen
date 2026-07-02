@@ -26,11 +26,12 @@ Skills can define data quality checks in `quality-checks.yaml` (declarative Type
 
 See [`docs/schema-lifecycle.md`](schema-lifecycle.md) for the full schema gap detection, migration, and PR workflow.
 
-Quick reference — file a gap:
+Quick reference — file a gap as a GitHub issue (triaged by the `curation-skill-builder` gap-review workflow):
 ```bash
-uv run python local_resources/skilllog/skill_logger.py file-slog-schema-gap \
-  --skill <skill-name> \
-  --concept "<concept>" --missing "<what's absent>" --suggested "<fix>"
+gh issue create --repo <owner/name> \
+  --title "Gap [moderate][entity-schema]: <one-sentence summary>" \
+  --body $'## What was missing\n<concept>\n\n## What broke\n<what is absent>\n\n## Suggested fix\n<proposed TypeQL>' \
+  --label "gap:open"
 ```
 
 ## External Skill Fixes Must Go Upstream

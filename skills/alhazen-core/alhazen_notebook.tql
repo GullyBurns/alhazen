@@ -260,7 +260,7 @@ entity alh-analysis-pipeline-note sub alh-analysis-note,
 
 # EPISODE - Process account of a work session (4th ICE sibling)
 # Distinct from note (semantic interpretation): records WHAT HAPPENED and WHICH ENTITIES were touched.
-# Linked to entities via alh-episode-mention; linked to skilllog-session by shared alh-session-id.
+# Linked to entities via alh-episode-mention; alh-session-id ties it to the Claude Code session.
 entity alh-episode sub alh-information-content-entity,
     owns alh-session-id,
     owns alh-source-skill,

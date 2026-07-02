@@ -19,7 +19,7 @@ Claude Code acts as the **coordinator agent** for the Alhazen notebook OS. The O
 | **Skills** | Domain-specific reusable instruction sets | `skills/` directories, `skills-registry.yaml` |
 | **Memory** | What the system remembers across sessions | Two-tier: MEMORY.md (short-term) + TypeDB `nbmem-memory-claim-note` (long-term) |
 | **Connections** | How agents reach external systems | Documented in `connections/README.md` |
-| **Verification** | Ensuring outputs are correct, system improves | `skilllog` + quality labels + schema gap detection |
+| **Verification** | Ensuring outputs are correct, system improves | Manual review + `curation-skill-builder` schema-gap GitHub workflow |
 
 ### Coordinator Responsibilities
 
@@ -56,7 +56,7 @@ Read an agent's `AGENT.md` before dispatching to understand its capabilities and
 
 - **Identity + Memory + Context**: `skills/agentic-memory/agentic_memory.py` — operator profiles, memory claims, episodes, context domains
 - **Notebook**: `skills/typedb-notebook/typedb_notebook.py` — collections, notes, tagging, aboutness
-- **Verification**: `local_resources/skilllog/skill_logger.py` — invocation logging, quality labels, schema gap detection
+- **Verification**: schema-gap detection via `skills/curation-skill-builder/skill_builder.py` (`link-gap` + the generated GitHub gap-review workflows); no automated invocation logging
 
 ## Database Architecture — per-repo split (Jun 2026)
 
