@@ -1500,6 +1500,10 @@ def main():
     parser = argparse.ArgumentParser(
         description="TypeDB Notebook CLI for Alhazen's knowledge graph"
     )
+    # Global DB override (before the subcommand); threads through the gateway as a plain arg
+    # so the dashboard can point notebook commands at a selected database.
+    parser.add_argument("--database", "--db", dest="database",
+                        help="Override TYPEDB_DATABASE for this invocation")
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
     # insert-collection
@@ -1643,6 +1647,9 @@ def main():
     if not args.command:
         parser.print_help()
         sys.exit(1)
+
+    if getattr(args, "database", None):
+        globals()["TYPEDB_DATABASE"] = args.database
 
     if not TYPEDB_AVAILABLE:
         print(json.dumps({"success": False, "error": "typedb-driver not installed"}))
