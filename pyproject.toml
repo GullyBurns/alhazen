@@ -87,7 +87,10 @@ embedding-map = [
     "pymde>=0.3.0",
 ]
 all = [
-    "skillful-alhazen[typedb,dev,skills,semantic,pipeline,gateway,embedding-map]",
+    "skillful-alhazen[typedb,dev,skills,semantic,pipeline,gateway,embedding-map,fulltext]",
+]
+fulltext = [
+    "kreuzberg>=4.9,<5",
 ]
 
 [project.scripts]
