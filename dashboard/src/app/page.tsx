@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Briefcase, Database, Dna, Heart, LayoutDashboard, Layers, Megaphone, Network, Search } from 'lucide-react';
+import { Briefcase, Database, Dna, Gauge, Heart, LayoutDashboard, Layers, Megaphone, Microscope, Network, PenTool, Scale, Search } from 'lucide-react';
 
 type ServiceStatus = 'checking' | 'online' | 'offline';
 
@@ -32,6 +32,7 @@ const STATUS_STYLES: Record<ServiceStatus, string> = {
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Briefcase, Heart, Search, Dna, Layers, Megaphone, Network, LayoutDashboard,
+  Microscope, Scale, PenTool, Gauge,
 };
 
 const COLOR_MAP: Record<string, { border: string; text: string; icon: string }> = {
@@ -78,9 +79,14 @@ export default function HubPage() {
   }
 
   const enabled = skills.filter(s => s.enabled !== false);
-  // when a scan is available, order: dashboards with data, then schema-only, then absent
-  const rank = (slug: string) => (availability[slug] === 'data' ? 0 : availability[slug] === 'schema' ? 1 : 2);
-  const ordered = scan.length ? [...enabled].sort((a, b) => rank(a.slug) - rank(b.slug)) : enabled;
+  // when a scan is available: hide dashboards absent from the selected database
+  // entirely, and order the rest data-first, then schema-only
+  const rank = (slug: string) => (availability[slug] === 'data' ? 0 : 1);
+  const ordered = scan.length
+    ? enabled
+        .filter(s => (availability[s.slug] ?? 'absent') !== 'absent')
+        .sort((a, b) => rank(a.slug) - rank(b.slug))
+    : enabled;
 
   return (
     <div className="min-h-screen flex flex-col">

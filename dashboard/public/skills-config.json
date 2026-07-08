@@ -43,5 +43,59 @@
     "url_path": "/coach",
     "icon": "Heart",
     "color": "teal"
+  },
+  {
+    "slug": "career",
+    "enabled": true,
+    "name": "Career",
+    "description": "The career graph: people, collaborators, projects, and the opportunity pipeline.",
+    "url_path": "/career",
+    "icon": "Briefcase",
+    "color": "blue"
+  },
+  {
+    "slug": "analyst",
+    "enabled": true,
+    "name": "Research Analyst",
+    "description": "Decision-framed research missions with multi-thread consensus and the three-question gate.",
+    "url_path": "/analyst",
+    "icon": "Microscope",
+    "color": "cyan"
+  },
+  {
+    "slug": "advisor",
+    "enabled": true,
+    "name": "Board of Advisors",
+    "description": "Strategic decisions debated by advisor personas, with bias checks and scenario stress-tests.",
+    "url_path": "/advisor",
+    "icon": "Scale",
+    "color": "teal"
+  },
+  {
+    "slug": "scribe",
+    "enabled": true,
+    "name": "Scribe",
+    "description": "Writing in your voice: profiles, audience personas, and dimension-scored drafts.",
+    "url_path": "/scribe",
+    "icon": "PenTool",
+    "color": "mint"
+  },
+  {
+    "slug": "ops",
+    "enabled": true,
+    "name": "Operations",
+    "description": "Morning briefs, stakeholder CRM, meeting prep, commitments, and monitors.",
+    "url_path": "/ops",
+    "icon": "Gauge",
+    "color": "rust"
+  },
+  {
+    "slug": "chief-of-staff",
+    "enabled": true,
+    "name": "Chief of Staff",
+    "description": "Cross-skill daily agenda: what needs you today across the whole team.",
+    "url_path": "/chief",
+    "icon": "LayoutDashboard",
+    "color": "teal"
   }
 ]
