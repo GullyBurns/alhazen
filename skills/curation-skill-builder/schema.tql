@@ -141,7 +141,7 @@ entity dm-source-doc sub alh-artifact,
     plays dm-source-for:source-doc;
 
 # A specific schema design choice (entity, relation, attribute, hierarchy, constraint).
-# dm-linked-gap-id is multi-valued: one value per linked schema-gap from skilllog.
+# dm-linked-gap-id is multi-valued: one value per linked schema-gap (GitHub issue number/ID).
 entity dm-design-decision sub alh-domain-thing,
     owns dm-decision-type,
     owns dm-decision-summary,

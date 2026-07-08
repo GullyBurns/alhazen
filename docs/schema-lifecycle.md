@@ -42,20 +42,18 @@ Periodic review of schema for unnecessary complexity, redundancy, or misalignmen
 
 ## Phase 2: File
 
-### CLI command
+### File as a GitHub issue
 
 ```bash
-uv run python local_resources/skilllog/skill_logger.py file-slog-schema-gap \
-  --skill <skill-name> \
-  --concept "<concept Claude tried to represent>" \
-  --missing "<which TypeDB entity/relation/attribute is absent>" \
-  --suggested "<proposed TypeQL snippet, or 'unknown'>" \
-  [--dry-run]
+gh issue create --repo <owner/repo> \
+  --title "Gap [<severity>][<gap-type>]: <one-sentence summary>" \
+  --body $'## What was missing\n<concept Claude tried to represent>\n\n## What broke\n<which TypeDB entity/relation/attribute is absent>\n\n## Suggested fix\n<proposed TypeQL snippet, or unknown>' \
+  --label "gap:open"
 ```
 
-**What it does:**
-1. Routes the issue to the correct GitHub repo (see Routing below)
-2. Deduplicates: checks for existing open `gap:open` issues with the same concept
+**Before filing:**
+1. Route the issue to the correct GitHub repo (see Routing below)
+2. Deduplicate: `gh issue list --repo <owner/repo> --label "gap:open"` — skip if the same concept is already open
 3. Builds a structured issue body
 4. Runs `gh issue create` with the `gap:open` label
 
@@ -210,11 +208,11 @@ make db-migrate-test-clean   # when done
 ### Start the fix (creates branch, updates issue)
 
 ```bash
-uv run python local_resources/skilllog/skill_logger.py fix-gap \
-  --issue <N> --repo <owner/repo>
+git checkout -b fix/gap-<N>-<slug>
+gh issue edit <N> --repo <owner/repo> --add-label gap:in-progress --remove-label gap:open
 ```
 
-Creates branch `fix/gap-N-<slug>`, labels issue `gap:in-progress`.
+Work on branch `fix/gap-N-<slug>`; the issue is now labelled `gap:in-progress`.
 
 ### Run the migration
 
@@ -241,17 +239,15 @@ Update all skill code that referenced the old schema:
 ### Open a draft PR
 
 ```bash
-uv run python local_resources/skilllog/skill_logger.py submit-gap-pr \
-  --issue <N> --repo <owner/repo> \
-  --decisions "brief description of key decisions made"
-```
+# Confirm commits ahead of main, run tests, then:
+git push -u origin fix/gap-<N>-<slug>
+gh pr create --draft --title "fix(<skill>): <slug> (closes #<N>)" \
+  --body "Closes #<N>
 
-**What it does:**
-1. Confirms commits ahead of `main`
-2. Runs tests if available
-3. Builds PR title: `fix(<skill>): <slug> (closes #N)`
-4. Pushes branch, creates draft PR via `gh pr create --draft`
-5. Labels issue `gap:pr-open`
+## Key decisions
+brief description of key decisions made"
+gh issue edit <N> --repo <owner/repo> --add-label gap:pr-open --remove-label gap:in-progress
+```
 
 ### Human merge
 
@@ -418,7 +414,6 @@ This compiles into `skills-registry.yaml` under `schema_map` (load_order + names
 
 | File | Purpose |
 |------|---------|
-| `local_resources/skilllog/skill_logger.py` | CLI: `file-slog-schema-gap`, `fix-gap`, `submit-gap-pr` |
 | `src/skillful_alhazen/utils/schema_mapper.py` | GLAV migration engine |
 | `src/skillful_alhazen/utils/schema_diff.py` | Schema diff + rule generation |
 | `local_resources/typedb/migration-rules/` | Migration rule sets (one dir per migration) |

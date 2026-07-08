@@ -46,6 +46,7 @@ next-env.d.ts
 src/app/(*)
 src/app/api/*
 !src/app/api/typedb-status
+!src/app/api/databases
 src/components/*
 !src/components/ui
 src/lib/*.ts

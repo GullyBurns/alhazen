@@ -41,5 +41,30 @@
     "badge": "SKILL",
     "color": "blue",
     "skill": "tech-recon"
+  },
+  "career": {
+    "badge": "SKILL",
+    "color": "blue",
+    "skill": "career"
+  },
+  "anlst": {
+    "badge": "SKILL",
+    "color": "blue",
+    "skill": "analyst"
+  },
+  "advsr": {
+    "badge": "SKILL",
+    "color": "blue",
+    "skill": "advisor"
+  },
+  "scribe": {
+    "badge": "SKILL",
+    "color": "blue",
+    "skill": "scribe"
+  },
+  "ops": {
+    "badge": "SKILL",
+    "color": "blue",
+    "skill": "ops"
   }
 }

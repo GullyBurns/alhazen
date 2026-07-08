@@ -31,7 +31,7 @@ function detectContextDomains(data: Record<string, unknown>): ContextDomain[] {
     if (value.length < 80) continue;
     // This is a long text attribute — show as a collapsible card
     const label = key
-      .replace(/^(nbmem-|jhunt-|trec-|alh-|scilit-|slog-|sltrend-|dm-)/, '')
+      .replace(/^(nbmem-|jhunt-|trec-|alh-|scilit-|sltrend-|dm-)/, '')
       .replace(/-/g, ' ')
       .replace(/\b\w/g, c => c.toUpperCase());
     domains.push({ key, label, attrName: key });

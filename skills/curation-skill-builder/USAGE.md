@@ -822,7 +822,7 @@ The full improvement loop connects live gap discovery through design decisions t
 discover gap during workflow
     |
     v
-log gap (typedb-notebook record-gap)          <-- surface-level observation
+file gap as GitHub issue (gap:open)           <-- surface-level observation
     |
     v
 snapshot-skill (captures current skill files)
@@ -847,9 +847,8 @@ export-design / export-design-phases (Markdown changelog)
 
 | Mechanism | Where | When to Use |
 |-----------|-------|-------------|
-| **Observed gap** | `typedb-notebook record-gap` (TypeDB) | Claude had to ask for something that should be stored, or made a wrong inference — logged during live skill use |
-| **Design gap** | `gh issue create` (GitHub Issues) | A structural gap discovered during implementation — logged as a GitHub Issue in the skill's repo |
-| **Link them** | `skill-builder link-gap` | Connect an observed gap (skilllog ID) to the design decision that fixes it |
+| **Observed / design gap** | `gh issue create` (GitHub Issues, label `gap:open`) | Claude had to ask for something that should be stored, made a wrong inference, or found a structural gap during implementation — filed as a GitHub Issue in the skill's repo |
+| **Link them** | `skill-builder link-gap` | Connect a filed gap (its issue number or ID) to the design decision that fixes it |
 
 ### Skill Snapshots
 
@@ -905,9 +904,9 @@ uv run python .claude/skills/curation-skill-builder/skill_builder.py \
     --rationale "collection already has collection-membership and nesting relations; reusing these avoids duplicating grouping infrastructure" \
     --alternatives "domain-thing would require custom grouping relations"
 
-# Link a schema-gap (from skilllog) as motivation for the decision
+# Link a filed schema-gap (its issue number or ID) as motivation for the decision
 uv run python .claude/skills/curation-skill-builder/skill_builder.py \
-    link-gap --decision-id dm-decision-ZZZZ --gap-id gap-abc123
+    link-gap --decision-id dm-decision-ZZZZ --gap-id 123
 
 # List decisions (optionally filter by type)
 uv run python .claude/skills/curation-skill-builder/skill_builder.py \
@@ -958,9 +957,9 @@ uv run python .claude/skills/curation-skill-builder/skill_builder.py \
     list-errors --domain-id dm-domain-XXXX --status open
 ```
 
-### Skill Gap Logging (typedb-notebook)
+### Skill Gap Logging (GitHub Issues)
 
-Record deficiencies discovered during skill use. When Claude has to ask something that should have been stored, or makes an incorrect inference, log it as a `schema-gap` for systematic improvement.
+Record deficiencies discovered during skill use. When Claude has to ask something that should have been stored, or makes an incorrect inference, file it as a GitHub Issue (label `gap:open`) for systematic improvement. The gap-type taxonomy below becomes the issue-title tag.
 
 | Gap Type | When to Log |
 |----------|-------------|
@@ -971,38 +970,30 @@ Record deficiencies discovered during skill use. When Claude has to ask somethin
 | `incorrect-inference` | Claude's reasoning produced a factually wrong result |
 
 ```bash
-# Record a gap
-uv run python .claude/skills/typedb-notebook/typedb_notebook.py record-gap \
-    --skill jobhunt \
-    --type missing-user-context \
-    --description "User home location not stored; had to ask about on-site viability" \
-    --severity moderate \
-    --example "GenBio AI on-site Palo Alto role: asked user if Palo Alto commute was viable"
+# File a gap
+gh issue create --repo <owner/name> \
+    --title "Gap [moderate][missing-user-context]: home location not stored" \
+    --body $'## What was missing\nUser home location; had to ask about on-site viability\n\n## What broke\nGenBio AI on-site Palo Alto role: asked user if Palo Alto commute was viable\n\n## Suggested fix\nAdd a home-location attribute to the operator profile' \
+    --label "gap:open"
 
-# List open gaps for a skill
-uv run python .claude/skills/typedb-notebook/typedb_notebook.py list-gaps --skill jobhunt
+# List open gaps
+gh issue list --repo <owner/name> --label "gap:open" --json number,title,url,labels
 
-# List all open gaps
-uv run python .claude/skills/typedb-notebook/typedb_notebook.py list-gaps
-
-# Close a gap once addressed
-uv run python .claude/skills/typedb-notebook/typedb_notebook.py close-gap \
-    --id "gap-abc123" --status addressed
+# Close a gap once addressed (its PR closing the issue does this automatically)
+gh issue close <number> --repo <owner/name>
 ```
 
-The `skill-model` entity (auto-created by `record-gap`) is the first-class representation of each skill in the knowledge graph. Multiple gaps can be linked to one skill-model.
-
-Link an observed gap to the design decision that fixes it:
+Link a filed gap to the design decision that fixes it:
 
 ```bash
-# Step 1: Record the gap (skilllog)
-uv run python .claude/skills/typedb-notebook/typedb_notebook.py record-gap \
-    --skill newskill --type missing-entity-type \
-    --description "No type for 510k predicate device"
+# Step 1: File the gap (GitHub issue) — note its issue number, e.g. 123
+gh issue create --repo <owner/name> \
+    --title "Gap [moderate][missing-entity-type]: no type for 510k predicate device" \
+    --label "gap:open"
 
 # Step 2: Link it to the fixing decision (skill-builder)
 uv run python .claude/skills/curation-skill-builder/skill_builder.py \
-    link-gap --decision-id dm-decision-ZZZZ --gap-id gap-abc123
+    link-gap --decision-id dm-decision-ZZZZ --gap-id 123
 ```
 
 The gap ID is stored as a `dm-linked-gap-id` attribute (multi-valued: one per linked gap). The `show-domain` output includes linked gap IDs for cross-referencing.

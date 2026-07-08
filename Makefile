@@ -138,7 +138,7 @@ build-dashboard: build-skills ## Wire skill dashboard pages/routes/components in
 	done < <(find dashboard/src/app -maxdepth 1 -mindepth 1 -name '(*' 2>/dev/null); \
 	while IFS= read -r d; do \
 	  skill_name=$$(basename "$$d"); \
-	  [ "$$skill_name" = "typedb-status" ] && continue; \
+	  case "$$skill_name" in typedb-status|databases) continue;; esac; \
 	  echo " $$PUBLIC_SKILLS " | grep -q " $$skill_name " || { \
 	    echo "  Removing stale API route: $$d"; rm -rf "$$d"; }; \
 	done < <(find dashboard/src/app/api -maxdepth 1 -mindepth 1 2>/dev/null); \
@@ -442,8 +442,8 @@ endif
 # =============================================================================
 
 .PHONY: deploy-claude-settings
-deploy-claude-settings: ## Write .claude/settings.json with portable PostToolUse hook
-	@printf '{\n  "hooks": {\n    "SessionStart": [\n      {\n        "hooks": [\n          {\n            "type": "command",\n            "command": "REPO=$$(git rev-parse --show-toplevel 2>/dev/null) && CORE=\\"$$REPO/local_skills/alhazen-core/alhazen_core.py\\" && [ -f \\"$$CORE\\" ] && cd \\"$$REPO\\" && unset VIRTUAL_ENV && uv run --project \\"$$REPO/local_skills/alhazen-core\\" python \\"$$CORE\\" init",\n            "timeout": 90000\n          }\n        ]\n      }\n    ],\n    "PostToolUse": [\n      {\n        "matcher": "Bash",\n        "hooks": [\n          {\n            "type": "command",\n            "command": "REPO=$$(git rev-parse --show-toplevel 2>/dev/null) && [ -f \\"$$REPO/local_resources/skilllog/skill_logger.py\\" ] && cd \\"$$REPO\\" && uv run python \\"$$REPO/local_resources/skilllog/skill_logger.py\\""\n          }\n        ]\n      }\n    ]\n  }\n}\n' > $(PROJECT_ROOT)/.claude/settings.json
+deploy-claude-settings: ## Write .claude/settings.json with the SessionStart TypeDB-init hook
+	@printf '{\n  "hooks": {\n    "SessionStart": [\n      {\n        "hooks": [\n          {\n            "type": "command",\n            "command": "REPO=$$(git rev-parse --show-toplevel 2>/dev/null) && CORE=\\"$$REPO/local_skills/alhazen-core/alhazen_core.py\\" && [ -f \\"$$CORE\\" ] && cd \\"$$REPO\\" && unset VIRTUAL_ENV && uv run --project \\"$$REPO/local_skills/alhazen-core\\" python \\"$$CORE\\" init",\n            "timeout": 90000\n          }\n        ]\n      }\n    ]\n  }\n}\n' > $(PROJECT_ROOT)/.claude/settings.json
 	@echo "$(GREEN)  ✓ Wrote .claude/settings.json$(NC)"
 
 .PHONY: deploy-claude
@@ -952,32 +952,6 @@ skills-update: ## Re-resolve all skills from registry (re-links core, re-clones 
 skills-sync: ## [deprecated] Skills are now self-contained — metadata lives in skill.yaml/SKILL.md
 	@echo "$(YELLOW)skills-sync is no longer needed: each skill is its own source of truth.$(NC)"
 	@echo "$(YELLOW)Edit skills/*/SKILL.md (core) or local_skills/*/SKILL.md (external) directly.$(NC)"
-
-# =============================================================================
-# Skill Observability
-# =============================================================================
-
-SKILL_LOGGER := $(PROJECT_ROOT)/local_resources/skilllog/skill_logger.py
-
-.PHONY: skills-token-report
-skills-token-report: ## Show token usage summary across all logged skill invocations
-	uv run python $(SKILL_LOGGER) token-report
-
-.PHONY: skills-token-report-skill
-skills-token-report-skill: ## Show token usage for a specific skill (requires SKILL=name)
-ifndef SKILL
-	@echo "$(RED)Error: SKILL variable required. Usage: make skills-token-report-skill SKILL=jobhunt$(NC)"
-	@exit 1
-endif
-	uv run python $(SKILL_LOGGER) token-report --skill $(SKILL)
-
-.PHONY: skills-invocations
-skills-invocations: ## List recent skill invocations (use SKILL=name to filter)
-	@if [ -n "$(SKILL)" ]; then \
-		uv run python $(SKILL_LOGGER) list-invocations --skill $(SKILL); \
-	else \
-		uv run python $(SKILL_LOGGER) list-invocations; \
-	fi
 
 # =============================================================================
 # Dashboard

@@ -958,7 +958,7 @@ def _run_namespace_audit(entities, relations):
         "trec",    # was tech-recon
         "jhunt",   # was jobhunt
         "sltrend", # was trend
-        "scilit", "dm", "slog", "nbmem", "alh",
+        "scilit", "dm", "nbmem", "alh",
     ]
 
     # Group entities by namespace prefix
@@ -1289,7 +1289,7 @@ def main():
     p = subparsers.add_parser("create-episode", help="Create an episode entity")
     p.add_argument("--skill", help="Source skill name")
     p.add_argument("--summary", required=True, help="Narrative of what happened")
-    p.add_argument("--session-id", help="Session ID to link to skilllog-session")
+    p.add_argument("--session-id", help="Session ID stored as alh-session-id on the episode")
 
     p = subparsers.add_parser("link-episode", help="Link episode to graph entities")
     p.add_argument("--episode", required=True)

@@ -29,7 +29,7 @@ COPY src/skillful_alhazen/__init__.py ./src/skillful_alhazen/
 # Skill runtime deps + the gateway's own. pipeline (sf-hamilton) for tech_recon.py;
 # semantic (umap/hdbscan/voyage) for scilit map/cluster/embed. No torch — pymde
 # stays in the embedding-map extra.
-RUN uv sync --extra typedb --extra skills --extra skilllog --extra qdrant --extra pipeline --extra semantic --extra gateway --no-dev
+RUN uv sync --extra typedb --extra skills --extra qdrant --extra pipeline --extra semantic --extra gateway --no-dev
 
 # ==============================================================================
 # Stage 3: Runtime

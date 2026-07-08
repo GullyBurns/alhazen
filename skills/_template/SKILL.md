@@ -36,11 +36,10 @@ When you notice a schema gap:
 2. Immediately file a gap issue:
 
 ```bash
-uv run python local_resources/skilllog/skill_logger.py file-schema-gap \
-  --skill <this-skill-name> \
-  --concept "<the concept you tried to represent>" \
-  --missing "<which TypeDB entity/relation/attribute is absent>" \
-  --suggested "<proposed TypeQL addition, or 'unknown' if unsure>"
+gh issue create --repo <owner/name> \
+  --title "Gap [moderate][entity-schema]: <one-sentence summary>" \
+  --body $'## What was missing\n<the concept you tried to represent>\n\n## What broke\n<which TypeDB entity/relation/attribute is absent>\n\n## Suggested fix\n<proposed TypeQL addition, or unknown>' \
+  --label "gap:open"
 ```
 
 **Examples of schema gaps:**

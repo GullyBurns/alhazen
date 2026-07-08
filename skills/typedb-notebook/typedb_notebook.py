@@ -342,6 +342,43 @@ def get_schema_model():
     return _SCHEMA_MODEL
 
 
+# Per-skill probe entity type: a representative type whose presence in a database means
+# that skill's dashboard is relevant there. Used by scan-databases for the hub DB switcher.
+# (Data query only — never a variable-free schema match, which panics TypeDB 3.8.)
+DASHBOARD_PROBES = {
+    "agentic-memory": "nbmem-memory-claim-note",
+    "scientific-literature": "scilit-paper",
+    "tech-recon": "trec-system",
+    "dismech-notebook": "dm-disease",
+    "coach": "coach-metric-series",
+    "jobhunt": "jhunt-position",
+}
+
+
+def scan_databases(args):
+    """List every TypeDB database and, per skill, whether its dashboard is available there.
+    For each (database, skill) it probes a representative entity type: status is
+    'data' (rows exist), 'schema' (type defined, no rows), or 'absent' (type not defined).
+    Powers the hub database switcher — selecting a DB reveals the dashboards valid for it."""
+    out = []
+    with get_driver() as driver:
+        names = sorted(db.name for db in driver.databases.all())
+        for name in names:
+            skills = {}
+            for slug, probe in DASHBOARD_PROBES.items():
+                status = "absent"
+                try:
+                    with driver.transaction(name, TransactionType.READ) as tx:
+                        rows = list(tx.query(
+                            f'match $x isa {probe}; limit 1; select $x;').resolve())
+                        status = "data" if rows else "schema"
+                except Exception:
+                    status = "absent"
+                skills[slug] = status
+            out.append({"name": name, "skills": skills})
+    print(json.dumps({"success": True, "databases": out}, indent=2))
+
+
 def describe_schema(args):
     """Inspect the parsed schema: a single type's detail, or a global summary."""
     sm = get_schema_model()
@@ -1081,111 +1118,6 @@ def search_tag(args):
         )
 
 
-def record_gap(args):
-    """Record a schema gap for a skill."""
-    with get_driver() as driver:
-        # Upsert slog-skill-model
-        with driver.transaction(TYPEDB_DATABASE, TransactionType.READ) as tx:
-            check = list(tx.query(
-                f'match $s isa slog-skill-model, has slog-skill-name "{escape_string(args.skill)}"; fetch {{ "id": $s.id }};'
-            ).resolve())
-
-        if check:
-            skill_id = check[0]["id"]
-        else:
-            skill_id = generate_id("slog-skill-model")
-            with driver.transaction(TYPEDB_DATABASE, TransactionType.WRITE) as tx:
-                tx.query(
-                    f'insert $s isa slog-skill-model, has id "{skill_id}", has name "{escape_string(args.skill)}", '
-                    f'has slog-skill-name "{escape_string(args.skill)}";'
-                ).resolve()
-                tx.commit()
-
-        # Insert slog-schema-gap
-        gap_id = generate_id("gap")
-        severity = getattr(args, "severity", "moderate") or "moderate"
-        query = (
-            f'insert $g isa slog-schema-gap, has id "{gap_id}", '
-            f'has name "{escape_string(args.skill)}: {escape_string(args.type)}", '
-            f'has description "{escape_string(args.description)}", '
-            f'has slog-gap-type "{escape_string(args.type)}", '
-            f'has slog-gap-severity "{severity}", '
-            f'has slog-gap-status "open"'
-        )
-        if args.example:
-            query += f', has slog-gap-example "{escape_string(args.example)}"'
-        query += ";"
-
-        with driver.transaction(TYPEDB_DATABASE, TransactionType.WRITE) as tx:
-            tx.query(query).resolve()
-            tx.commit()
-
-        # Link gap to slog-skill-model
-        with driver.transaction(TYPEDB_DATABASE, TransactionType.WRITE) as tx:
-            tx.query(
-                f'match $s isa slog-skill-model, has id "{skill_id}"; $g isa slog-schema-gap, has id "{gap_id}"; '
-                f'insert (slog-skill-model: $s, slog-schema-gap: $g) isa slog-skill-has-gap;'
-            ).resolve()
-            tx.commit()
-
-    print(json.dumps({"success": True, "gap_id": gap_id, "skill": args.skill, "type": args.type}))
-
-
-def list_gaps(args):
-    """List schema gaps, optionally filtered by skill and/or status."""
-    with get_driver() as driver:
-        with driver.transaction(TYPEDB_DATABASE, TransactionType.READ) as tx:
-            skill_filter = ""
-            if hasattr(args, "skill") and args.skill:
-                skill_filter = f'$s isa slog-skill-model, has slog-skill-name "{escape_string(args.skill)}"; '
-
-            status_filter = ""
-            if hasattr(args, "status") and args.status:
-                status_filter = f'$g has slog-gap-status "{escape_string(args.status)}"; '
-            else:
-                status_filter = '$g has slog-gap-status "open"; '
-
-            if skill_filter:
-                query = (
-                    f'match {skill_filter}(slog-skill-model: $s, slog-schema-gap: $g) isa slog-skill-has-gap; '
-                    f'{status_filter}'
-                    f'fetch {{ "id": $g.id, "type": $g.slog-gap-type, "severity": $g.slog-gap-severity, '
-                    f'"status": $g.slog-gap-status, "description": $g.description, "example": $g.slog-gap-example }};'
-                )
-            else:
-                query = (
-                    f'match $g isa slog-schema-gap; {status_filter}'
-                    f'fetch {{ "id": $g.id, "type": $g.slog-gap-type, "severity": $g.slog-gap-severity, '
-                    f'"status": $g.slog-gap-status, "description": $g.description, "example": $g.slog-gap-example }};'
-                )
-
-            results = [{k: v for k, v in r.items() if v is not None}
-                       for r in tx.query(query).resolve()]
-
-    print(json.dumps({"success": True, "gaps": results, "count": len(results)}, indent=2))
-
-
-def close_gap(args):
-    """Update a gap's status to addressed or wont-fix."""
-    with get_driver() as driver:
-        # Delete old status, insert new
-        with driver.transaction(TYPEDB_DATABASE, TransactionType.WRITE) as tx:
-            tx.query(
-                f'match $g isa slog-schema-gap, has id "{args.id}", has slog-gap-status $s; '
-                f'delete $s;'
-            ).resolve()
-            tx.commit()
-
-        with driver.transaction(TYPEDB_DATABASE, TransactionType.WRITE) as tx:
-            tx.query(
-                f'match $g isa slog-schema-gap, has id "{args.id}"; '
-                f'insert $g has slog-gap-status "{escape_string(args.status)}";'
-            ).resolve()
-            tx.commit()
-
-    print(json.dumps({"success": True, "gap_id": args.id, "status": args.status}))
-
-
 def export_db(args):
     """Export the full TypeDB database using the TypeDB Python driver API."""
     if not TYPEDB_AVAILABLE:
@@ -1476,11 +1408,31 @@ def run_pipeline_note(args):
                 written[output_name] = {"attr": attr_name, "chars": len(value)}
             tx.commit()
 
+        # Observable-Plot support: a note may carry a `plot_code` (JS expression string) and a
+        # `plot_data_output` naming which output holds the row data; the dashboard evals plot_code
+        # against `data`. Fall back to the first list-of-dicts output when unnamed.
+        plot_code = config.get("plot_code")
+        plot_data = None
+        data_output = config.get("plot_data_output")
+        if data_output and data_output in results_map:
+            plot_data = results_map[data_output]
+        else:
+            for v in results_map.values():
+                if isinstance(v, list) and v and isinstance(v[0], dict):
+                    plot_data = v
+                    break
+        try:
+            json.dumps(plot_data)
+        except (TypeError, ValueError):
+            plot_data = None
+
         print(json.dumps({
             "success": True,
             "note_id": args.id,
             "outputs_written": written,
             "outputs_not_persisted": non_persisted,
+            "plot_code": plot_code,
+            "data": plot_data,
         }))
 
 
@@ -1501,13 +1453,16 @@ def show_pipeline_note(args):
 
     r = results[0]
     config_str = r.get("config")
+    config = json.loads(config_str) if config_str else None
     out = {
         "success": True,
         "note_id": args.id,
         "name": r.get("name"),
         "script": r.get("script"),
-        "config": json.loads(config_str) if config_str else None,
+        "config": config,
         "content": r.get("content"),
+        # convenience for the dashboard Plot renderer (also inside config)
+        "plot_code": (config or {}).get("plot_code"),
     }
     print(json.dumps(out, indent=2))
 
@@ -1545,6 +1500,10 @@ def main():
     parser = argparse.ArgumentParser(
         description="TypeDB Notebook CLI for Alhazen's knowledge graph"
     )
+    # Global DB override (before the subcommand); threads through the gateway as a plain arg
+    # so the dashboard can point notebook commands at a selected database.
+    parser.add_argument("--database", "--db", dest="database",
+                        help="Override TYPEDB_DATABASE for this invocation")
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
     # insert-collection
@@ -1579,34 +1538,6 @@ def main():
     # search-tag
     p = subparsers.add_parser("search-tag", help="Search by tag")
     p.add_argument("--tag", required=True, help="Tag to search for")
-
-    # record-gap
-    p = subparsers.add_parser("record-gap", help="Record a schema/model gap for a skill")
-    p.add_argument("--skill", required=True, help="Skill name (e.g., 'jobhunt')")
-    p.add_argument(
-        "--type", required=True,
-        choices=["missing-user-context", "missing-entity-type", "missing-attribute",
-                 "unclear-workflow", "incorrect-inference"],
-        help="Gap type",
-    )
-    p.add_argument("--description", required=True, help="What information is missing or wrong")
-    p.add_argument(
-        "--severity", choices=["minor", "moderate", "significant"], default="moderate",
-        help="Gap severity (default: moderate)",
-    )
-    p.add_argument("--example", help="The specific triggering situation")
-
-    # list-gaps
-    p = subparsers.add_parser("list-gaps", help="List schema gaps")
-    p.add_argument("--skill", help="Filter by skill name")
-    p.add_argument("--status", choices=["open", "addressed", "wont-fix"],
-                   help="Filter by status (default: open)")
-
-    # close-gap
-    p = subparsers.add_parser("close-gap", help="Mark a gap as addressed or wont-fix")
-    p.add_argument("--id", required=True, help="Gap ID")
-    p.add_argument("--status", required=True, choices=["addressed", "wont-fix"],
-                   help="New status")
 
     # export-db
     p = subparsers.add_parser("export-db", help="Export database to timestamped zip")
@@ -1648,6 +1579,10 @@ def main():
     p = subparsers.add_parser("describe-schema",
                               help="Inspect the parsed schema (a single type, or a global summary)")
     p.add_argument("--type", help="Type to describe (entity, relation, or attribute)")
+
+    # scan-databases (hub DB switcher: per-DB availability of each skill dashboard)
+    subparsers.add_parser("scan-databases",
+                          help="List databases and, per skill, whether its dashboard is available")
 
     # create-entity
     p = subparsers.add_parser("create-entity", help="Create (or upsert) a typed entity")
@@ -1713,6 +1648,9 @@ def main():
         parser.print_help()
         sys.exit(1)
 
+    if getattr(args, "database", None):
+        globals()["TYPEDB_DATABASE"] = args.database
+
     if not TYPEDB_AVAILABLE:
         print(json.dumps({"success": False, "error": "typedb-driver not installed"}))
         sys.exit(1)
@@ -1724,9 +1662,6 @@ def main():
         "query-notes": query_notes,
         "tag": tag_entity,
         "search-tag": search_tag,
-        "record-gap": record_gap,
-        "list-gaps": list_gaps,
-        "close-gap": close_gap,
         "export-db": export_db,
         "import-db": import_db,
         "create-pipeline-note": create_pipeline_note,
@@ -1734,6 +1669,7 @@ def main():
         "show-pipeline-note": show_pipeline_note,
         "list-pipeline-notes": list_pipeline_notes,
         "describe-schema": describe_schema,
+        "scan-databases": scan_databases,
         "create-entity": create_entity,
         "set-attr": set_attr,
         "delete-attr": delete_attr,

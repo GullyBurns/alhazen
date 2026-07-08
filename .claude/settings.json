@@ -1,12 +1,12 @@
 {
   "hooks": {
-    "PostToolUse": [
+    "SessionStart": [
       {
-        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "REPO=$(git rev-parse --show-toplevel 2>/dev/null) && [ -f \"$REPO/local_resources/skilllog/skill_logger.py\" ] && cd \"$REPO\" && uv run python \"$REPO/local_resources/skilllog/skill_logger.py\""
+            "command": "REPO=$(git rev-parse --show-toplevel 2>/dev/null) && CORE=\"$REPO/local_skills/alhazen-core/alhazen_core.py\" && [ -f \"$CORE\" ] && cd \"$REPO\" && unset VIRTUAL_ENV && uv run --project \"$REPO/local_skills/alhazen-core\" python \"$CORE\" init",
+            "timeout": 90000
           }
         ]
       }
