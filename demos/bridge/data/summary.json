@@ -1,0 +1,9 @@
+{
+  "gene": "EGFR",
+  "uniprot": "P00533",
+  "ncbi_gene_id": "1956",
+  "pathways_count": 37,
+  "data_source": "Reactome ContentService",
+  "license": "CC-BY 4.0",
+  "api_url": "https://reactome.org/ContentService"
+}

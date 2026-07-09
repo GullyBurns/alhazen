@@ -1,0 +1,20 @@
+name: gene-pathway-link
+description: Link the bridge gene to each Reactome pathway it participates in
+idempotent: false
+depends_on: [gene, pathway]
+skolem_keys: [pathway_id]
+source_match: |
+  match
+    $p isa raw-pathway,
+      has pathway-id $pid,
+      has gene-ref $gref;
+  fetch {
+    "pathway_id": $pid,
+    "gref": $gref
+  };
+target_insert: |
+  match
+    $dg isa demo-gene, has demo-hgnc-symbol $gref;
+    $dp isa demo-pathway, has demo-pathway-id $pathway_id;
+  insert
+    (demo-gp-gene: $dg, demo-gp-pathway: $dp) isa demo-gene-pathway-link;

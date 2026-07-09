@@ -1,0 +1,27 @@
+# Bridge staging schema -- raw source representation for the cross-domain layer.
+# Loaded additively into the same chembl_staging database used by the ChEMBL
+# demo, so a single schema_mapper run can read both. Source side of the GLAV
+# mapping for genes and Reactome pathways.
+
+define
+
+attribute hgnc-symbol, value string;
+attribute ncbi-gene-id, value string;
+# (uniprot-id, pref-name already defined by the ChEMBL staging schema)
+
+attribute pathway-id, value string;
+attribute pathway-source, value string;
+attribute pathway-species, value string;
+attribute gene-ref, value string;
+
+entity raw-gene,
+    owns hgnc-symbol,
+    owns ncbi-gene-id,
+    owns uniprot-id;
+
+entity raw-pathway,
+    owns pathway-id,
+    owns pref-name,
+    owns pathway-source,
+    owns pathway-species,
+    owns gene-ref;

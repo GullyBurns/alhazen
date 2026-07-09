@@ -1,0 +1,31 @@
+name: bioactivity
+description: Map raw ChEMBL activity record to Alhazen demo-bioactivity entity
+idempotent: true
+skolem_keys: [activity_id]
+source_match: |
+  match
+    $x isa raw-activity,
+      has activity-id $aid,
+      has standard-type $st,
+      has standard-value $sv,
+      has standard-units $su,
+      has standard-relation $sr,
+      has pchembl-value $pv;
+  fetch {
+    "activity_id": $aid,
+    "st": $st,
+    "sv": $sv,
+    "su": $su,
+    "sr": $sr,
+    "pv": $pv
+  };
+target_insert: |
+  insert $b isa demo-bioactivity,
+    has id $skolem_id,
+    has name $st,
+    has demo-chembl-id $activity_id,
+    has demo-activity-type $st,
+    has demo-activity-value $sv,
+    has demo-activity-units $su,
+    has demo-activity-relation $sr,
+    has demo-pchembl-value $pv;

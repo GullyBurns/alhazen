@@ -1,0 +1,35 @@
+name: measurement
+description: >
+  Link compound, target, assay, and bioactivity result into a single
+  demo-bioactivity-measurement relation. This is the cross-entity join that
+  Benchling's ELN cannot express natively -- one declarative rule reconstructs
+  the full experimental fact from four separately-mapped entities.
+# Relations carry no id @key, so the batch idempotency guard (which checks for
+# an existing entity id) does not apply. Run once against a clean target.
+idempotent: false
+depends_on: [target, compound, assay, bioactivity]
+skolem_keys: [activity_id]
+source_match: |
+  match
+    $x isa raw-activity,
+      has activity-id $aid,
+      has molecule-ref $mref,
+      has target-ref $tref,
+      has assay-ref $aref;
+  fetch {
+    "activity_id": $aid,
+    "mref": $mref,
+    "tref": $tref,
+    "aref": $aref
+  };
+target_insert: |
+  match
+    $c isa demo-compound, has demo-chembl-id $mref;
+    $t isa demo-target, has demo-chembl-id $tref;
+    $a isa demo-assay, has demo-chembl-id $aref;
+    $b isa demo-bioactivity, has demo-chembl-id $activity_id;
+  insert
+    (demo-bm-compound: $c,
+     demo-bm-target: $t,
+     demo-bm-assay: $a,
+     demo-bm-result: $b) isa demo-bioactivity-measurement;

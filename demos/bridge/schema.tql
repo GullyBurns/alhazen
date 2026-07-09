@@ -1,0 +1,52 @@
+# Cross-Domain Bridge Schema
+#
+# This is the integration layer that makes the demo a CROSS-DOMAIN story.
+# It introduces shared biological entities (gene, pathway) that connect the
+# chemistry domain (demo-target from demos/chembl/schema.tql) to systems
+# biology (Reactome pathways). The bridge is what lets a single query span
+# modalities -- e.g. "which compounds are active against targets in pathway X"
+# -- the kind of join Benchling's ELN cannot express because chemistry and
+# pathway data live in unconnected silos.
+#
+# Source data: Reactome ContentService (CC-BY 4.0), gene xrefs from UniProt.
+#
+# LOAD ORDER: demos/chembl/schema.tql MUST be loaded first -- this schema
+# adds a `plays` capability to the existing demo-target entity.
+
+define
+
+# --- Bridge attributes ---
+attribute demo-hgnc-symbol, value string;
+attribute demo-ncbi-gene-id, value string;
+attribute demo-pathway-id, value string;
+attribute demo-pathway-source, value string;
+attribute demo-pathway-species, value string;
+
+# --- Bridge relations (before entities so role names resolve) ---
+
+relation demo-gene-target-link,
+    relates demo-gt-gene,
+    relates demo-gt-target;
+
+relation demo-gene-pathway-link,
+    relates demo-gp-gene,
+    relates demo-gp-pathway;
+
+# --- Bridge entities ---
+
+entity demo-gene sub alh-domain-thing,
+    owns demo-hgnc-symbol,
+    owns demo-ncbi-gene-id,
+    owns demo-uniprot-id,
+    plays demo-gene-target-link:demo-gt-gene,
+    plays demo-gene-pathway-link:demo-gp-gene;
+
+entity demo-pathway sub alh-domain-thing,
+    owns demo-pathway-id,
+    owns demo-pathway-source,
+    owns demo-pathway-species,
+    plays demo-gene-pathway-link:demo-gp-pathway;
+
+# --- Extend the chemistry-domain target to play the bridge role ---
+
+demo-target plays demo-gene-target-link:demo-gt-target;

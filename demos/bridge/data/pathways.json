@@ -1,0 +1,261 @@
+[
+  {
+    "pathway_id": "R-HSA-1227986",
+    "name": "Signaling by ERBB2",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-1236382",
+    "name": "Constitutive Signaling by Ligand-Responsive EGFR Cancer Variants",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-1236394",
+    "name": "Signaling by ERBB4",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-1250196",
+    "name": "SHC1 events in ERBB2 signaling",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-1251932",
+    "name": "PLCG1 events in ERBB2 signaling",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-1257604",
+    "name": "PIP3 activates AKT signaling",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-177929",
+    "name": "Signaling by EGFR",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-179812",
+    "name": "GRB2 events in EGFR signaling",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-180292",
+    "name": "GAB1 signalosome",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-180336",
+    "name": "SHC1 events in EGFR signaling",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-182971",
+    "name": "EGFR downregulation",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-1963640",
+    "name": "GRB2 events in ERBB2 signaling",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-1963642",
+    "name": "PI3K events in ERBB2 signaling",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-212718",
+    "name": "EGFR interacts with phospholipase C-gamma",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-2179392",
+    "name": "EGFR Transactivation by Gastrin",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-2219530",
+    "name": "Constitutive Signaling by Aberrant PI3K in Cancer",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-445144",
+    "name": "Signal transduction by L1",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-5637810",
+    "name": "Constitutive Signaling by EGFRvIII",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-5638303",
+    "name": "Inhibition of Signaling by Overexpressed EGFR",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-5673001",
+    "name": "RAF/MAP kinase cascade",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-6785631",
+    "name": "ERBB2 Regulates Cell Motility",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-6811558",
+    "name": "PI5P, PP2A and IER3 Regulate PI3K/AKT Signaling",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-8847993",
+    "name": "ERBB2 Activates PTK6 Signaling",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-8856825",
+    "name": "Cargo recognition for clathrin-mediated endocytosis",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-8856828",
+    "name": "Clathrin-mediated endocytosis",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-8857538",
+    "name": "PTK6 promotes HIF1A stabilization",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-8863795",
+    "name": "Downregulation of ERBB2 signaling",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-8866910",
+    "name": "TFAP2 (AP-2) family regulates transcription of growth factors and their receptors",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-9009391",
+    "name": "Extra-nuclear estrogen signaling",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-9013507",
+    "name": "NOTCH3 Activation and Transmission of Signal to the Nucleus",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-9609690",
+    "name": "HCMV Early Events",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-9634638",
+    "name": "Estrogen-dependent nuclear events downstream of ESR-membrane signaling",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-9664565",
+    "name": "Signaling by ERBB2 KD Mutants",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-9665348",
+    "name": "Signaling by ERBB2 ECD mutants",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-9665686",
+    "name": "Signaling by ERBB2 TMD/JMD mutants",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-9820960",
+    "name": "Respiratory syncytial virus (RSV) attachment and entry",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  },
+  {
+    "pathway_id": "R-HSA-9927432",
+    "name": "Developmental Lineage of Mammary Gland Myoepithelial Cells",
+    "source": "Reactome",
+    "species": "",
+    "gene_ref": "EGFR"
+  }
+]
