@@ -58,6 +58,14 @@ QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
 # instance. id-preserving copy is idempotent: skipped if the id already exists.
 SHARED_REFS = ["alh-vocabulary", "alh-vocabulary-type", "alh-tag"]
 
+# Cache capture rules. Each rule pulls content out of ~/.alhazen/cache/<dir>
+# whose name is derived from an in-slice entity id, for every slice id starting
+# with `id_prefix`. This keeps the extracted document content (paper full text,
+# text artifacts) travelling WITH the graph that references it, scoped to exactly
+# the ids in the bundle -- no unrelated files. Two shapes:
+#   kind="dir":  ~/.alhazen/cache/<dir>/<id>/...    whole per-id subtree (fulltext PDFs)
+#   kind="file": ~/.alhazen/cache/<dir>/<id><ext>   one file per id (text artifacts)
+
 TARGETS: dict[str, dict[str, Any]] = {
     "career-kg": {
         "description": "Career knowledge graph (career-* live graph + legacy jhunt-*) "
@@ -68,6 +76,7 @@ TARGETS: dict[str, dict[str, Any]] = {
             "also_types": ["alh-person"] + SHARED_REFS,
         },
         "qdrant": ["career-opportunities", "jobhunt-candidates", "jobhunt-opportunities"],
+        "cache": [],
     },
     "deep-research": {
         "description": "Scientific-literature + tech-recon subgraph (scilit-/kefed-/ooevv-/trec-) "
@@ -76,9 +85,23 @@ TARGETS: dict[str, dict[str, Any]] = {
         "typedb": {
             "source": "alh_deep_research",
             "prefixes": ["scilit-", "kefed-", "ooevv-", "trec-"],
+            # Artifact nodes (scilit-pdf-fulltext, scilit-citation-record, kefed-model,
+            # ooevv-element-set, ...) are concrete subtypes of alh-artifact and are
+            # already captured by the prefixes above, so their alh-representation /
+            # alh-fragmentation relations resolve without extra also_types.
             "also_types": list(SHARED_REFS),
         },
         "qdrant": ["alhazen_papers"],
+        # Cache content that is REFERENCED by the graph and not already inline:
+        #   fulltext/<scilit-paper-id>/  the downloaded PDF + extracted fulltext text,
+        #                               one subdir per paper (papers are in scope).
+        # NOTE: section/observation/sentence text lives inline in TypeDB attributes
+        # (travels in data.typedb), and ~/.alhazen/cache/text/artifact-*.txt is a
+        # stale older-pipeline cache disjoint from the current graph -- so it is NOT
+        # captured (id-scoping it yields 0 for this DB).
+        "cache": [
+            {"dir": "fulltext", "id_prefix": "scilit-paper-", "kind": "dir"},
+        ],
     },
 }
 
@@ -118,9 +141,25 @@ def _snapshot_collection(collection: str, out_dir: Path) -> dict[str, Any]:
             "server_snapshot_name": snap_name}
 
 
+def _all_ids(driver, db: str) -> set[str]:
+    """Every entity id present in `db` (relations carry no id @key)."""
+    from typedb.driver import TransactionType
+
+    ids: set[str] = set()
+    with driver.transaction(db, TransactionType.READ) as tx:
+        for r in tx.query("match $e has id $id;").resolve():
+            ids.add(r.get("id").try_get_string())
+    return ids
+
+
 def _typedb_slice(source: str, prefixes: list[str], also_types: list[str],
-                  out_dir: Path, dry_run: bool) -> dict[str, Any]:
-    """Copy the scoped subgraph into a temp DB, export it, drop the temp DB."""
+                  out_dir: Path, dry_run: bool) -> tuple[dict[str, Any], set[str]]:
+    """Copy the scoped subgraph into a temp DB, export it, drop the temp DB.
+
+    Returns (result_dict, slice_ids) -- slice_ids is the exact set of entity ids
+    in the slice (empty on dry-run, since nothing is materialised), used to scope
+    cache-file capture.
+    """
     from typedb.driver import TransactionType
 
     temp_db = f"bkp_slice_{source}"
@@ -139,7 +178,7 @@ def _typedb_slice(source: str, prefixes: list[str], also_types: list[str],
             report = sm.copy(source, temp_db, prefixes, set(),
                              dry_run=True, also_types=also_types)
             driver.databases.get(temp_db).delete()
-            return {"dry_run": True, "report": report}
+            return {"dry_run": True, "report": report}, set()
 
         driver.databases.create(temp_db)
         with driver.transaction(temp_db, TransactionType.SCHEMA) as tx:
@@ -148,6 +187,8 @@ def _typedb_slice(source: str, prefixes: list[str], also_types: list[str],
 
         report = sm.copy(source, temp_db, prefixes, set(),
                          dry_run=False, also_types=also_types)
+
+        slice_ids = _all_ids(driver, temp_db)
 
         schema_path = out_dir / f"{source}_schema.typeql"
         data_path = out_dir / f"{source}_data.typedb"
@@ -161,13 +202,71 @@ def _typedb_slice(source: str, prefixes: list[str], also_types: list[str],
             "data_size": data_path.stat().st_size,
         }
         driver.databases.get(temp_db).delete()
-        return result
+        return result, slice_ids
     finally:
         driver.close()
 
 
-def _restore_instructions(slug: str, source_db: str, collections: list[str]) -> dict[str, Any]:
-    return {
+def _collect_cache_files(slice_ids: set[str], cache_rules: list[dict[str, Any]],
+                         out_dir: Path, dry_run: bool) -> list[dict[str, Any]]:
+    """Copy cache files whose name derives from an in-slice id into out_dir/<dir>/.
+
+    For each rule, a file is captured when `f"{id}{ext}"` exists under
+    ~/.alhazen/cache/<dir> for some slice id starting with `id_prefix`. On dry-run
+    nothing is copied and slice_ids is empty, so we instead report how many files
+    in the source dir match the prefix (an upper bound on what a real run captures).
+    """
+    def _tree_bytes(p: Path) -> int:
+        return sum(f.stat().st_size for f in p.rglob("*") if f.is_file())
+
+    cache_root = _cache_dir()
+    results: list[dict[str, Any]] = []
+    for rule in cache_rules:
+        d, id_prefix = rule["dir"], rule["id_prefix"]
+        kind, ext = rule.get("kind", "file"), rule.get("ext", "")
+        src_dir = cache_root / d
+
+        if dry_run:
+            available = 0
+            if src_dir.is_dir():
+                available = sum(
+                    1 for f in src_dir.iterdir()
+                    if f.name.startswith(id_prefix)
+                    and (f.is_dir() if kind == "dir" else (f.is_file() and f.name.endswith(ext)))
+                )
+            results.append({"dir": d, "kind": kind, "dry_run": True,
+                            "available_in_source": available, "id_prefix": id_prefix})
+            continue
+
+        dest_dir = out_dir / d
+        ids = [i for i in slice_ids if i.startswith(id_prefix)]
+        copied, total_bytes, missing = 0, 0, 0
+        for i in ids:
+            if kind == "dir":
+                src = src_dir / i
+                if not src.is_dir():
+                    missing += 1
+                    continue
+                shutil.copytree(src, dest_dir / i, dirs_exist_ok=True)
+                total_bytes += _tree_bytes(src)
+            else:
+                src = src_dir / f"{i}{ext}"
+                if not src.is_file():
+                    missing += 1
+                    continue
+                dest_dir.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(src, dest_dir / f"{i}{ext}")
+                total_bytes += src.stat().st_size
+            copied += 1
+        results.append({"dir": d, "kind": kind, "id_prefix": id_prefix,
+                        "candidates": len(ids), "copied": copied,
+                        "missing": missing, "bytes": total_bytes})
+    return results
+
+
+def _restore_instructions(slug: str, source_db: str, collections: list[str],
+                          cache_dirs: list[str]) -> dict[str, Any]:
+    out = {
         "typedb": (
             "Import the slice into a NEW database (creates it from the bundled "
             "schema+data; id-preserving so it can also be merged into an existing "
@@ -182,13 +281,21 @@ def _restore_instructions(slug: str, source_db: str, collections: list[str]) -> 
             for c in collections
         ],
     }
+    if cache_dirs:
+        out["cache"] = (
+            "Copy the bundled document content back into the file cache "
+            "(restore does this automatically; manual equivalent):\n"
+            f"  cp -rn {slug}/cache/* ~/.alhazen/cache/    # dirs: {', '.join(cache_dirs)}"
+        )
+    return out
 
 
-def backup_target(slug: str, dry_run: bool) -> dict[str, Any]:
+def backup_target(slug: str, dry_run: bool, include_cache: bool = False) -> dict[str, Any]:
     if slug not in TARGETS:
         raise SystemExit(f"Unknown target '{slug}'. Known: {', '.join(TARGETS)}")
     spec = TARGETS[slug]
     td = spec["typedb"]
+    cache_rules = spec.get("cache", []) if include_cache else []
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     staging = _cache_dir() / "backups" / f"{slug}_{ts}"
@@ -197,8 +304,8 @@ def backup_target(slug: str, dry_run: bool) -> dict[str, Any]:
 
     print(f"[{slug}] TypeDB slice from '{td['source']}' "
           f"(prefixes={td['prefixes']}, shared={td['also_types']})...", file=sys.stderr)
-    typedb_res = _typedb_slice(td["source"], td["prefixes"], td["also_types"],
-                               staging / "typedb", dry_run)
+    typedb_res, slice_ids = _typedb_slice(td["source"], td["prefixes"], td["also_types"],
+                                          staging / "typedb", dry_run)
 
     qdrant_res: list[dict[str, Any]] = []
     if dry_run:
@@ -214,6 +321,11 @@ def backup_target(slug: str, dry_run: bool) -> dict[str, Any]:
             print(f"[{slug}] Qdrant snapshot '{c}'...", file=sys.stderr)
             qdrant_res.append(_snapshot_collection(c, staging / "qdrant"))
 
+    cache_res: list[dict[str, Any]] = []
+    if cache_rules:
+        print(f"[{slug}] cache files (dirs={[r['dir'] for r in cache_rules]})...", file=sys.stderr)
+        cache_res = _collect_cache_files(slice_ids, cache_rules, staging / "cache", dry_run)
+
     manifest = {
         "slug": slug,
         "description": spec["description"],
@@ -225,7 +337,9 @@ def backup_target(slug: str, dry_run: bool) -> dict[str, Any]:
             **typedb_res,
         },
         "qdrant": qdrant_res,
-        "restore": _restore_instructions(slug, td["source"], spec["qdrant"]),
+        "cache": cache_res,
+        "restore": _restore_instructions(slug, td["source"], spec["qdrant"],
+                                         [r["dir"] for r in cache_rules]),
     }
     (staging / "MANIFEST.json").write_text(json.dumps(manifest, indent=2))
 
@@ -363,6 +477,29 @@ def restore_bundle(zip_path: str, target_db: str | None, mode: str,
             schema_path, data_path, source_db, dest_db,
             td.get("prefixes", []), td.get("shared_refs", []), mode, yes)
 
+    if not typedb_only and not qdrant_only:
+        # Restore bundled document content into the local file cache (additive,
+        # never overwrites an existing file). Cache is a third dimension alongside
+        # TypeDB/Qdrant, so it rides along on a full restore only.
+        cache_src = next((p for p in staging.rglob("cache") if p.is_dir()), None)
+        if cache_src:
+            cache_root = _cache_dir()
+            restored, skipped = 0, 0
+            for f in cache_src.rglob("*"):
+                if not f.is_file():
+                    continue
+                rel = f.relative_to(cache_src)
+                dest = cache_root / rel
+                if dest.exists():
+                    skipped += 1
+                    continue
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(f, dest)
+                restored += 1
+            print(f"[restore] cache -> {cache_root} ({restored} new, {skipped} kept)...",
+                  file=sys.stderr)
+            result["cache"] = {"root": str(cache_root), "restored": restored, "skipped": skipped}
+
     if not typedb_only:
         qres = []
         for snap in sorted((staging).rglob("qdrant/*.snapshot")):
@@ -400,6 +537,9 @@ def main():
     bp.add_argument("--all", action="store_true", help="back up every preset")
     bp.add_argument("--dry-run", action="store_true",
                     help="report scope + counts without writing a zip")
+    bp.add_argument("--include-cache", action="store_true",
+                    help="also bundle cached document content (fulltext/, text/) scoped "
+                         "to the slice's ids -- makes bundles much larger")
 
     rp = sub.add_parser("restore", help="load a bundle into TYPEDB_HOST/QDRANT_HOST")
     rp.add_argument("--zip", required=True, help="path to a bundle zip")
@@ -429,7 +569,7 @@ def main():
     if not targets:
         raise SystemExit("Specify --target <slug> or --all")
 
-    out = [backup_target(t, args.dry_run) for t in targets]
+    out = [backup_target(t, args.dry_run, args.include_cache) for t in targets]
     print(json.dumps(out if len(out) > 1 else out[0], indent=2))
 
 
