@@ -518,7 +518,7 @@ def cmd_backup(args):
     targets = list(fb.TARGETS) if args.all else ([args.target] if args.target else [])
     if not targets:
         raise SystemExit("Specify --target <slug>, --all, or --list")
-    out = [fb.backup_target(t, args.dry_run) for t in targets]
+    out = [fb.backup_target(t, args.dry_run, args.include_cache) for t in targets]
     print(json.dumps(out if len(out) > 1 else out[0], indent=2))
 
 
@@ -563,6 +563,8 @@ def main():
     backup_p.add_argument("--all", action="store_true", help="Back up every preset")
     backup_p.add_argument("--list", action="store_true", help="List available backup presets")
     backup_p.add_argument("--dry-run", action="store_true", help="Report scope + counts without writing a zip")
+    backup_p.add_argument("--include-cache", action="store_true",
+                          help="Also bundle cached document content (fulltext/, text/) scoped to the slice ids (larger zips)")
 
     restore_p = sub.add_parser("restore", help="Load a backup bundle into TYPEDB_HOST/QDRANT_HOST (point them at the destination to load elsewhere)")
     restore_p.add_argument("--zip", required=True, help="Path to a bundle zip")
