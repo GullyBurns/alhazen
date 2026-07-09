@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { queryTypeQL, describeSchema } from '@/lib/agentic-memory';
+import { queryTypeQL, describeSchema, resolveDb } from '@/lib/agentic-memory';
 
 // Common attributes present on most entities — always try to fetch these
 const COMMON_ATTRS = [
@@ -14,7 +14,7 @@ const SKIP_ATTRS = new Set([
 ]);
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -24,14 +24,16 @@ export async function GET(
   }
 
   try {
+    const db = resolveDb(request);
     const safeId = id.replace(/'/g, "\\'");
 
     // Step 1: Get the schema
-    const schema = await describeSchema(undefined, true);
+    const schema = await describeSchema(undefined, true, db);
 
     // Step 2: Get entity type
     const typeResult = await queryTypeQL(
-      `match $e has id '${safeId}'; $e isa $t; fetch { "type": $t };`
+      `match $e has id '${safeId}'; $e isa $t; fetch { "type": $t };`,
+      undefined, db
     );
 
     let entityType = 'unknown';
@@ -76,7 +78,8 @@ export async function GET(
     const fetchFields = attrsToFetch.map((attr: string) => `"${attr}": $e.${attr}`);
     try {
       const result = await queryTypeQL(
-        `match $e isa ${entityType}, has id '${safeId}'; fetch { ${fetchFields.join(', ')} };`
+        `match $e isa ${entityType}, has id '${safeId}'; fetch { ${fetchFields.join(', ')} };`,
+        undefined, db
       );
       if (result?.success && result.count > 0) {
         Object.assign(entity, result.results[0] as Record<string, unknown>);
@@ -97,7 +100,8 @@ export async function GET(
       const fields = batch.map((attr: string) => `"${attr}": $e.${attr}`);
       try {
         const r = await queryTypeQL(
-          `match $e isa alh-identifiable-entity, has id '${safeId}'; fetch { ${fields.join(', ')} };`
+          `match $e isa alh-identifiable-entity, has id '${safeId}'; fetch { ${fields.join(', ')} };`,
+          undefined, db
         );
         if (r?.success && r.count > 0) {
           Object.assign(entity, r.results[0] as Record<string, unknown>);
@@ -107,7 +111,8 @@ export async function GET(
         for (const attr of batch) {
           try {
             const r = await queryTypeQL(
-              `match $e isa alh-identifiable-entity, has id '${safeId}'; fetch { "${attr}": $e.${attr} };`
+              `match $e isa alh-identifiable-entity, has id '${safeId}'; fetch { "${attr}": $e.${attr} };`,
+              undefined, db
             );
             if (r?.success && r.count > 0) {
               Object.assign(entity, r.results[0] as Record<string, unknown>);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getContext } from '@/lib/agentic-memory';
+import { getContext, resolveDb } from '@/lib/agentic-memory';
 
 export async function GET(request: NextRequest) {
   const personId = request.nextUrl.searchParams.get('person');
@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'person parameter required' }, { status: 400 });
   }
   try {
-    const data = await getContext(personId);
+    const data = await getContext(personId, resolveDb(request));
     return NextResponse.json(data);
   } catch (error) {
     console.error('getContext error:', error);

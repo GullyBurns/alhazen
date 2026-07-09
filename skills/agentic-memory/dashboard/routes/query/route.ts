@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { queryTypeQL } from '@/lib/agentic-memory';
+import { queryTypeQL, resolveDb } from '@/lib/agentic-memory';
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const data = await queryTypeQL(typeql, limit);
+    const data = await queryTypeQL(typeql, limit, resolveDb(request));
     return NextResponse.json(data);
   } catch (error) {
     console.error('queryTypeQL error:', error);

@@ -24,6 +24,14 @@ type DbScan = { name: string; skills: Record<string, 'data' | 'schema' | 'absent
 
 const DB_KEY = 'alh-db';
 
+// Mirror the selected DB into a cookie so server-side skill routes (e.g. the
+// Alhazen Notebook catalog) resolve it without threading ?db= through every fetch.
+function setDbCookie(name: string) {
+  if (typeof document !== 'undefined') {
+    document.cookie = `${DB_KEY}=${encodeURIComponent(name)}; path=/; max-age=31536000; samesite=lax`;
+  }
+}
+
 const STATUS_STYLES: Record<ServiceStatus, string> = {
   checking: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
   online: 'bg-green-500/20 text-green-400 border-green-500/30',
@@ -66,7 +74,9 @@ export default function HubPage() {
         setScan(dbs);
         const stored = typeof window !== 'undefined' ? window.localStorage.getItem(DB_KEY) : null;
         const withData = dbs.find(d => Object.values(d.skills).some(s => s === 'data'))?.name;
-        setDb(stored || withData || dbs[0]?.name || 'alh_deep_research');
+        const initial = stored || withData || dbs[0]?.name || 'alh_deep_research';
+        setDb(initial);
+        setDbCookie(initial);
       })
       .catch(() => {});
   }, []);
@@ -76,6 +86,7 @@ export default function HubPage() {
   function pickDb(name: string) {
     setDb(name);
     if (typeof window !== 'undefined') window.localStorage.setItem(DB_KEY, name);
+    setDbCookie(name);
   }
 
   const enabled = skills.filter(s => s.enabled !== false);

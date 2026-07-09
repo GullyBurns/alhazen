@@ -370,14 +370,26 @@ DASHBOARD_PROBES = {
 }
 
 
+# Databases never offered in the dashboard switcher: the (usually empty) core
+# OS database, and transient restore/backup scratch DBs created during db-import.
+_HIDDEN_DATABASES = {"alh_core"}
+
+
+def _is_hidden_db(name: str) -> bool:
+    return name in _HIDDEN_DATABASES or name.startswith("bkp_restore_")
+
+
 def scan_databases(args):
     """List every TypeDB database and, per skill, whether its dashboard is available there.
     For each (database, skill) it probes a representative entity type: status is
     'data' (rows exist), 'schema' (type defined, no rows), or 'absent' (type not defined).
-    Powers the hub database switcher — selecting a DB reveals the dashboards valid for it."""
+    Powers the hub database switcher — selecting a DB reveals the dashboards valid for it.
+    Hidden databases (see _is_hidden_db) are omitted. The Alhazen Notebook (agentic-memory)
+    is a generic catalog of any database's contents, so it is marked available everywhere."""
     out = []
     with get_driver() as driver:
-        names = sorted(db.name for db in driver.databases.all())
+        names = [n for n in sorted(db.name for db in driver.databases.all())
+                 if not _is_hidden_db(n)]
         for name in names:
             skills = {}
             for slug, probe in DASHBOARD_PROBES.items():
@@ -398,6 +410,9 @@ def scan_databases(args):
                     if status == "schema" and best == "absent":
                         best = "schema"
                 skills[slug] = best
+            # The Alhazen Notebook browses schema/entities/relations of whatever
+            # DB is selected, so it is always an available, first-class view.
+            skills["agentic-memory"] = "data"
             out.append({"name": name, "skills": skills})
     print(json.dumps({"success": True, "databases": out}, indent=2))
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { searchSemantic } from '@/lib/agentic-memory';
+import { searchSemantic, resolveDb } from '@/lib/agentic-memory';
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const limit = limitStr ? parseInt(limitStr, 10) : undefined;
     const threshold = thresholdStr ? parseFloat(thresholdStr) : undefined;
 
-    const data = await searchSemantic(query, collection, limit, threshold);
+    const data = await searchSemantic(query, collection, limit, threshold, resolveDb(request));
     return NextResponse.json(data);
   } catch (error) {
     console.error('searchSemantic error:', error);

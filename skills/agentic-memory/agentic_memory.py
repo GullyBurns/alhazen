@@ -33,7 +33,7 @@ Episode commands:
 Environment:
     TYPEDB_HOST       TypeDB server host (default: localhost)
     TYPEDB_PORT       TypeDB server port (default: 1729)
-    TYPEDB_DATABASE   Database name (default: alhazen_notebook)
+    TYPEDB_DATABASE   Database name (default: alh_core; override with --database)
     TYPEDB_USERNAME   TypeDB username (default: admin)
     TYPEDB_PASSWORD   TypeDB password (default: password)
 """
@@ -1226,6 +1226,11 @@ def list_aliases(args):
 
 def main():
     parser = argparse.ArgumentParser(description="Agentic Memory CLI")
+    # Global override: which TypeDB database to operate on. Lets the dashboard
+    # use the Alhazen Notebook as a generic catalog of ANY database's contents
+    # (must precede the subcommand: `agentic_memory.py --database <db> <cmd> ...`).
+    parser.add_argument("--database", default=None,
+                        help="TypeDB database to query (overrides $TYPEDB_DATABASE)")
     subparsers = parser.add_subparsers(dest="command")
 
     # --- Person / Context ---
@@ -1337,6 +1342,13 @@ def main():
     p.add_argument("--id", help="Entity ID to find aliases for")
 
     args = parser.parse_args()
+
+    # Honor --database as a per-invocation override of the module-level default.
+    # Every query site reads the TYPEDB_DATABASE global at call time, so setting
+    # it here (before dispatch) reroutes the whole command to the chosen DB.
+    if args.database:
+        global TYPEDB_DATABASE
+        TYPEDB_DATABASE = args.database
 
     if not args.command:
         parser.print_help()

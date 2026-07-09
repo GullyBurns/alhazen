@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { listPersons } from '@/lib/agentic-memory';
+import { listPersons, resolveDb } from '@/lib/agentic-memory';
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const data = await listPersons();
+    const data = await listPersons(resolveDb(request));
     return NextResponse.json(data);
   } catch (error) {
     console.error('listPersons error:', error);

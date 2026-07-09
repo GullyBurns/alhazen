@@ -1,6 +1,7 @@
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
+import type { NextRequest } from 'next/server';
 import { runSkill, gatewayConfigured } from '@/lib/skill-gateway';
 
 const execFileAsync = promisify(execFile);
@@ -12,17 +13,35 @@ const AGENTIC_MEMORY_SCRIPT = path.join(
   '.claude/skills/agentic-memory/agentic_memory.py'
 );
 
+// The Notebook is a generic catalog of ANY database. When no DB is selected we
+// fall back to the deep-research DB rather than the (removed-from-switcher,
+// usually empty) core DB.
+export const DEFAULT_DB = 'alh_deep_research';
+
+// Resolve the database a request should browse: the hub's `alh-db` cookie wins,
+// then a `?db=` query param, then the default. Reading the cookie server-side
+// lets every existing client fetch stay unchanged.
+export function resolveDb(request: NextRequest): string {
+  return (
+    request.cookies.get('alh-db')?.value ||
+    new URL(request.url).searchParams.get('db') ||
+    DEFAULT_DB
+  );
+}
+
 // Prefer the warm gateway (no per-request Python cold-start); fall back to
 // spawning the CLI directly for host dev where no gateway is running.
-async function runAgenticMemory(args: string[]): Promise<unknown> {
-  if (gatewayConfigured()) return runSkill('agentic-memory', args);
+// `db` is threaded as `--database` (before the subcommand) so it works on both
+// paths — the gateway forwards argv verbatim.
+async function runAgenticMemory(args: string[], db?: string): Promise<unknown> {
+  const argv = db ? ['--database', db, ...args] : args;
+  if (gatewayConfigured()) return runSkill('agentic-memory', argv);
   const { stdout } = await execFileAsync(
     'uv',
-    ['run', 'python', AGENTIC_MEMORY_SCRIPT, ...args],
+    ['run', 'python', AGENTIC_MEMORY_SCRIPT, ...argv],
     {
       cwd: PROJECT_ROOT,
       maxBuffer: 5 * 1024 * 1024,
-      env: { ...process.env, TYPEDB_DATABASE: 'alh_core' },
     }
   );
   return JSON.parse(stdout);
@@ -73,42 +92,42 @@ export interface Episode {
 // API functions
 // ---------------------------------------------------------------------------
 
-export async function listPersons(): Promise<Person[]> {
-  const result = await runAgenticMemory(['list-persons']) as { success: boolean; persons: Person[] };
+export async function listPersons(db?: string): Promise<Person[]> {
+  const result = await runAgenticMemory(['list-persons'], db) as { success: boolean; persons: Person[] };
   return result.persons || [];
 }
 
-export async function getContext(personId: string): Promise<PersonContext> {
-  return await runAgenticMemory(['get-context', '--person', personId]) as PersonContext;
+export async function getContext(personId: string, db?: string): Promise<PersonContext> {
+  return await runAgenticMemory(['get-context', '--person', personId], db) as PersonContext;
 }
 
-export async function recallPerson(personId: string): Promise<MemoryClaimNote[]> {
-  const result = await runAgenticMemory(['recall-person', '--person', personId]) as {
+export async function recallPerson(personId: string, db?: string): Promise<MemoryClaimNote[]> {
+  const result = await runAgenticMemory(['recall-person', '--person', personId], db) as {
     success: boolean;
     claims: MemoryClaimNote[];
   };
   return result.claims || [];
 }
 
-export async function listClaims(factType?: string, limit = 50): Promise<MemoryClaimNote[]> {
+export async function listClaims(factType?: string, limit = 50, db?: string): Promise<MemoryClaimNote[]> {
   const args = ['list-claims', '--limit', String(limit)];
   if (factType) args.push('--alh-fact-type', factType);
-  const result = await runAgenticMemory(args) as { success: boolean; claims: MemoryClaimNote[] };
+  const result = await runAgenticMemory(args, db) as { success: boolean; claims: MemoryClaimNote[] };
   return result.claims || [];
 }
 
-export async function listEpisodes(skill?: string, limit = 20): Promise<Episode[]> {
+export async function listEpisodes(skill?: string, limit = 20, db?: string): Promise<Episode[]> {
   const args = ['list-episodes', '--limit', String(limit)];
   if (skill) args.push('--skill', skill);
-  const result = await runAgenticMemory(args) as { success: boolean; episodes: Episode[] };
+  const result = await runAgenticMemory(args, db) as { success: boolean; episodes: Episode[] };
   return result.episodes || [];
 }
 
-export async function showEpisode(episodeId: string): Promise<{
+export async function showEpisode(episodeId: string, db?: string): Promise<{
   episode: Episode;
   entities: Array<{ id: string; name: string }>;
 }> {
-  const result = await runAgenticMemory(['show-episode', episodeId]) as {
+  const result = await runAgenticMemory(['show-episode', episodeId], db) as {
     success: boolean;
     episode: Episode;
     entities: Array<{ id: string; name: string }>;
@@ -176,8 +195,9 @@ export interface SearchResult {
 let _schemaCache: { data: SchemaResult; timestamp: number; key: string } | null = null;
 const SCHEMA_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-export async function describeSchema(skill?: string, full?: boolean): Promise<SchemaResult> {
-  const cacheKey = `${skill ?? ''}:${full ?? false}`;
+export async function describeSchema(skill?: string, full?: boolean, db?: string): Promise<SchemaResult> {
+  // Key the cache by db too — otherwise one DB's schema would be served for another.
+  const cacheKey = `${db ?? DEFAULT_DB}:${skill ?? ''}:${full ?? false}`;
 
   if (_schemaCache && _schemaCache.key === cacheKey && Date.now() - _schemaCache.timestamp < SCHEMA_CACHE_TTL) {
     return _schemaCache.data;
@@ -186,27 +206,28 @@ export async function describeSchema(skill?: string, full?: boolean): Promise<Sc
   const args = ['describe-schema'];
   if (skill) args.push('--skill', skill);
   if (full) args.push('--full');
-  const data = await runAgenticMemory(args) as SchemaResult;
+  const data = await runAgenticMemory(args, db) as SchemaResult;
 
   _schemaCache = { data, timestamp: Date.now(), key: cacheKey };
   return data;
 }
 
-export async function queryTypeQL(typeql: string, limit?: number): Promise<QueryResult> {
+export async function queryTypeQL(typeql: string, limit?: number, db?: string): Promise<QueryResult> {
   const args = ['query', '--typeql', typeql];
   if (limit !== undefined) args.push('--limit', String(limit));
-  return await runAgenticMemory(args) as QueryResult;
+  return await runAgenticMemory(args, db) as QueryResult;
 }
 
 export async function searchSemantic(
   query: string,
   collection?: string,
   limit?: number,
-  threshold?: number
+  threshold?: number,
+  db?: string
 ): Promise<SearchResult> {
   const args = ['search', '--query', query];
   if (collection) args.push('--collection', collection);
   if (limit !== undefined) args.push('--limit', String(limit));
   if (threshold !== undefined) args.push('--threshold', String(threshold));
-  return await runAgenticMemory(args) as SearchResult;
+  return await runAgenticMemory(args, db) as SearchResult;
 }

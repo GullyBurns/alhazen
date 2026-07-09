@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { queryTypeQL } from '@/lib/agentic-memory';
+import { queryTypeQL, resolveDb } from '@/lib/agentic-memory';
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -12,12 +12,13 @@ export async function GET(
   }
 
   try {
+    const db = resolveDb(request);
     const safeId = id.replace(/'/g, "\\'");
 
     // Single query: find ALL relations this entity participates in
     const result = await queryTypeQL(
       `match $e has id '${safeId}'; ($role: $e, $other_role: $other) isa $rel; $other has id $oid, has name $oname; fetch { "id": $oid, "name": $oname, "rel": $rel };`,
-      200
+      200, db
     );
 
     if (!result.success) {
