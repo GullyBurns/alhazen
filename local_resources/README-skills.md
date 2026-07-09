@@ -2,6 +2,12 @@
 
 This document provides a comprehensive comparison of skill formats across different AI agent frameworks and describes how skills can be made portable between them.
 
+> **⚠️ Running Alhazen skills within OpenClaw is deprecated.** The project has pivoted to a full
+> Claude-based implementation (run with Claude Code) to keep the curation approach undiluted and
+> avoid the token-cost overhead of a persistent OpenClaw service through the API. The OpenClaw
+> sections below (including `make deploy-openclaw`, workspace symlinks, and `~/.openclaw/openclaw.json`
+> config) are retained as portability reference only and are unmaintained.
+
 ## Framework Comparison
 
 ### AgentSkills (Open Standard by Anthropic)

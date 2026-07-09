@@ -1,5 +1,13 @@
 # Deployment Guide
 
+> **⚠️ DEPRECATED — OpenClaw deployment is no longer supported.**
+> The project has **pivoted to a full Claude-based implementation**: run Alhazen interactively with
+> Claude Code (`make build && claude`). Driving the agent through Claude Code keeps the curation
+> approach undiluted and avoids the token-cost overhead of running a persistent OpenClaw service
+> through the API. Everything below (Mac Mini / VPS OpenClaw stacks, Telegram, Squid egress
+> filtering, LiteLLM brokering) is retained for reference only and is **unmaintained** — the
+> `deploy/` scripts and `make deploy-*` targets may drift out of sync with the rest of the project.
+
 Deploy OpenClaw + Alhazen as a hardened stack with Telegram access, egress filtering, and credential brokering.
 
 ## Development Workflow: A &rarr; B &rarr; C

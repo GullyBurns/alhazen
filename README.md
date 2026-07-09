@@ -1,6 +1,6 @@
 # Skillful Alhazen
 
-**A TypeDB-powered agentic knowledge notebook — run interactively with Claude Code or deployed persistently via OpenClaw**
+**A TypeDB-powered agentic knowledge notebook — run interactively with Claude Code**
 
 > **Prototype software** — APIs, schemas, and skill interfaces are subject to change without notice.
 
@@ -16,7 +16,7 @@ Skillful Alhazen is an **agentic curation system with knowledge graph memory**. 
 
 Three layers work together:
 
-- **Agent** — Claude Code (interactive) or OpenClaw (persistent service). You talk; the agent curates.
+- **Agent** — Claude Code (interactive). You talk; the agent curates. *(Persistent OpenClaw service deployment is [deprecated](#how-to-run).)*
 - **TypeDB** — ontological memory. The schema defines the concepts the agent reasons *about*; the data is what it has learned so far.
 - **Skills** — domain modules combining a TypeDB schema namespace, Python CLI scripts, and agent instructions. Each skill extends what the agent can do and remember in a specific domain.
 
@@ -77,15 +77,13 @@ Resolved from [`sciknow-io/alhazen-skill-examples`](https://github.com/sciknow-i
 
 ---
 
-## Three Ways to Run
+## How to Run
 
 | Mode | Setup | Best for |
 |------|-------|----------|
-| **(A) Claude Code** | `make build && claude` | Exploration, skill development, one-off research |
-| **(B) OpenClaw on Mac Mini** | `./deploy/deploy.sh --target-type macmini` | Persistent local service with Telegram triage |
-| **(C) OpenClaw on VPS** | `./deploy/deploy.sh --target-type vps` | Always-on, hardened production deployment |
+| **Claude Code** | `make build && claude` | Everything — exploration, skill development, research, curation |
 
-See the [Deployment guide](https://github.com/GullyBurns/skillful-alhazen/wiki/Deployment) for the A → B → C progression.
+> **⚠️ OpenClaw deployment is deprecated.** Running Alhazen as a persistent OpenClaw service (Mac Mini or VPS, options B and C in earlier docs) is no longer supported. The project has **pivoted to a full Claude-based implementation** — run interactively with Claude Code. Driving the agent through Claude Code keeps the curation approach undiluted and avoids the token-cost overhead of running a persistent service through the API. The `deploy/` scripts and `make deploy-*` targets remain in the tree but are unmaintained; see [`deploy/README.md`](deploy/README.md).
 
 ---
 
