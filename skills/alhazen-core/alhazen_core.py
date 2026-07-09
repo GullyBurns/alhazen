@@ -496,6 +496,40 @@ def cmd_reset(args):
 
 
 # =============================================================================
+# Focused backup (scoped TypeDB slice + Qdrant snapshots -> one portable zip)
+# =============================================================================
+
+def _load_focused_backup():
+    """Import the focused_backup engine from the repo src/ package (local-dev)."""
+    src = Path(__file__).resolve().parents[2] / "src"
+    if str(src) not in sys.path:
+        sys.path.insert(0, str(src))
+    from skillful_alhazen.utils import focused_backup  # noqa: E402
+    return focused_backup
+
+
+def cmd_backup(args):
+    fb = _load_focused_backup()
+    if args.list:
+        for slug, spec in fb.TARGETS.items():
+            print(f"{slug}\n  {spec['description']}\n  typedb: {spec['typedb']['source']} "
+                  f"{spec['typedb']['prefixes']}\n  qdrant: {spec['qdrant']}\n")
+        return
+    targets = list(fb.TARGETS) if args.all else ([args.target] if args.target else [])
+    if not targets:
+        raise SystemExit("Specify --target <slug>, --all, or --list")
+    out = [fb.backup_target(t, args.dry_run) for t in targets]
+    print(json.dumps(out if len(out) > 1 else out[0], indent=2))
+
+
+def cmd_restore(args):
+    fb = _load_focused_backup()
+    out = fb.restore_bundle(args.zip, args.target_db, args.mode,
+                            args.typedb_only, args.qdrant_only, args.yes, args.dry_run)
+    print(json.dumps(out, indent=2))
+
+
+# =============================================================================
 # CLI
 # =============================================================================
 
@@ -524,6 +558,22 @@ def main():
     reset_p = sub.add_parser("reset", help="Drop and recreate the database (destroys data)")
     reset_p.add_argument("--yes", action="store_true", help="Confirm destructive reset")
 
+    backup_p = sub.add_parser("backup", help="Create a focused, portable backup (scoped TypeDB slice + Qdrant snapshots) as one zip")
+    backup_p.add_argument("--target", help="Preset slug (see --list): career-kg, deep-research")
+    backup_p.add_argument("--all", action="store_true", help="Back up every preset")
+    backup_p.add_argument("--list", action="store_true", help="List available backup presets")
+    backup_p.add_argument("--dry-run", action="store_true", help="Report scope + counts without writing a zip")
+
+    restore_p = sub.add_parser("restore", help="Load a backup bundle into TYPEDB_HOST/QDRANT_HOST (point them at the destination to load elsewhere)")
+    restore_p.add_argument("--zip", required=True, help="Path to a bundle zip")
+    restore_p.add_argument("--target-db", help="Destination TypeDB database (default: bundle's source DB)")
+    restore_p.add_argument("--mode", choices=["fresh", "merge", "replace"], default="fresh",
+                           help="fresh=create, refuse if exists; merge=id-preserving additive; replace=drop first (destructive)")
+    restore_p.add_argument("--typedb-only", action="store_true", help="Restore only the TypeDB slice")
+    restore_p.add_argument("--qdrant-only", action="store_true", help="Restore only the Qdrant snapshots")
+    restore_p.add_argument("--yes", action="store_true", help="Confirm destructive --mode replace")
+    restore_p.add_argument("--dry-run", action="store_true", help="Show what would load, change nothing")
+
     args = parser.parse_args()
     dispatch = {
         "init": cmd_init,
@@ -533,6 +583,8 @@ def main():
         "dashboard-status": cmd_dashboard_status,
         "status": cmd_status,
         "reset": cmd_reset,
+        "backup": cmd_backup,
+        "restore": cmd_restore,
     }
     dispatch[args.command](args)
 
