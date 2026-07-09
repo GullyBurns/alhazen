@@ -84,17 +84,72 @@ skills:
     url_path: /coach
     icon: Heart
     color: teal
-- name: jobhunt
+- name: career
   git: https://github.com/sciknow-io/alhazen-skill-personal-assistant
-  ref: main
-  subdir: skills/jobhunt
+  ref: executive-team
+  subdir: skills/career
   dashboard:
     enabled: true
-    name: Job Hunt Dashboard
-    description: Pipeline kanban, skills matrix, learning plan, and candidate triage.
-    url_path: /jobhunt
+    name: Career
+    description: "The career graph: people, collaborators, projects, and the opportunity pipeline."
+    url_path: /career
     icon: Briefcase
     color: blue
+- name: analyst
+  git: https://github.com/sciknow-io/alhazen-skill-personal-assistant
+  ref: executive-team
+  subdir: skills/analyst
+  dashboard:
+    enabled: true
+    name: Research Analyst
+    description: Decision-framed research missions with multi-thread consensus and the three-question gate.
+    url_path: /analyst
+    icon: Microscope
+    color: cyan
+- name: advisor
+  git: https://github.com/sciknow-io/alhazen-skill-personal-assistant
+  ref: executive-team
+  subdir: skills/advisor
+  dashboard:
+    enabled: true
+    name: Board of Advisors
+    description: Strategic decisions debated by advisor personas, with bias checks and scenario stress-tests.
+    url_path: /advisor
+    icon: Scale
+    color: teal
+- name: scribe
+  git: https://github.com/sciknow-io/alhazen-skill-personal-assistant
+  ref: executive-team
+  subdir: skills/scribe
+  dashboard:
+    enabled: true
+    name: Scribe
+    description: "Writing in your voice: profiles, audience personas, and dimension-scored drafts."
+    url_path: /scribe
+    icon: PenTool
+    color: mint
+- name: ops
+  git: https://github.com/sciknow-io/alhazen-skill-personal-assistant
+  ref: executive-team
+  subdir: skills/ops
+  dashboard:
+    enabled: true
+    name: Operations
+    description: Morning briefs, stakeholder CRM, meeting prep, commitments, and monitors.
+    url_path: /ops
+    icon: Gauge
+    color: rust
+- name: chief-of-staff
+  git: https://github.com/sciknow-io/alhazen-skill-personal-assistant
+  ref: executive-team
+  subdir: skills/chief-of-staff
+  dashboard:
+    enabled: true
+    name: Chief of Staff
+    description: "Cross-skill daily agenda: what needs you today across the whole team."
+    url_path: /chief
+    icon: LayoutDashboard
+    color: teal
 schema_map:
   load_order:
   - agent-os
@@ -102,7 +157,11 @@ schema_map:
   - coach
   - curation-skill-builder
   - dismech-notebook
-  - jobhunt
+  - career
+  - analyst
+  - advisor
+  - scribe
+  - ops
   - mythras-gm
   - scientific-literature
   - tech-recon
@@ -123,9 +182,25 @@ schema_map:
       skill: curation-skill-builder
       schema: local_skills/curation-skill-builder/schema.tql
       depends_on: []
-    jhunt:
-      skill: jobhunt
-      schema: local_skills/jobhunt/schema.tql
+    career:
+      skill: career
+      schema: local_skills/career/schema.tql
+      depends_on: []
+    anlst:
+      skill: analyst
+      schema: local_skills/analyst/schema.tql
+      depends_on: []
+    advsr:
+      skill: advisor
+      schema: local_skills/advisor/schema.tql
+      depends_on: []
+    scribe:
+      skill: scribe
+      schema: local_skills/scribe/schema.tql
+      depends_on: []
+    ops:
+      skill: ops
+      schema: local_skills/ops/schema.tql
       depends_on: []
     myth:
       skill: mythras-gm
