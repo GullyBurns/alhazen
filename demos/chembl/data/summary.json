@@ -1,0 +1,11 @@
+{
+  "target": "CHEMBL203",
+  "target_name": "Epidermal growth factor receptor",
+  "organism": "Homo sapiens",
+  "activities_count": 500,
+  "molecules_count": 362,
+  "assays_count": 44,
+  "data_source": "ChEMBL",
+  "license": "CC-BY-SA 3.0",
+  "api_url": "https://www.ebi.ac.uk/chembl/api/data"
+}

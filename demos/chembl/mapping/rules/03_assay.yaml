@@ -1,0 +1,21 @@
+name: assay
+description: Map raw ChEMBL assay to Alhazen demo-assay entity
+idempotent: true
+skolem_keys: [chembl_id]
+source_match: |
+  match
+    $a isa raw-assay,
+      has chembl-id $cid,
+      has description $desc,
+      has assay-type $at;
+  fetch {
+    "chembl_id": $cid,
+    "desc": $desc,
+    "at": $at
+  };
+target_insert: |
+  insert $da isa demo-assay,
+    has id $skolem_id,
+    has name $desc,
+    has demo-chembl-id $chembl_id,
+    has demo-assay-type $at;

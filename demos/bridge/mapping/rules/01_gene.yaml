@@ -1,0 +1,22 @@
+name: gene
+description: Map raw gene to Alhazen demo-gene bridge entity
+idempotent: true
+skolem_keys: [hgnc]
+source_match: |
+  match
+    $g isa raw-gene,
+      has hgnc-symbol $hgnc,
+      has ncbi-gene-id $ncbi,
+      has uniprot-id $up;
+  fetch {
+    "hgnc": $hgnc,
+    "ncbi": $ncbi,
+    "up": $up
+  };
+target_insert: |
+  insert $dg isa demo-gene,
+    has id $skolem_id,
+    has name $hgnc,
+    has demo-hgnc-symbol $hgnc,
+    has demo-ncbi-gene-id $ncbi,
+    has demo-uniprot-id $up;

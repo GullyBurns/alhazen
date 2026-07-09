@@ -1,0 +1,30 @@
+name: target
+description: Map raw ChEMBL target to Alhazen demo-target entity
+idempotent: true
+skolem_keys: [chembl_id]
+source_match: |
+  match
+    $t isa raw-target,
+      has chembl-id $cid,
+      has pref-name $name,
+      has organism $org,
+      has target-type $tt,
+      has uniprot-id $up,
+      has gene-symbol $gs;
+  fetch {
+    "chembl_id": $cid,
+    "name": $name,
+    "org": $org,
+    "tt": $tt,
+    "up": $up,
+    "gs": $gs
+  };
+target_insert: |
+  insert $dt isa demo-target,
+    has id $skolem_id,
+    has name $name,
+    has demo-chembl-id $chembl_id,
+    has demo-organism $org,
+    has demo-target-type $tt,
+    has demo-uniprot-id $up,
+    has demo-gene-symbol $gs;

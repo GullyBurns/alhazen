@@ -1,0 +1,24 @@
+name: pathway
+description: Map raw Reactome pathway to Alhazen demo-pathway bridge entity
+idempotent: true
+skolem_keys: [pathway_id]
+source_match: |
+  match
+    $p isa raw-pathway,
+      has pathway-id $pid,
+      has pref-name $name,
+      has pathway-source $src,
+      has pathway-species $sp;
+  fetch {
+    "pathway_id": $pid,
+    "name": $name,
+    "src": $src,
+    "sp": $sp
+  };
+target_insert: |
+  insert $dp isa demo-pathway,
+    has id $skolem_id,
+    has name $name,
+    has demo-pathway-id $pathway_id,
+    has demo-pathway-source $src,
+    has demo-pathway-species $sp;

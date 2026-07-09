@@ -1,0 +1,18 @@
+name: gene-target-link
+description: >
+  Link the bridge gene to the chemistry-domain target that shares its gene
+  symbol. This single declarative rule stitches the systems-biology layer onto
+  the ChEMBL bioactivity layer -- the seam Benchling's siloed ELN cannot cross.
+idempotent: false
+depends_on: [gene]
+skolem_keys: [hgnc]
+source_match: |
+  match
+    $g isa raw-gene, has hgnc-symbol $hgnc;
+  fetch { "hgnc": $hgnc };
+target_insert: |
+  match
+    $dg isa demo-gene, has demo-hgnc-symbol $hgnc;
+    $dt isa demo-target, has demo-gene-symbol $hgnc;
+  insert
+    (demo-gt-gene: $dg, demo-gt-target: $dt) isa demo-gene-target-link;

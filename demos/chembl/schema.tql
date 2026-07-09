@@ -1,0 +1,66 @@
+# ChEMBL Demo Schema — Small Molecule Data Integration
+# Demonstrates Alhazen GLAV mapping from ChEMBL open bioactivity data
+# Source: https://www.ebi.ac.uk/chembl/ (CC-BY-SA 3.0)
+#
+# This schema extends the core alhazen_notebook schema and defines
+# entity types for compounds, targets, assays, and bioactivities.
+
+# --- Attributes ---
+
+attribute demo-chembl-id, value string;
+attribute demo-smiles, value string;
+attribute demo-inchi-key, value string;
+attribute demo-molecular-weight, value double;
+attribute demo-alogp, value double;
+attribute demo-pchembl-value, value double;
+attribute demo-activity-type, value string;
+attribute demo-activity-value, value double;
+attribute demo-activity-units, value string;
+attribute demo-activity-relation, value string;
+attribute demo-uniprot-id, value string;
+attribute demo-gene-symbol, value string;
+attribute demo-organism, value string;
+attribute demo-assay-type, value string;
+attribute demo-target-type, value string;
+attribute demo-max-phase, value integer;
+
+# --- Relations (before entities so role names resolve) ---
+
+relation demo-bioactivity-measurement,
+    relates demo-bm-compound,
+    relates demo-bm-target,
+    relates demo-bm-assay,
+    relates demo-bm-result;
+
+# --- Entities ---
+
+entity demo-compound sub alh-domain-thing,
+    owns demo-chembl-id,
+    owns demo-smiles,
+    owns demo-inchi-key,
+    owns demo-molecular-weight,
+    owns demo-alogp,
+    owns demo-max-phase,
+    plays demo-bioactivity-measurement:demo-bm-compound;
+
+entity demo-target sub alh-domain-thing,
+    owns demo-chembl-id,
+    owns demo-uniprot-id,
+    owns demo-gene-symbol,
+    owns demo-organism,
+    owns demo-target-type,
+    plays demo-bioactivity-measurement:demo-bm-target;
+
+entity demo-assay sub alh-domain-thing,
+    owns demo-chembl-id,
+    owns demo-assay-type,
+    plays demo-bioactivity-measurement:demo-bm-assay;
+
+entity demo-bioactivity sub alh-domain-thing,
+    owns demo-chembl-id,
+    owns demo-activity-type,
+    owns demo-activity-value,
+    owns demo-activity-units,
+    owns demo-activity-relation,
+    owns demo-pchembl-value,
+    plays demo-bioactivity-measurement:demo-bm-result;

@@ -1,0 +1,30 @@
+name: compound
+description: Map raw ChEMBL molecule to Alhazen demo-compound entity
+idempotent: true
+skolem_keys: [chembl_id]
+source_match: |
+  match
+    $m isa raw-molecule,
+      has chembl-id $cid,
+      has pref-name $name,
+      has smiles $smiles,
+      has mol-weight $mw,
+      has alogp $alogp,
+      has max-phase $mp;
+  fetch {
+    "chembl_id": $cid,
+    "name": $name,
+    "smiles": $smiles,
+    "mw": $mw,
+    "alogp": $alogp,
+    "mp": $mp
+  };
+target_insert: |
+  insert $c isa demo-compound,
+    has id $skolem_id,
+    has name $name,
+    has demo-chembl-id $chembl_id,
+    has demo-smiles $smiles,
+    has demo-molecular-weight $mw,
+    has demo-alogp $alogp,
+    has demo-max-phase $mp;

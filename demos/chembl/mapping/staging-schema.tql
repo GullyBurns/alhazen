@@ -1,0 +1,79 @@
+# ChEMBL Staging Schema -- raw source representation
+#
+# This schema models the ChEMBL REST API JSON payloads "as fetched", in a
+# throwaway staging database (chembl_staging). It deliberately does NOT use
+# the Alhazen core ontology -- it is the SOURCE side of a GLAV mapping.
+#
+# The declarative rules in mapping/rules/ read from these raw types and
+# project them into the Alhazen-aligned demo schema (schema.tql) living in
+# the alhazen_notebook database. This separation is the whole point of the
+# demo: heterogeneous source data -> unified ontology via declarative rules.
+#
+# All attributes are populated by load_staging.py with sentinel defaults
+# ("" for strings, 0.0 for doubles, 0 for integers) so every raw entity is
+# fully populated and therefore matchable by a single GLAV rule (no row drops).
+
+define
+
+# --- Shared identifier / cross-reference attributes ---
+attribute chembl-id, value string;
+attribute pref-name, value string;
+attribute organism, value string;
+attribute target-type, value string;
+attribute uniprot-id, value string;
+attribute gene-symbol, value string;
+
+# --- Molecule attributes ---
+attribute smiles, value string;
+attribute mol-weight, value double;
+attribute alogp, value double;
+attribute max-phase, value integer;
+
+# --- Assay attributes ---
+attribute assay-type, value string;
+attribute description, value string;
+
+# --- Activity attributes (with foreign-key refs to molecule/target/assay) ---
+attribute activity-id, value string;
+attribute molecule-ref, value string;
+attribute target-ref, value string;
+attribute assay-ref, value string;
+attribute standard-type, value string;
+attribute standard-value, value double;
+attribute standard-units, value string;
+attribute standard-relation, value string;
+attribute pchembl-value, value double;
+
+# --- Raw entities (flat staging tables) ---
+
+entity raw-target,
+    owns chembl-id,
+    owns pref-name,
+    owns organism,
+    owns target-type,
+    owns uniprot-id,
+    owns gene-symbol;
+
+entity raw-molecule,
+    owns chembl-id,
+    owns pref-name,
+    owns smiles,
+    owns mol-weight,
+    owns alogp,
+    owns max-phase;
+
+entity raw-assay,
+    owns chembl-id,
+    owns description,
+    owns assay-type;
+
+entity raw-activity,
+    owns activity-id,
+    owns molecule-ref,
+    owns target-ref,
+    owns assay-ref,
+    owns standard-type,
+    owns standard-value,
+    owns standard-units,
+    owns standard-relation,
+    owns pchembl-value;
