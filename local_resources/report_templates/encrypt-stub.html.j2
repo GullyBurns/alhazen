@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title | default("Protected Report") }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070d1c; --bg-raised: #0c1628; --fg: #c8dde8; --fg-dim: #8ba4b8;
+      --fg-faint: #5e7387; --teal: #5aadaf; --teal-dim: rgba(90,173,175,0.18);
+      --border: rgba(90,173,175,0.18); --border-hi: rgba(90,173,175,0.42);
+      --rust: #c87a4a; --panel: rgba(12,22,40,0.72);
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
+      --serif: 'DM Serif Display', Georgia, serif;
+      --sans: 'DM Sans', system-ui, sans-serif;
+      --radius: 6px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      font-family: var(--sans); background: var(--bg); color: var(--fg);
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 2rem;
+    }
+    .lock-container {
+      max-width: 420px; width: 100%; text-align: center;
+    }
+    .lock-icon {
+      width: 48px; height: 48px; margin: 0 auto 1.5rem;
+      color: var(--teal); opacity: 0.7;
+    }
+    h1 {
+      font-family: var(--serif); font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      color: var(--fg-dim); font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+    .input-group {
+      display: flex; gap: 0.5rem; margin-bottom: 1rem;
+    }
+    input[type="password"] {
+      flex: 1; padding: 0.6rem 1rem;
+      background: var(--bg-raised); border: 1px solid var(--border-hi);
+      border-radius: var(--radius); color: var(--fg);
+      font-family: var(--mono); font-size: 0.9rem;
+      outline: none;
+    }
+    input[type="password"]:focus {
+      border-color: var(--teal);
+    }
+    button {
+      padding: 0.6rem 1.2rem; background: var(--teal-dim);
+      border: 1px solid var(--teal); border-radius: var(--radius);
+      color: var(--teal); font-family: var(--mono); font-size: 0.85rem;
+      cursor: pointer; white-space: nowrap;
+    }
+    button:hover { background: rgba(90,173,175,0.3); }
+    .error {
+      color: var(--rust); font-size: 0.85rem;
+      margin-top: 0.5rem; display: none;
+    }
+    .spinner {
+      display: none; color: var(--fg-faint);
+      font-size: 0.85rem; margin-top: 0.5rem;
+    }
+    .meta {
+      font-family: var(--mono); font-size: 0.72rem;
+      color: var(--fg-faint); margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="lock-container">
+    <svg class="lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      <circle cx="12" cy="16" r="1"/>
+    </svg>
+    <h1>{{ title | default("Protected Report") }}</h1>
+    <p class="subtitle">This report is encrypted. Enter the passphrase to view.</p>
+    <div class="input-group">
+      <input type="password" id="passphrase" placeholder="Passphrase" autofocus
+             onkeydown="if(event.key==='Enter')decrypt()">
+      <button onclick="decrypt()">Unlock</button>
+    </div>
+    <div class="error" id="error">Incorrect passphrase. Please try again.</div>
+    <div class="spinner" id="spinner">Decrypting...</div>
+    <div class="meta">
+      Skillful Alhazen | {{ project | default("") }}
+    </div>
+  </div>
+
+  <script>
+  // Encrypted payload
+  var _ct = "{{ ciphertext }}";
+  var _salt = "{{ salt }}";
+  var _nonce = "{{ nonce }}";
+
+  function b64decode(b64) {
+    var bin = atob(b64);
+    var len = bin.length;
+    var bytes = new Uint8Array(len);
+    for (var i = 0; i < len; i++) {
+      bytes[i] = bin.charCodeAt(i);
+    }
+    return bytes;
+  }
+
+  async function decrypt() {
+    var input = document.getElementById('passphrase');
+    var errorEl = document.getElementById('error');
+    var spinnerEl = document.getElementById('spinner');
+    var passphrase = input.value;
+    if (!passphrase) return;
+
+    errorEl.style.display = 'none';
+    spinnerEl.style.display = 'block';
+
+    try {
+      var salt = b64decode(_salt);
+      var nonce = b64decode(_nonce);
+      var ct = b64decode(_ct);
+
+      var keyMaterial = await crypto.subtle.importKey(
+        'raw', new TextEncoder().encode(passphrase), 'PBKDF2', false, ['deriveKey']
+      );
+      var key = await crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt: salt, iterations: 100000, hash: 'SHA-256' },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['decrypt']
+      );
+      var plain = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: nonce }, key, ct
+      );
+      var html = new TextDecoder().decode(plain);
+
+      // Replace entire page with decrypted content
+      document.open();
+      document.write(html);
+      document.close();
+    } catch (e) {
+      spinnerEl.style.display = 'none';
+      errorEl.style.display = 'block';
+      input.value = '';
+      input.focus();
+    }
+  }
+  </script>
+</body>
+</html>

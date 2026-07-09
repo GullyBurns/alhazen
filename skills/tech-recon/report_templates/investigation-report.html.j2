@@ -1,0 +1,278 @@
+{% extends "base.html.j2" %}
+{% from "macros.html.j2" import render_section %}
+
+{% block meta_items %}
+{% if data.investigation and data.investigation.type %}
+<span class="type-chip {{ data.investigation.type }}">{{ data.investigation.type[:4] | upper }}</span>
+{% endif %}
+{% if data.investigation and data.investigation.status %}
+<span class="status-badge {{ data.investigation.status }}">{{ data.investigation.status }}</span>
+{% endif %}
+<span>{{ data.stats.systems }} system{{ "s" if data.stats.systems != 1 }}</span>
+<span>{{ data.stats.artifacts }} artifact{{ "s" if data.stats.artifacts != 1 }}</span>
+<span>{{ data.stats.notes }} note{{ "s" if data.stats.notes != 1 }}</span>
+{% if data.stats.fragments %}<span>{{ data.stats.fragments }} fragment{{ "s" if data.stats.fragments != 1 }}</span>{% endif %}
+{% if data.stats.analyses %}<span>{{ data.stats.analyses }} analys{{ "es" if data.stats.analyses != 1 else "is" }}</span>{% endif %}
+<span>{{ generated_at }}</span>
+{% endblock %}
+
+{% block toc %}
+<nav class="section-nav">
+  <a href="#scope">
+    <span class="nav-dot {{ 'done' if data.investigation.goal }}"></span>
+    Scope
+  </a>
+  <a href="#discovery">
+    <span class="nav-dot {{ 'done' if data.systems }}"></span>
+    Discovery
+    <span class="nav-count">{{ data.stats.systems }}</span>
+  </a>
+  <a href="#sensemaking">
+    <span class="nav-dot {{ 'done' if data.stats.notes > 0 }}"></span>
+    Sensemaking
+    <span class="nav-count">{{ data.stats.notes }}</span>
+  </a>
+  {% if data.stats.analyses > 0 %}
+  <a href="#analysis">
+    <span class="nav-dot done"></span>
+    Analysis
+    <span class="nav-count">{{ data.stats.analyses }}</span>
+  </a>
+  {% endif %}
+  <a href="#outputs">
+    <span class="nav-dot {{ 'done' if data.outputs.synthesis_report }}"></span>
+    Outputs
+  </a>
+  <a href="#schema">
+    <span class="nav-dot done"></span>
+    Schema
+  </a>
+  <a href="#structured-data">
+    <span class="nav-dot done"></span>
+    Data
+  </a>
+</nav>
+{% endblock %}
+
+{% block content %}
+
+{# ================================================================ #}
+{# SCOPE                                                            #}
+{# ================================================================ #}
+<div class="report-section" id="scope">
+  <h2>Scope</h2>
+
+  {% if data.investigation.goal %}
+  <div class="scope-panel">
+    <h3>Goal</h3>
+    {{ data.investigation.goal | md }}
+  </div>
+  {% endif %}
+
+  {% if data.investigation.criteria %}
+  <div class="scope-panel criteria">
+    <h3>Success Criteria</h3>
+    {{ data.investigation.criteria | md }}
+  </div>
+  {% endif %}
+</div>
+
+{# ================================================================ #}
+{# DISCOVERY                                                        #}
+{# ================================================================ #}
+<div class="report-section" id="discovery">
+  <h2>Discovery</h2>
+
+  {% if data.systems %}
+  <table>
+    <thead>
+      <tr>
+        <th>System</th>
+        <th>Status</th>
+        <th>Artifacts</th>
+        {% for topic in data.stats.topics %}
+        <th style="text-align:center; font-size: 0.7rem;">{{ topic | replace("-", " ") | truncate(12, True, "..") }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for sys in data.systems %}
+      <tr>
+        <td>
+          <strong>{{ sys.name }}</strong>
+          {% if sys.url %}<br><span style="font-size:0.78rem; color:var(--fg-faint);">{{ sys.url | truncate(50) }}</span>{% endif %}
+        </td>
+        <td><span class="status-badge {{ sys.status }}">{{ sys.status }}</span></td>
+        <td style="text-align:center;">{{ sys.artifacts | length }}</td>
+        {% for topic in data.stats.topics %}
+        <td>
+          {% if topic in sys.topics %}
+          <span class="topic-check">&#10003;</span>
+          {% else %}
+          <span class="topic-missing">-</span>
+          {% endif %}
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color: var(--fg-faint); font-style: italic;">No systems discovered yet.</p>
+  {% endif %}
+</div>
+
+{# ================================================================ #}
+{# SENSEMAKING                                                      #}
+{# ================================================================ #}
+<div class="report-section" id="sensemaking">
+  <h2>Sensemaking</h2>
+
+  {% for sys in data.systems %}
+  <div class="system-card">
+    <div class="system-card-header">
+      <h3>{{ sys.name }}</h3>
+      <div class="system-card-stats">
+        <span>{{ sys.artifacts | length }}a</span>
+        <span>{{ sys.notes | length }}n</span>
+        {% if sys.fragments %}<span>{{ sys.fragments | length }}f</span>{% endif %}
+      </div>
+    </div>
+    <div class="system-card-body">
+
+      {# -- Artifacts -- #}
+      {% if sys.artifacts %}
+      <div class="subsection-label">
+        Artifacts <span class="count">{{ sys.artifacts | length }}</span>
+      </div>
+      <div class="artifact-list">
+        {% for art in sys.artifacts %}
+        <div class="artifact-row">
+          <span class="artifact-type-badge">{{ art.type | default("page") }}</span>
+          <span class="artifact-url">{{ art.url | default(art.id) }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {# -- Notes (expandable) -- #}
+      {% if sys.notes %}
+      <div class="subsection-label">
+        Notes <span class="count">{{ sys.notes | length }}</span>
+      </div>
+      {% for note in sys.notes %}
+      <div class="note-item">
+        <div class="note-item-header" onclick="this.parentElement.classList.toggle('expanded')">
+          <span style="font-size:0.75rem; color:var(--fg-faint);">&#9654;</span>
+          <span class="note-topic-badge {{ note.topic }}">{{ note.topic }}</span>
+          <span class="note-format-badge">{{ note.format | default("md") }}</span>
+          <span class="note-preview">{{ note.content[:80] | replace("\n", " ") }}...</span>
+        </div>
+        <div class="note-item-body">
+          {{ note.content | md }}
+        </div>
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      {# -- Fragments -- #}
+      {% if sys.fragments %}
+      <div class="fragment-list">
+        <div class="fragment-count">{{ sys.fragments | length }} extracted fragments</div>
+        <p style="color: var(--fg-faint); font-size: 0.82rem;">
+          Code and documentation fragments extracted from artifacts for detailed analysis.
+        </p>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{# ================================================================ #}
+{# ANALYSIS                                                         #}
+{# ================================================================ #}
+{% if data.analyses %}
+<div class="report-section" id="analysis">
+  <h2>Analysis</h2>
+  <div class="analysis-grid">
+    {% for ana in data.analyses %}
+    <div class="analysis-card">
+      <h4>{{ ana.title }}</h4>
+      <span class="analysis-type-badge">{{ ana.type | default("plot") }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{# ================================================================ #}
+{# OUTPUTS                                                          #}
+{# ================================================================ #}
+<div class="report-section" id="outputs">
+  <h2>Outputs</h2>
+
+  {% if data.outputs.synthesis_report %}
+  <div style="margin-bottom: var(--gap-lg);">
+    <div class="subsection-label">Synthesis Report</div>
+    <div style="padding: var(--gap-md); background: var(--bg-sunken); border-radius: var(--radius); border: 1px solid var(--border-dim);">
+      {{ data.outputs.synthesis_report.content | md }}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if data.outputs.completion_assessment %}
+  <div style="margin-bottom: var(--gap-lg);">
+    <div class="subsection-label">Completion Assessment</div>
+    <div style="padding: var(--gap-md); background: var(--bg-sunken); border-radius: var(--radius); border: 1px solid var(--border-dim);">
+      {{ data.outputs.completion_assessment.content | md }}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if data.outputs.investigation_notes %}
+  <div class="subsection-label">
+    Investigation Notes <span class="count">{{ data.outputs.investigation_notes | length }}</span>
+  </div>
+  {% for note in data.outputs.investigation_notes %}
+  <div class="note-item">
+    <div class="note-item-header" onclick="this.parentElement.classList.toggle('expanded')">
+      <span style="font-size:0.75rem; color:var(--fg-faint);">&#9654;</span>
+      <span class="note-topic-badge {{ note.topic }}">{{ note.topic }}</span>
+      <span class="note-format-badge">{{ note.format | default("md") }}</span>
+      <span class="note-preview">{{ note.content[:80] | replace("\n", " ") }}...</span>
+    </div>
+    <div class="note-item-body">
+      {{ note.content | md }}
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if not data.outputs.synthesis_report and not data.outputs.completion_assessment and not data.outputs.investigation_notes %}
+  <p style="color: var(--fg-faint); font-style: italic;">No outputs generated yet.</p>
+  {% endif %}
+</div>
+
+{# ================================================================ #}
+{# SCHEMA DIAGRAM                                                   #}
+{# ================================================================ #}
+<div class="schema-section" id="schema">
+  <h2>Knowledge Graph Schema</h2>
+  <p style="color: var(--fg-dim); font-size: 0.9rem; margin-bottom: var(--gap-md);">
+    This investigation is backed by a TypeDB knowledge graph. The schema below shows the
+    entity types, inheritance hierarchy, and relations used to structure the data.
+  </p>
+  <div class="mermaid-container">
+    <pre class="mermaid">{{ data.schema_mermaid }}</pre>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block footer %}
+<footer class="report-footer">
+  Generated by Skillful Alhazen Report Publisher | {{ generated_at }} | <a href="https://sciknow.io/alhazen" style="color: var(--fg-faint);">sciknow.io/alhazen</a>
+</footer>
+{% endblock %}
