@@ -1,0 +1,8 @@
+name: 24_bundles
+description: 24 bundles
+depends_on: []
+idempotent: true
+source_match: 'match $cc isa scilit-corpus, has id "collection-b329eae9911b"; $kp isa scilit-paper; (collection: $cc, member: $kp) isa alh-collection-membership; $k isa scilit-investigation, has scilit-investigation-type "deep-dive"; not { $k has id "scinv-3e0aa419866c"; }; (note: $k, subject: $kp) isa alh-aboutness;  $k has name $kn; fetch { "f_id": $k.id, "f_name": $kn };'
+target_insert: insert $b isa scilit-paper-sensemaking, has id $f_id, has name $f_name, has created-at 2026-06-26T12:00:00;
+skolem_keys:
+- f_id

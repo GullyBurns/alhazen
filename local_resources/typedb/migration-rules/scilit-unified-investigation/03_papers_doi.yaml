@@ -1,0 +1,9 @@
+name: 03_papers_doi
+description: 03 papers doi
+depends_on:
+- 02_papers_base
+idempotent: true
+source_match: 'match $cc isa scilit-corpus, has id "collection-b329eae9911b"; (collection: $cc, member: $p) isa alh-collection-membership; $p isa scilit-paper, has scilit-doi $d; fetch { "f_id": $p.id, "f_doi": $d };'
+target_insert: match $p isa scilit-paper, has id $f_id; insert $p has scilit-doi $f_doi;
+skolem_keys:
+- f_id

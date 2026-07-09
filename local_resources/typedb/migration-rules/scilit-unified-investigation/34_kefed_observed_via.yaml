@@ -1,0 +1,11 @@
+name: 34_kefed_observed_via
+description: 34 kefed observed via
+depends_on:
+- 31_observations
+- 33_kefed_models
+idempotent: true
+source_match: 'match $cc isa scilit-corpus, has id "collection-b329eae9911b"; $kp isa scilit-paper; (collection: $cc, member: $kp) isa alh-collection-membership; $k isa scilit-investigation, has scilit-investigation-type "deep-dive"; not { $k has id "scinv-3e0aa419866c"; }; (note: $k, subject: $kp) isa alh-aboutness; (parent-note: $k, child-note: $o) isa alh-note-threading; $o isa scilit-observation; (observation: $o, model: $m) isa kefed-observed-via;  fetch { "f_oid": $o.id, "f_mid": $m.id };'
+target_insert: 'match $o isa scilit-observation, has id $f_oid; $m isa kefed-model, has id $f_mid; insert (observation: $o, model: $m) isa kefed-observed-via;'
+skolem_keys:
+- f_oid
+- f_mid

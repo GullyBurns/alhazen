@@ -1,0 +1,10 @@
+name: 12_phasing_sensemaking
+description: 12 phasing sensemaking
+depends_on:
+- 01_investigation
+- 11_phase_sensemaking
+idempotent: true
+source_match: 'match $i isa scilit-investigation, has id "scinv-3e0aa419866c"; fetch { "f_id": $i.id };'
+target_insert: 'match $i isa scilit-investigation, has id $f_id; $ph isa scilit-investigation-phase, has id "scphase-hallmarks-sensemaking"; insert (investigation: $i, phase: $ph) isa scilit-investigation-phasing;'
+skolem_keys:
+- f_id

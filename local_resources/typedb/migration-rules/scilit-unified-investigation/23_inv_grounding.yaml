@@ -1,0 +1,11 @@
+name: 23_inv_grounding
+description: 23 inv grounding
+depends_on:
+- 01_investigation
+- 22_grounding_policy
+idempotent: true
+source_match: 'match $i isa scilit-investigation, has id "scinv-3e0aa419866c"; (parent-note: $i, child-note: $pp) isa alh-note-threading; $pp isa scilit-grounding-policy; fetch { "f_iid": $i.id, "f_pid": $pp.id };'
+target_insert: 'match $i isa scilit-investigation, has id $f_iid; $pp isa scilit-grounding-policy, has id $f_pid; insert (investigation: $i, policy: $pp) isa scilit-investigation-grounding;'
+skolem_keys:
+- f_iid
+- f_pid

@@ -1,0 +1,8 @@
+name: 29_reported_gaps
+description: 29 reported gaps
+depends_on: []
+idempotent: true
+source_match: 'match $cc isa scilit-corpus, has id "collection-b329eae9911b"; $kp isa scilit-paper; (collection: $cc, member: $kp) isa alh-collection-membership; $k isa scilit-investigation, has scilit-investigation-type "deep-dive"; not { $k has id "scinv-3e0aa419866c"; }; (note: $k, subject: $kp) isa alh-aboutness;  (parent-note: $k, child-note: $g) isa alh-note-threading; $g isa scilit-gap, has scilit-knowledge-goal $kg, has name $nm; fetch { "f_id": $g.id, "f_goal": $kg, "f_name": $nm };'
+target_insert: insert $g isa scilit-reported-gap, has id $f_id, has scilit-knowledge-goal $f_goal, has name $f_name, has created-at 2026-06-26T12:00:00;
+skolem_keys:
+- f_id

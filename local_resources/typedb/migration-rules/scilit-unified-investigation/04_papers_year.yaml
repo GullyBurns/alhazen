@@ -1,0 +1,9 @@
+name: 04_papers_year
+description: 04 papers year
+depends_on:
+- 02_papers_base
+idempotent: true
+source_match: 'match $cc isa scilit-corpus, has id "collection-b329eae9911b"; (collection: $cc, member: $p) isa alh-collection-membership; $p isa scilit-paper, has scilit-publication-year $y; fetch { "f_id": $p.id, "f_year": $y };'
+target_insert: match $p isa scilit-paper, has id $f_id; insert $p has scilit-publication-year $f_year;
+skolem_keys:
+- f_id

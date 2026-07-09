@@ -1,0 +1,8 @@
+name: 02_papers_base
+description: 02 papers base
+depends_on: []
+idempotent: true
+source_match: 'match $cc isa scilit-corpus, has id "collection-b329eae9911b"; (collection: $cc, member: $p) isa alh-collection-membership; $p isa scilit-paper, has name $nm; fetch { "f_id": $p.id, "f_name": $nm };'
+target_insert: insert $p isa scilit-paper, has id $f_id, has name $f_name, has created-at 2026-06-26T12:00:00;
+skolem_keys:
+- f_id

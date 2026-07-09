@@ -1,0 +1,11 @@
+name: 07_inv_scope
+description: 07 inv scope
+depends_on:
+- 01_investigation
+- 05_corpus
+idempotent: true
+source_match: 'match $i isa scilit-investigation, has id "scinv-3e0aa419866c"; (note: $i, subject: $c) isa alh-aboutness; $c isa scilit-corpus, has id "collection-b329eae9911b"; fetch { "f_iid": $i.id, "f_cid": $c.id };'
+target_insert: 'match $i isa scilit-investigation, has id $f_iid; $c isa scilit-corpus, has id $f_cid; insert (investigation: $i, corpus: $c) isa scilit-investigation-scope;'
+skolem_keys:
+- f_iid
+- f_cid

@@ -1,0 +1,8 @@
+name: 02b_papers_citing
+description: 02b papers citing
+depends_on: []
+idempotent: true
+source_match: 'match $i isa scilit-investigation, has id "scinv-3e0aa419866c"; (parent-note: $i, child-note: $im) isa alh-note-threading; $im isa scilit-citation-impact; (note: $im, subject: $p) isa alh-aboutness; $p isa scilit-paper, has name $nm; fetch { "f_id": $p.id, "f_name": $nm };'
+target_insert: insert $p isa scilit-paper, has id $f_id, has name $f_name, has created-at 2026-06-26T12:00:00;
+skolem_keys:
+- f_id

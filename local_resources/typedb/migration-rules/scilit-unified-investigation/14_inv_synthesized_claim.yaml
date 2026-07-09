@@ -1,0 +1,11 @@
+name: 14_inv_synthesized_claim
+description: 14 inv synthesized claim
+depends_on:
+- 01_investigation
+- 13_synthesized_claims
+idempotent: true
+source_match: 'match $i isa scilit-investigation, has id "scinv-3e0aa419866c"; (parent-note: $i, child-note: $cl) isa alh-note-threading; $cl isa scilit-claim; fetch { "f_iid": $i.id, "f_cid": $cl.id };'
+target_insert: 'match $i isa scilit-investigation, has id $f_iid; $cl isa scilit-synthesized-claim, has id $f_cid; insert (investigation: $i, synthesized-claim: $cl) isa scilit-investigation-synthesized-claim;'
+skolem_keys:
+- f_iid
+- f_cid

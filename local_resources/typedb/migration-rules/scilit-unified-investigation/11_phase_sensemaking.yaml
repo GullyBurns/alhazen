@@ -1,0 +1,8 @@
+name: 11_phase_sensemaking
+description: 11 phase sensemaking
+depends_on: []
+idempotent: true
+source_match: 'match $i isa scilit-investigation, has id "scinv-3e0aa419866c"; fetch { "f_id": $i.id };'
+target_insert: insert $ph isa scilit-investigation-phase, has id "scphase-hallmarks-sensemaking", has scilit-phase "sensemaking", has name "Sensemaking phase", has scilit-iteration-number 1, has created-at 2026-06-26T12:00:00;
+skolem_keys:
+- f_id

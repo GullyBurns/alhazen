@@ -1,0 +1,8 @@
+name: 35_kefed_variables
+description: 35 kefed variables
+depends_on: []
+idempotent: true
+source_match: 'match $cc isa scilit-corpus, has id "collection-b329eae9911b"; $kp isa scilit-paper; (collection: $cc, member: $kp) isa alh-collection-membership; $k isa scilit-investigation, has scilit-investigation-type "deep-dive"; not { $k has id "scinv-3e0aa419866c"; }; (note: $k, subject: $kp) isa alh-aboutness; (parent-note: $k, child-note: $o) isa alh-note-threading; $o isa scilit-observation; (observation: $o, model: $m) isa kefed-observed-via;  (model: $m, variable: $v) isa kefed-element; $v isa kefed-variable, has name $nm, has kefed-variable-role $r; fetch { "f_id": $v.id, "f_name": $nm, "f_role": $r };'
+target_insert: insert $v isa kefed-variable, has id $f_id, has name $f_name, has kefed-variable-role $f_role, has created-at 2026-06-26T12:00:00;
+skolem_keys:
+- f_id

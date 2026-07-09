@@ -1,0 +1,11 @@
+name: 20_inv_impact
+description: 20 inv impact
+depends_on:
+- 01_investigation
+- 19_citation_impacts
+idempotent: true
+source_match: 'match $i isa scilit-investigation, has id "scinv-3e0aa419866c"; (parent-note: $i, child-note: $im) isa alh-note-threading; $im isa scilit-citation-impact; fetch { "f_iid": $i.id, "f_mid": $im.id };'
+target_insert: 'match $i isa scilit-investigation, has id $f_iid; $im isa scilit-citation-impact, has id $f_mid; insert (investigation: $i, impact: $im) isa scilit-investigation-impact;'
+skolem_keys:
+- f_iid
+- f_mid

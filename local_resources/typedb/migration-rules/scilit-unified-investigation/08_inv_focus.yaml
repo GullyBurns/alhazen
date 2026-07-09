@@ -1,0 +1,11 @@
+name: 08_inv_focus
+description: 08 inv focus
+depends_on:
+- 01_investigation
+- 02_papers_base
+idempotent: true
+source_match: 'match $i isa scilit-investigation, has id "scinv-3e0aa419866c"; (note: $i, subject: $p) isa alh-aboutness; $p isa scilit-paper; fetch { "f_iid": $i.id, "f_pid": $p.id };'
+target_insert: 'match $i isa scilit-investigation, has id $f_iid; $p isa scilit-paper, has id $f_pid; insert (investigation: $i, focal-paper: $p) isa scilit-investigation-focus;'
+skolem_keys:
+- f_iid
+- f_pid

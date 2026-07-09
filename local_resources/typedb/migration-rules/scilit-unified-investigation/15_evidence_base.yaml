@@ -1,0 +1,8 @@
+name: 15_evidence_base
+description: 15 evidence base
+depends_on: []
+idempotent: true
+source_match: 'match $i isa scilit-investigation, has id "scinv-3e0aa419866c"; (parent-note: $i, child-note: $cl) isa alh-note-threading; $cl isa scilit-claim; (parent-note: $cl, child-note: $e) isa alh-note-threading; $e isa scilit-evidence;  fetch { "f_id": $e.id };'
+target_insert: insert $e isa scilit-evidence, has id $f_id, has confidence 0.5, has created-at 2026-06-26T12:00:00;
+skolem_keys:
+- f_id

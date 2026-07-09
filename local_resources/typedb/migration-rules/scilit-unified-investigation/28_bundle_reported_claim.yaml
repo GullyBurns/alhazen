@@ -1,0 +1,11 @@
+name: 28_bundle_reported_claim
+description: 28 bundle reported claim
+depends_on:
+- 24_bundles
+- 27_reported_claims
+idempotent: true
+source_match: 'match $cc isa scilit-corpus, has id "collection-b329eae9911b"; $kp isa scilit-paper; (collection: $cc, member: $kp) isa alh-collection-membership; $k isa scilit-investigation, has scilit-investigation-type "deep-dive"; not { $k has id "scinv-3e0aa419866c"; }; (note: $k, subject: $kp) isa alh-aboutness;  (parent-note: $k, child-note: $cl) isa alh-note-threading; $cl isa scilit-claim; fetch { "f_kid": $k.id, "f_cid": $cl.id };'
+target_insert: 'match $b isa scilit-paper-sensemaking, has id $f_kid; $cl isa scilit-reported-claim, has id $f_cid; insert (sensemaking: $b, reported-claim: $cl) isa scilit-sensemaking-reported-claim;'
+skolem_keys:
+- f_kid
+- f_cid

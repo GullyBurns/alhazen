@@ -1,0 +1,11 @@
+name: 18_claim_evidence
+description: 18 claim evidence
+depends_on:
+- 13_synthesized_claims
+- 15_evidence_base
+idempotent: true
+source_match: 'match $i isa scilit-investigation, has id "scinv-3e0aa419866c"; (parent-note: $i, child-note: $cl) isa alh-note-threading; $cl isa scilit-claim; (parent-note: $cl, child-note: $e) isa alh-note-threading; $e isa scilit-evidence;  fetch { "f_cid": $cl.id, "f_eid": $e.id };'
+target_insert: 'match $cl isa scilit-synthesized-claim, has id $f_cid; $e isa scilit-evidence, has id $f_eid; insert (synthesized-claim: $cl, evidence: $e) isa scilit-claim-evidence;'
+skolem_keys:
+- f_cid
+- f_eid
