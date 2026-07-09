@@ -338,7 +338,7 @@
         --arg root "{{ openclaw_home }}/workspace" \
         --arg typedb_host "localhost" \
         --arg typedb_port "1729" \
-        --arg typedb_db "alhazen_notebook" \
+        --arg typedb_db "alh_core" \
         '. + {($name): {"env": {"ALHAZEN_PROJECT_ROOT": $root, "TYPEDB_HOST": $typedb_host, "TYPEDB_PORT": $typedb_port, "TYPEDB_DATABASE": $typedb_db}}}')
     done
     jq --argjson entries "$patch" '.skills.entries = $entries' \
@@ -421,6 +421,6 @@
     PATH: "{{ macos_path }}"
     TYPEDB_HOST: "localhost"
     TYPEDB_PORT: "1729"
-    TYPEDB_DATABASE: "alhazen_notebook"
+    TYPEDB_DATABASE: "alh_core"
     ALHAZEN_PROJECT_ROOT: "{{ repo_dir }}"
   ignore_errors: true

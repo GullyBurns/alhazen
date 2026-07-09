@@ -25,7 +25,7 @@ from .typedb_client import TypeDBClient
 # Configuration from environment
 TYPEDB_HOST = os.getenv("TYPEDB_HOST", "localhost")
 TYPEDB_PORT = int(os.getenv("TYPEDB_PORT", "1729"))
-TYPEDB_DATABASE = os.getenv("TYPEDB_DATABASE", "alhazen")
+TYPEDB_DATABASE = os.getenv("TYPEDB_DATABASE", "alh_core")
 TYPEDB_USERNAME = os.getenv("TYPEDB_USERNAME", "admin")
 TYPEDB_PASSWORD = os.getenv("TYPEDB_PASSWORD", "password")
 SEARXNG_URL = os.getenv("SEARXNG_URL", "")

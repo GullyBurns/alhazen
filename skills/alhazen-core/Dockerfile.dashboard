@@ -53,7 +53,8 @@ ENV PROJECT_ROOT=/app
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV TYPEDB_HOST=typedb
 ENV TYPEDB_PORT=1729
-ENV TYPEDB_DATABASE=alhazen_notebook
+# No baked TYPEDB_DATABASE: dashboard libs set the per-skill DB themselves, or
+# delegate to the gateway (which uses each skill's per-repo default).
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 

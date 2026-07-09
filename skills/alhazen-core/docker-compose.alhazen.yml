@@ -43,7 +43,7 @@ services:
     environment:
       - TYPEDB_HOST=${TYPEDB_HOST:-typedb}
       - TYPEDB_PORT=${TYPEDB_PORT:-1729}
-      - TYPEDB_DATABASE=${TYPEDB_DATABASE:-alhazen_notebook}
+      - TYPEDB_DATABASE=${TYPEDB_DATABASE:-alh_core}
       - PROJECT_ROOT=/app
     extra_hosts:
       - "host.docker.internal:host-gateway"

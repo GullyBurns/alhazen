@@ -12,7 +12,7 @@ Run from the worktree root with the project venv:
 import argparse, os, sys
 from typedb.driver import Credentials, DriverOptions, TransactionType, TypeDB
 
-DB = os.getenv("TYPEDB_DATABASE", "alhazen_notebook")
+DB = os.getenv("TYPEDB_DATABASE", "alh_core")
 HOST = os.getenv("TYPEDB_HOST", "localhost"); PORT = os.getenv("TYPEDB_PORT", "1729")
 USER = os.getenv("TYPEDB_USERNAME", "admin"); PW = os.getenv("TYPEDB_PASSWORD", "password")
 

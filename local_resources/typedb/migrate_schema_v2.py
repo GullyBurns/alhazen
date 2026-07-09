@@ -52,7 +52,7 @@ except ImportError:
 # Configuration
 TYPEDB_HOST = os.getenv("TYPEDB_HOST", "localhost")
 TYPEDB_PORT = int(os.getenv("TYPEDB_PORT", "1729"))
-TYPEDB_DATABASE = os.getenv("TYPEDB_DATABASE", "alhazen_notebook")
+TYPEDB_DATABASE = os.getenv("TYPEDB_DATABASE", "alh_core")
 
 # Path to schema files (relative to project root)
 PROJECT_ROOT = Path(__file__).parent.parent.parent

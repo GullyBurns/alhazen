@@ -38,7 +38,7 @@ services:
     environment:
       - TYPEDB_HOST=typedb
       - TYPEDB_PORT=1729
-      - TYPEDB_DATABASE=alhazen_notebook
+      - TYPEDB_DATABASE=alh_core
       - MCP_PORT=3000
     ports:
       - "127.0.0.1:3000:3000"
@@ -62,7 +62,7 @@ services:
     environment:
       - TYPEDB_HOST=typedb
       - TYPEDB_PORT=1729
-      - TYPEDB_DATABASE=alhazen_notebook
+      - TYPEDB_DATABASE=alh_core
     entrypoint: ["/bin/bash", "-c"]
     command:
       - |

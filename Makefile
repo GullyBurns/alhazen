@@ -252,7 +252,7 @@ db-init: ## Create database and load schemas
 		SCHEMAS="$$SCHEMAS $$schema"; \
 	done; \
 	SCHEMAS="$$SCHEMAS $$SCHEMAS_LATE"; \
-	uv run python scripts/db_init.py $$SCHEMAS
+	uv run python scripts/db_init.py --database $(TYPEDB_DATABASE) $$SCHEMAS
 	@echo "$(GREEN)✓ Database initialized$(NC)"
 
 .PHONY: qdrant-start

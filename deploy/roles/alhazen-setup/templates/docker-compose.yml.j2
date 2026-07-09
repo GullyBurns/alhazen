@@ -138,7 +138,7 @@ services:
     environment:
       - TYPEDB_HOST=typedb
       - TYPEDB_PORT=1729
-      - TYPEDB_DATABASE=alhazen_notebook
+      - TYPEDB_DATABASE=alh_core
     entrypoint: ["/bin/bash", "-c"]
     command:
       - |
@@ -159,7 +159,7 @@ services:
     environment:
       - TYPEDB_HOST=typedb
       - TYPEDB_PORT=1729
-      - TYPEDB_DATABASE=alhazen_notebook
+      - TYPEDB_DATABASE=alh_core
       - MCP_PORT=3000
     depends_on:
       typedb:
@@ -186,7 +186,7 @@ services:
     environment:
       - TYPEDB_HOST={{ 'alhazen-typedb' if target_type == 'macmini' else 'typedb' }}
       - TYPEDB_PORT=1729
-      - TYPEDB_DATABASE=alhazen_notebook
+      - TYPEDB_DATABASE=alh_core
 {% if target_type != 'macmini' %}
     depends_on:
       - typedb

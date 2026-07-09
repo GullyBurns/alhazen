@@ -22,7 +22,7 @@ Commands:
 Environment:
     TYPEDB_HOST         TypeDB server host (default: localhost)
     TYPEDB_PORT         TypeDB server port (default: 1729)
-    TYPEDB_DATABASE     Database name (default: alhazen_notebook)
+    TYPEDB_DATABASE     Database name (default: alh_core)
     ALHAZEN_PROJECT_ROOT  Project root (default: auto-detected)
 """
 
@@ -43,7 +43,7 @@ if str(_src_dir) not in sys.path:
 # Configuration
 TYPEDB_HOST = os.getenv("TYPEDB_HOST", "localhost")
 TYPEDB_PORT = int(os.getenv("TYPEDB_PORT", "1729"))
-TYPEDB_DATABASE = os.getenv("TYPEDB_DATABASE", "alhazen_notebook")
+TYPEDB_DATABASE = os.getenv("TYPEDB_DATABASE", "alh_core")
 TYPEDB_USERNAME = os.getenv("TYPEDB_USERNAME", "admin")
 TYPEDB_PASSWORD = os.getenv("TYPEDB_PASSWORD", "password")
 

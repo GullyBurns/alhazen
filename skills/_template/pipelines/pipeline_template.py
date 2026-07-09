@@ -46,7 +46,7 @@ from typing import Optional
 # ── CONFIGURATION ─────────────────────────────────────────────────
 TYPEDB_HOST = os.environ.get("TYPEDB_HOST", "localhost")
 TYPEDB_PORT = int(os.environ.get("TYPEDB_PORT", 1729))
-TYPEDB_DATABASE = os.environ.get("TYPEDB_DATABASE", "alhazen_notebook")
+TYPEDB_DATABASE = os.environ.get("TYPEDB_DATABASE", "alh_core")
 TYPEDB_PASSWORD = os.environ.get("TYPEDB_PASSWORD", "password")
 
 # Keyword -> dimension field mapping for score table parsing.

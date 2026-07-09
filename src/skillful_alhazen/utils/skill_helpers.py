@@ -69,7 +69,7 @@ def check_infrastructure(
             from typedb.driver import Credentials, DriverOptions, TransactionType, TypeDB
             host = os.environ.get("TYPEDB_HOST", "localhost")
             port = os.environ.get("TYPEDB_PORT", "1729")
-            db   = os.environ.get("TYPEDB_DATABASE", "alhazen_notebook")
+            db   = os.environ.get("TYPEDB_DATABASE", "alh_core")
             user = os.environ.get("TYPEDB_USERNAME", "admin")
             pwd  = os.environ.get("TYPEDB_PASSWORD", "password")
             driver = TypeDB.driver(

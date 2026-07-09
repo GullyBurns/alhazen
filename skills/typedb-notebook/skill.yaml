@@ -33,6 +33,6 @@ operations:
 typedb:
   container_name: alhazen-typedb
   default_port: 1729
-  default_database: alhazen_notebook
+  default_database: alh_core
   schema_path: local_resources/typedb/alhazen_notebook.tql
   namespaces_path: local_resources/typedb/namespaces/

@@ -9,12 +9,12 @@ with Makefile targets and docker-compose init services.
 Usage:
     uv run python scripts/db_init.py [--wait-only]
     uv run python scripts/db_init.py schema1.tql schema2.tql ...
-    uv run python scripts/db_init.py --host localhost --port 1729 --database alhazen_notebook
+    uv run python scripts/db_init.py --host localhost --port 1729 --database alh_core
 
 Environment:
     TYPEDB_HOST       TypeDB server host (default: localhost)
     TYPEDB_PORT       TypeDB server port (default: 1729)
-    TYPEDB_DATABASE   Database name (default: alhazen_notebook)
+    TYPEDB_DATABASE   Database name (default: alh_core)
     TYPEDB_USERNAME   TypeDB username (default: admin)
     TYPEDB_PASSWORD   TypeDB password (default: password)
 """
@@ -60,7 +60,7 @@ def main():
     parser = argparse.ArgumentParser(description="Initialize TypeDB 3.x database")
     parser.add_argument("--host", default=os.getenv("TYPEDB_HOST", "localhost"))
     parser.add_argument("--port", type=int, default=int(os.getenv("TYPEDB_PORT", "1729")))
-    parser.add_argument("--database", default=os.getenv("TYPEDB_DATABASE", "alhazen_notebook"))
+    parser.add_argument("--database", default=os.getenv("TYPEDB_DATABASE", "alh_core"))
     parser.add_argument("--username", default=os.getenv("TYPEDB_USERNAME", "admin"))
     parser.add_argument("--password", default=os.getenv("TYPEDB_PASSWORD", "password"))
     parser.add_argument("--timeout", type=int, default=60,

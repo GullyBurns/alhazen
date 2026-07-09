@@ -51,7 +51,8 @@ ENV GATEWAY_HOST=0.0.0.0
 ENV GATEWAY_PORT=8900
 ENV TYPEDB_HOST=typedb
 ENV TYPEDB_PORT=1729
-ENV TYPEDB_DATABASE=alhazen_notebook
+# No baked TYPEDB_DATABASE: each skill the gateway spawns uses its own per-repo
+# default (alh_core / alh_deep_research / alh_personal) via os.getenv fallback.
 
 EXPOSE 8900
 

@@ -13,7 +13,7 @@ Usage:
 Environment:
     TYPEDB_HOST       TypeDB server host (default: localhost)
     TYPEDB_PORT       TypeDB server port (default: 1729)
-    TYPEDB_DATABASE   Database name (default: alhazen_notebook)
+    TYPEDB_DATABASE   Database name (default: alh_core)
     TYPEDB_USERNAME   TypeDB username (default: admin)
     TYPEDB_PASSWORD   TypeDB password (default: password)
 """
@@ -31,7 +31,7 @@ def get_connection_params(args):
     return {
         "host": args.host or os.environ.get("TYPEDB_HOST", "localhost"),
         "port": int(args.port or os.environ.get("TYPEDB_PORT", "1729")),
-        "database": args.database or os.environ.get("TYPEDB_DATABASE", "alhazen_notebook"),
+        "database": args.database or os.environ.get("TYPEDB_DATABASE", "alh_core"),
         "username": args.username or os.environ.get("TYPEDB_USERNAME", "admin"),
         "password": args.password or os.environ.get("TYPEDB_PASSWORD", "password"),
     }
@@ -309,7 +309,7 @@ def main():
     parser.add_argument("--port", default=None,
                         help="TypeDB port (default: $TYPEDB_PORT or 1729)")
     parser.add_argument("--database", default=None,
-                        help="Database name (default: $TYPEDB_DATABASE or alhazen_notebook)")
+                        help="Database name (default: $TYPEDB_DATABASE or alh_core)")
     parser.add_argument("--username", default=None,
                         help="TypeDB username (default: $TYPEDB_USERNAME or admin)")
     parser.add_argument("--password", default=None,
