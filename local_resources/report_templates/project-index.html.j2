@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ project.title | default("Project") }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>{{ inline_css }}</style>
+  <style>
+    .breadcrumb {
+      font-family: var(--mono); font-size: 0.78rem; color: var(--fg-faint);
+      margin-bottom: 1.5rem;
+    }
+    .breadcrumb a { color: var(--fg-faint); border-bottom: 1px solid var(--border-dim); }
+    .breadcrumb a:hover { color: var(--teal); }
+    .report-list { margin-top: 1.5rem; }
+    .report-item {
+      display: block; padding: 1.25rem; margin-bottom: 1rem;
+      background: var(--bg-raised); border: 1px solid var(--border);
+      border-radius: var(--radius); text-decoration: none; color: inherit;
+      transition: border-color 0.2s;
+    }
+    .report-item:hover { border-color: var(--teal); }
+    .report-item h3 { font-family: var(--serif); color: var(--fg); margin-bottom: 0.35rem; font-size: 1.05rem; }
+    .report-item-meta {
+      font-family: var(--mono); font-size: 0.75rem; color: var(--fg-faint);
+      display: flex; gap: 1rem; flex-wrap: wrap;
+    }
+    .project-desc { color: var(--fg-dim); font-size: 0.92rem; max-width: 40rem; }
+  </style>
+</head>
+<body>
+  <div class="report-container">
+    <nav class="breadcrumb">
+      <a href="../">All Projects</a> / {{ project.title | default("Project") }}
+    </nav>
+
+    <header class="report-header">
+      <h1>{{ project.title | default("Project") }}</h1>
+      <div class="report-meta">
+        <span>{{ project.reports | length }} report{{ "s" if project.reports | length != 1 }}</span>
+        <span>{{ generated_at }}</span>
+      </div>
+    </header>
+
+    {% if project.description %}
+    <p class="project-desc">{{ project.description }}</p>
+    {% endif %}
+
+    <div class="report-list">
+      {% for report in project.reports %}
+      <a class="report-item" href="{{ report.slug }}/">
+        <h3>{{ report.title }}</h3>
+        <div class="report-item-meta">
+          <span>{{ report.skill | default("") }}</span>
+          {% if report.exported_at %}<span>{{ report.exported_at[:10] }}</span>{% endif %}
+          <span>{{ report.access | default("encrypted") }}</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    <footer class="report-footer">
+      <a href="../" style="color: var(--fg-faint);">Back to all projects</a>
+    </footer>
+  </div>
+</body>
+</html>

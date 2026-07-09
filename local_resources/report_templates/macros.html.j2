@@ -1,0 +1,59 @@
+{# Section Renderer Macros — imported by base and child templates #}
+
+{% macro render_section(section, index) %}
+<div class="report-section" id="{{ section.id | default('section-' ~ index) }}">
+  <h2>{{ section.title }}</h2>
+
+  {% if section.type == "markdown" %}
+    {{ section.content_html | default("") }}
+
+  {% elif section.type == "data-table" %}
+    <table>
+      <thead>
+        <tr>
+          {% for col in section.columns %}
+          <th>{{ col }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in section.rows %}
+        <tr>
+          {% for cell in row %}
+          <td>
+            {%- if cell is string and cell in ["PASS", "GOOD", "STRONG", "YES"] -%}
+              <span class="status-pass">{{ cell }}</span>
+            {%- elif cell is string and cell in ["PARTIAL", "GAP", "MODERATE"] -%}
+              <span class="status-partial">{{ cell }}</span>
+            {%- elif cell is string and cell in ["FAIL", "WEAK", "NO", "MISSING"] -%}
+              <span class="status-fail">{{ cell }}</span>
+            {%- else -%}
+              {{ cell }}
+            {%- endif -%}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  {% elif section.type == "quote-block" %}
+    <blockquote>
+      {{ section.content_html | default(section.content | default("") | e) }}
+      {% if section.attribution %}
+      <div class="quote-attribution">-- {{ section.attribution }}</div>
+      {% endif %}
+    </blockquote>
+
+  {% elif section.type == "image" %}
+    <figure>
+      <img src="{{ section.src }}" alt="{{ section.alt | default(section.title) }}" style="max-width: 100%; border-radius: var(--radius);">
+      {% if section.caption %}<figcaption style="color: var(--fg-faint); font-size: 0.85rem; margin-top: var(--gap-sm);">{{ section.caption }}</figcaption>{% endif %}
+    </figure>
+
+  {% else %}
+    {# Fallback: render content as markdown HTML #}
+    {{ section.content_html | default(section.content | default("") | e) }}
+  {% endif %}
+</div>
+{% endmacro %}
