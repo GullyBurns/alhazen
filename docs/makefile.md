@@ -10,7 +10,10 @@ make build-skills     # Resolve skills registry → local_skills/ + wire .claude
 make build-db         # Start TypeDB + load all schemas
 ```
 
-**Phase 2 — Deploy (production OpenClaw):**
+**Phase 2 — Deploy (production OpenClaw) — ⚠️ DEPRECATED:**
+> OpenClaw deployment is no longer supported — the project pivoted to a full Claude-based
+> implementation (run with Claude Code) to keep the approach undiluted and avoid the token-cost of a
+> persistent service through the API. These targets remain but are unmaintained.
 ```bash
 make deploy-macmini   # Deploy to Mac Mini (Docker Desktop)
 make deploy-vps       # Deploy to VPS (Podman rootless)
@@ -132,6 +135,6 @@ make db-start         # Start TypeDB container only
 make db-init          # (Re-)load all schemas into running TypeDB
 make skills-update    # Force re-clone all external skills
 make status           # Show TypeDB + skills deployment status
-make deploy-macmini   # Phase 2: deploy to Mac Mini (Docker Desktop)
-make deploy-vps       # Phase 2: deploy to VPS (Podman rootless)
+make deploy-macmini   # Phase 2 (DEPRECATED): deploy to Mac Mini (Docker Desktop)
+make deploy-vps       # Phase 2 (DEPRECATED): deploy to VPS (Podman rootless)
 ```

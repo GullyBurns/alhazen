@@ -1,5 +1,6 @@
 _proc/
 .worktrees/
+.claude/worktrees/
 .superpowers/
 .codex/
 .next/
@@ -191,3 +192,9 @@ exports/
 # Local skills registry (private/proprietary skills)
 skills-registry-local.yaml.worktrees/
 skills-registry-local.yaml
+
+# biorodeo-workbench — PRIVATE / commercial. This repo is PUBLIC.
+# Never commit any biorodeo design docs, specs, or notes here.
+docs/private/
+**/*biorodeo*-design.md
+**/*biorodeo*-spec.md

@@ -1,5 +1,12 @@
 # Deployment: Build -> Deploy Workflow
 
+> **⚠️ DEPRECATED — the OpenClaw deploy phase (Phase 2) is no longer supported.** The project has
+> **pivoted to a full Claude-based implementation**: run interactively with Claude Code
+> (`make build && claude`). This keeps the curation approach undiluted and avoids the token-cost
+> overhead of running a persistent OpenClaw service through the API. Phase 1 (Build) is the
+> supported path; the Phase 2 material below and the `make deploy-*` targets are retained for
+> reference only and are unmaintained.
+
 **(Phase 1 — Build)** `make build` — local dev with Claude Code. Python deps + skills resolved + TypeDB ready.
 
 **(Phase 2 — Deploy)** `make deploy-macmini` or `make deploy-vps` — production OpenClaw.
