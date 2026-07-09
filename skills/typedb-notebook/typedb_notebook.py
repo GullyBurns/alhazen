@@ -345,13 +345,28 @@ def get_schema_model():
 # Per-skill probe entity type: a representative type whose presence in a database means
 # that skill's dashboard is relevant there. Used by scan-databases for the hub DB switcher.
 # (Data query only — never a variable-free schema match, which panics TypeDB 3.8.)
+# A probe may be a single type or a list of types; for a list the best status
+# across the types wins (data > schema > absent) — used by chief-of-staff,
+# which has no namespace of its own and is relevant wherever any of its five
+# team-member namespaces exists.
 DASHBOARD_PROBES = {
     "agentic-memory": "nbmem-memory-claim-note",
     "scientific-literature": "scilit-paper",
     "tech-recon": "trec-system",
     "dismech-notebook": "dm-disease",
-    "coach": "coach-metric-series",
-    "jobhunt": "jhunt-position",
+    "coach": ["coach-daily-metric", "coach-workout", "coach-metric-series"],
+    "career": "career-opportunity",
+    "analyst": "anlst-mission",
+    "advisor": "advsr-decision",
+    "scribe": "scribe-piece",
+    "ops": "ops-brief-spec",
+    "chief-of-staff": [
+        "ops-brief-spec",
+        "advsr-decision",
+        "anlst-mission",
+        "scribe-piece",
+        "career-opportunity",
+    ],
 }
 
 
@@ -366,15 +381,23 @@ def scan_databases(args):
         for name in names:
             skills = {}
             for slug, probe in DASHBOARD_PROBES.items():
-                status = "absent"
-                try:
-                    with driver.transaction(name, TransactionType.READ) as tx:
-                        rows = list(tx.query(
-                            f'match $x isa {probe}; limit 1; select $x;').resolve())
-                        status = "data" if rows else "schema"
-                except Exception:
+                probes = probe if isinstance(probe, list) else [probe]
+                best = "absent"
+                for p in probes:
                     status = "absent"
-                skills[slug] = status
+                    try:
+                        with driver.transaction(name, TransactionType.READ) as tx:
+                            rows = list(tx.query(
+                                f'match $x isa {p}; limit 1; select $x;').resolve())
+                            status = "data" if rows else "schema"
+                    except Exception:
+                        status = "absent"
+                    if status == "data":
+                        best = "data"
+                        break
+                    if status == "schema" and best == "absent":
+                        best = "schema"
+                skills[slug] = best
             out.append({"name": name, "skills": skills})
     print(json.dumps({"success": True, "databases": out}, indent=2))
 
