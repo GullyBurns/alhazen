@@ -1,0 +1,11 @@
+name: 30_bundle_reported_gap
+description: 30 bundle reported gap
+depends_on:
+- 24_bundles
+- 29_reported_gaps
+idempotent: true
+source_match: 'match $cc isa scilit-corpus, has id "collection-b329eae9911b"; $kp isa scilit-paper; (collection: $cc, member: $kp) isa alh-collection-membership; $k isa scilit-investigation, has scilit-investigation-type "deep-dive"; not { $k has id "scinv-3e0aa419866c"; }; (note: $k, subject: $kp) isa alh-aboutness;  (parent-note: $k, child-note: $g) isa alh-note-threading; $g isa scilit-gap; fetch { "f_kid": $k.id, "f_gid": $g.id };'
+target_insert: 'match $b isa scilit-paper-sensemaking, has id $f_kid; $g isa scilit-reported-gap, has id $f_gid; insert (sensemaking: $b, reported-gap: $g) isa scilit-sensemaking-reported-gap;'
+skolem_keys:
+- f_kid
+- f_gid

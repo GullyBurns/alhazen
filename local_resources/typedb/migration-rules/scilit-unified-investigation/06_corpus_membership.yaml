@@ -1,0 +1,11 @@
+name: 06_corpus_membership
+description: 06 corpus membership
+depends_on:
+- 05_corpus
+- 02_papers_base
+idempotent: true
+source_match: 'match $c isa scilit-corpus, has id "collection-b329eae9911b"; (collection: $c, member: $p) isa alh-collection-membership; $p isa scilit-paper; fetch { "f_cid": $c.id, "f_pid": $p.id };'
+target_insert: 'match $c isa scilit-corpus, has id $f_cid; $p isa scilit-paper, has id $f_pid; insert (collection: $c, member: $p) isa alh-collection-membership;'
+skolem_keys:
+- f_cid
+- f_pid

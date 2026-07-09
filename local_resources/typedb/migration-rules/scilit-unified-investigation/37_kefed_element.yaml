@@ -1,0 +1,11 @@
+name: 37_kefed_element
+description: 37 kefed element
+depends_on:
+- 33_kefed_models
+- 35_kefed_variables
+idempotent: true
+source_match: 'match $cc isa scilit-corpus, has id "collection-b329eae9911b"; $kp isa scilit-paper; (collection: $cc, member: $kp) isa alh-collection-membership; $k isa scilit-investigation, has scilit-investigation-type "deep-dive"; not { $k has id "scinv-3e0aa419866c"; }; (note: $k, subject: $kp) isa alh-aboutness; (parent-note: $k, child-note: $o) isa alh-note-threading; $o isa scilit-observation; (observation: $o, model: $m) isa kefed-observed-via;  (model: $m, variable: $v) isa kefed-element; fetch { "f_mid": $m.id, "f_vid": $v.id };'
+target_insert: 'match $m isa kefed-model, has id $f_mid; $v isa kefed-variable, has id $f_vid; insert (model: $m, variable: $v) isa kefed-element;'
+skolem_keys:
+- f_mid
+- f_vid

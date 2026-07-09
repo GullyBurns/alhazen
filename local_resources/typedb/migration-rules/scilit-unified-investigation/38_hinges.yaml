@@ -1,0 +1,11 @@
+name: 38_hinges
+description: 38 hinges
+depends_on:
+- 27_reported_claims
+- 02c_papers_hinge
+idempotent: true
+source_match: 'match $cc isa scilit-corpus, has id "collection-b329eae9911b"; $kp isa scilit-paper; (collection: $cc, member: $kp) isa alh-collection-membership; $k isa scilit-investigation, has scilit-investigation-type "deep-dive"; not { $k has id "scinv-3e0aa419866c"; }; (note: $k, subject: $kp) isa alh-aboutness;  (parent-note: $k, child-note: $cl) isa alh-note-threading; $cl isa scilit-claim; (hinging-claim: $cl, hinged-to: $tt) isa scilit-hinge; $tt has id $tid; fetch { "f_cid": $cl.id, "f_tid": $tid };'
+target_insert: 'match $cl isa scilit-reported-claim, has id $f_cid; $tt isa scilit-paper, has id $f_tid; insert (hinging-claim: $cl, hinged-to: $tt) isa scilit-hinge;'
+skolem_keys:
+- f_cid
+- f_tid

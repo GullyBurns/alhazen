@@ -1,0 +1,8 @@
+name: 01_investigation
+description: 01 investigation
+depends_on: []
+idempotent: true
+source_match: 'match $i isa scilit-investigation, has id "scinv-3e0aa419866c", has scilit-investigation-status $st, has scilit-investigation-question $q, has scilit-investigation-type $ty, has name $nm, has content $bd; fetch { "f_id": $i.id, "f_name": $nm, "f_content": $bd, "f_status": $st, "f_question": $q, "f_type": $ty };'
+target_insert: insert $i isa scilit-investigation, has id $f_id, has name $f_name, has content $f_content, has scilit-investigation-status $f_status, has scilit-investigation-question $f_question, has scilit-investigation-type $f_type, has scilit-iteration-number 1, has created-at 2026-06-26T12:00:00;
+skolem_keys:
+- f_id

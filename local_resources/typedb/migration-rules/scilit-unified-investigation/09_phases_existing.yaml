@@ -1,0 +1,8 @@
+name: 09_phases_existing
+description: 09 phases existing
+depends_on: []
+idempotent: true
+source_match: 'match $i isa scilit-investigation, has id "scinv-3e0aa419866c"; (parent-note: $i, child-note: $ph) isa alh-note-threading; $ph isa scilit-investigation-phase, has scilit-phase $phase, has name $nm, has content $c; fetch { "f_id": $ph.id, "f_phase": $phase, "f_name": $nm, "f_content": $c };'
+target_insert: insert $ph isa scilit-investigation-phase, has id $f_id, has scilit-phase $f_phase, has name $f_name, has content $f_content, has scilit-iteration-number 1, has created-at 2026-06-26T12:00:00;
+skolem_keys:
+- f_id
