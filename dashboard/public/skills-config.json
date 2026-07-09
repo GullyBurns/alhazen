@@ -45,6 +45,7 @@
     "color": "teal"
   },
   {
+<<<<<<< Updated upstream
     "slug": "career",
     "enabled": true,
     "name": "Career",
@@ -97,5 +98,14 @@
     "url_path": "/chief",
     "icon": "LayoutDashboard",
     "color": "teal"
+=======
+    "slug": "jobhunt",
+    "enabled": true,
+    "name": "Job Hunt Dashboard",
+    "description": "Pipeline kanban, skills matrix, learning plan, and candidate triage.",
+    "url_path": "/jobhunt",
+    "icon": "Briefcase",
+    "color": "blue"
+>>>>>>> Stashed changes
   }
 ]

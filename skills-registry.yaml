@@ -68,10 +68,6 @@ skills:
   git: https://github.com/sciknow-io/alhazen-skill-deep-research
   ref: main
   subdir: skills/literature-trends
-- name: mythras-gm
-  git: https://github.com/fourth-wall-gaming/mythras-gm
-  ref: main
-  subdir: skills/mythras-gm
 - name: coach
   git: https://github.com/sciknow-io/alhazen-skill-personal-assistant
   ref: main

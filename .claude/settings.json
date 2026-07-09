@@ -1,6 +1,20 @@
 {
   "hooks": {
     "SessionStart": [
+<<<<<<< Updated upstream
+=======
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "REPO=$(git rev-parse --show-toplevel 2>/dev/null) && CORE=\"$REPO/local_skills/alhazen-core/alhazen_core.py\" && [ -f \"$CORE\" ] && cd \"$REPO\" && unset VIRTUAL_ENV && uv run --project \"$REPO/local_skills/alhazen-core\" python \"$CORE\" init",
+            "timeout": 90000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+>>>>>>> Stashed changes
       {
         "hooks": [
           {
