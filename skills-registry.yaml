@@ -53,6 +53,10 @@ skills:
     url_path: /tech-recon
     icon: Search
     color: cyan
+- name: dismech
+  git: https://github.com/sciknow-io/alhazen-skill-deep-research
+  ref: main
+  subdir: skills/dismech
 - name: dismech-notebook
   git: https://github.com/sciknow-io/alhazen-skill-deep-research
   ref: main
@@ -160,6 +164,7 @@ schema_map:
   - career
   - coach
   - curation-skill-builder
+  - dismech
   - dismech-notebook
   - ops
   - scientific-literature

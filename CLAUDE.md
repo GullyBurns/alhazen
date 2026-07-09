@@ -65,11 +65,11 @@ Data is split across **one TypeDB database per repo** (the old single `alhazen_n
 | Database | Repo | Skills |
 |----------|------|--------|
 | `alh_core` | skillful-alhazen | alhazen-core, typedb-notebook, agentic-memory, curation-skill-builder, agent-os, web-search |
-| `alh_deep_research` | `sciknow-io/alhazen-skill-deep-research` | scientific-literature (schema base), literature-trends, tech-recon, dismech-notebook |
+| `alh_deep_research` | `sciknow-io/alhazen-skill-deep-research` | scientific-literature (schema base), literature-trends, tech-recon, dismech-notebook; **also hosts `dismech`** (which targets the separate `dismech` DB below) |
 | `alh_personal` | `sciknow-io/alhazen-skill-personal-assistant` | jobhunt, coach |
 | `alh_mythras` | `fourth-wall-gaming/mythras-gm` | mythras-gm |
 | `alh_biorodeo` | alhazen-skill-biorodeo | biorodeo-workbench |
-| `dismech` | alhazen-skill-dismech | dismech (Monarch ingest source; GLAV source for dismech-notebook) |
+| `dismech` | `sciknow-io/alhazen-skill-deep-research` | dismech (Monarch ingest → `dismech` DB; **lives in the deep-research repo alongside `dismech-notebook`**, which GLAV-maps this DB into `alh_deep_research`). The old `alhazen-skill-dismech` repo is **deprecated** (retains only `dismech-workspace/` benchmarks). |
 
 Rules:
 - **Shared reference data** (`alh-vocabulary`, `alh-vocabulary-type`, `alh-tag`) is **replicated** into each DB so classification/tagging/vocab relations resolve locally.
@@ -176,6 +176,15 @@ git branch -d wt/<slug>                  # -D if intentionally discarding unmerg
 ```
 
 ## Critical Safety Rules
+
+### NEVER Commit Employer-Specific or Proprietary Language
+
+**Nothing that identifies a specific employer, internal system, product, codename, project, internal hostname/URL, or named individual may appear in any file that is committed to git or could be published to GitHub.** This applies to THIS repo (a publishable Claude Code marketplace) **and** every upstream external-skill repo. It covers code, comments, docstrings, schemas, docs, `README`/`SKILL`/`USAGE`, example content, test fixtures, commit messages, and PR titles/descriptions.
+
+1. **Skills are generic, publishable infrastructure — keep them domain-neutral.** Use neutral placeholders (`example-system`, `acme`, `https://example.com`) in any committed code, comment, or example.
+2. **Real, sensitive subjects belong ONLY in local data** — the local TypeDB databases and local files under `~/.claude/` and `~/.alhazen/`. Investigation/notebook *data* is not committed, so real names there are fine; **tracked repo files are not**.
+3. **Generated copies count as committed.** `dashboard/src/**`, `local_skills/**` symlink targets, and `.claude/` outputs all reach git indirectly — the same rule applies.
+4. **Scan every diff before commit/push (here or upstream).** Grep the staged diff for employer/system/product names and internal hostnames; replace with neutral placeholders or move the content into local data. If in doubt, leave it out.
 
 ### NEVER Chain Destructive Commands With make build-skills
 
