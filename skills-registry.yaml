@@ -87,7 +87,8 @@ skills:
   dashboard:
     enabled: true
     name: Career
-    description: "The career graph: people, collaborators, projects, and the opportunity pipeline."
+    description: 'The career graph: people, collaborators, projects, and the opportunity
+      pipeline.'
     url_path: /career
     icon: Briefcase
     color: blue
@@ -98,7 +99,8 @@ skills:
   dashboard:
     enabled: true
     name: Research Analyst
-    description: Decision-framed research missions with multi-thread consensus and the three-question gate.
+    description: Decision-framed research missions with multi-thread consensus and
+      the three-question gate.
     url_path: /analyst
     icon: Microscope
     color: cyan
@@ -109,7 +111,8 @@ skills:
   dashboard:
     enabled: true
     name: Board of Advisors
-    description: Strategic decisions debated by advisor personas, with bias checks and scenario stress-tests.
+    description: Strategic decisions debated by advisor personas, with bias checks
+      and scenario stress-tests.
     url_path: /advisor
     icon: Scale
     color: teal
@@ -120,7 +123,8 @@ skills:
   dashboard:
     enabled: true
     name: Scribe
-    description: "Writing in your voice: profiles, audience personas, and dimension-scored drafts."
+    description: 'Writing in your voice: profiles, audience personas, and dimension-scored
+      drafts.'
     url_path: /scribe
     icon: PenTool
     color: mint
@@ -142,26 +146,30 @@ skills:
   dashboard:
     enabled: true
     name: Chief of Staff
-    description: "Cross-skill daily agenda: what needs you today across the whole team."
+    description: 'Cross-skill daily agenda: what needs you today across the whole
+      team.'
     url_path: /chief
     icon: LayoutDashboard
     color: teal
 schema_map:
   load_order:
+  - advisor
   - agent-os
   - agentic-memory
+  - analyst
+  - career
   - coach
   - curation-skill-builder
   - dismech-notebook
-  - career
-  - analyst
-  - advisor
-  - scribe
   - ops
-  - mythras-gm
   - scientific-literature
+  - scribe
   - tech-recon
   namespaces:
+    advsr:
+      skill: advisor
+      schema: local_skills/advisor/schema.tql
+      depends_on: []
     aos:
       skill: agent-os
       schema: local_skills/agent-os/schema.tql
@@ -169,6 +177,14 @@ schema_map:
     nbmem:
       skill: agentic-memory
       schema: local_skills/agentic-memory/schema.tql
+      depends_on: []
+    anlst:
+      skill: analyst
+      schema: local_skills/analyst/schema.tql
+      depends_on: []
+    career:
+      skill: career
+      schema: local_skills/career/schema.tql
       depends_on: []
     coach:
       skill: coach
@@ -178,33 +194,17 @@ schema_map:
       skill: curation-skill-builder
       schema: local_skills/curation-skill-builder/schema.tql
       depends_on: []
-    career:
-      skill: career
-      schema: local_skills/career/schema.tql
-      depends_on: []
-    anlst:
-      skill: analyst
-      schema: local_skills/analyst/schema.tql
-      depends_on: []
-    advsr:
-      skill: advisor
-      schema: local_skills/advisor/schema.tql
-      depends_on: []
-    scribe:
-      skill: scribe
-      schema: local_skills/scribe/schema.tql
-      depends_on: []
     ops:
       skill: ops
       schema: local_skills/ops/schema.tql
       depends_on: []
-    myth:
-      skill: mythras-gm
-      schema: local_skills/mythras-gm/schema.tql
-      depends_on: []
     scilit:
       skill: scientific-literature
       schema: local_skills/scientific-literature/schema.tql
+      depends_on: []
+    scribe:
+      skill: scribe
+      schema: local_skills/scribe/schema.tql
       depends_on: []
     trec:
       skill: tech-recon
