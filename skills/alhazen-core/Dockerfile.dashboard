@@ -1,11 +1,18 @@
 # =============================================================================
 # Alhazen Dashboard — Lightweight base image for plugin users
 # =============================================================================
-# Builds a dashboard with just the hub page and TypeDB status.
-# Skill-specific pages are wired in later via `alhazen_core.py wire-dashboard`.
+# Builds a dashboard with just the hub page and TypeDB status. Skill-specific
+# pages are wired in later via `alhazen_core.py wire-dashboard`, then compiled by
+# `alhazen_core.py rebuild-dashboard` (which runs `next build` inside the container).
 #
-# Build context: this directory (skills/alhazen-core/)
+# Build context: this directory (skills/alhazen-core/).
 # The Dockerfile clones skillful-alhazen to get the dashboard source.
+#
+# IMPORTANT: node deps are installed in the FINAL stage, NOT copied across stages.
+# A previous cross-stage `COPY --from=deps /app/ ./` dropped npm's node_modules/.bin
+# symlinks (so the image had no `next` binary and `rebuild-dashboard` failed with
+# "next: not found"). Installing here keeps .bin intact. `--include=dev` is required
+# because `next build` needs typescript/tailwind/etc. (dev dependencies).
 # =============================================================================
 
 # Stage 1: Clone dashboard source from skillful-alhazen
@@ -14,38 +21,38 @@ ARG REPO=https://github.com/sciknow-io/skillful-alhazen.git
 ARG REF=main
 RUN git clone --depth=1 --branch $REF $REPO /src
 
-# Stage 2: Node.js — install deps only, NO build
-# Build happens later via `alhazen_core.py rebuild-dashboard` after skills are wired in.
-FROM node:20-slim AS deps
-WORKDIR /app
-COPY --from=dashboard-src /src/dashboard/package*.json ./
-RUN ELECTRON_SKIP_BINARY_DOWNLOAD=1 npm ci
-COPY --from=dashboard-src /src/dashboard/ ./
-
-# No skill dashboards baked in — all arrive via wire-dashboard + rebuild-dashboard
-RUN echo '[]' > public/skills-config.json
-RUN echo '{}' > public/namespace-config.json
-
-# Stage 3: Runtime (Node.js + Python + uv)
+# Stage 2: Runtime — Node.js + Python + uv; install node deps here (NO build yet —
+# the build happens via `rebuild-dashboard` after skills are wired in)
 FROM python:3.11-slim AS runner
 
-# Install Node.js and curl
+# Node.js + curl
 RUN apt-get update && \
     apt-get install -y curl && \
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
-# Install uv
+# uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:$PATH"
 
 WORKDIR /app
 
-# Copy source + node_modules (NOT a built .next — build happens after wiring)
-COPY --from=deps /app/ ./
+# Install node deps in this final stage so node_modules/.bin (incl. `next`) is
+# intact. --include=dev: `next build` (run later by rebuild-dashboard) needs the
+# dev toolchain. ELECTRON_SKIP_BINARY_DOWNLOAD: electron is a dev dep used only for
+# the desktop build — don't fetch its ~100MB binary here.
+COPY --from=dashboard-src /src/dashboard/package*.json ./
+RUN ELECTRON_SKIP_BINARY_DOWNLOAD=1 npm ci --include=dev
 
-# Create directories for skill wiring
+# Dashboard source. node_modules is gitignored in the clone, so this does not
+# clobber the install above.
+COPY --from=dashboard-src /src/dashboard/ ./
+
+# No skill dashboards baked in — all arrive via wire-dashboard + rebuild-dashboard
+RUN echo '[]' > public/skills-config.json && echo '{}' > public/namespace-config.json
+
+# Directory for skill wiring
 RUN mkdir -p .claude/skills
 
 # Environment
@@ -60,6 +67,6 @@ ENV HOSTNAME="0.0.0.0"
 
 EXPOSE 3000
 
-# Start with a placeholder that waits for rebuild-dashboard to produce .next/
-# After rebuild-dashboard runs, the container restarts with the built app.
+# Placeholder until rebuild-dashboard produces .next/, after which the container
+# restarts and serves the built app.
 CMD ["sh", "-c", "if [ -d .next ]; then npm start; else echo 'Dashboard not yet built. Run: alhazen_core.py rebuild-dashboard' && sleep infinity; fi"]
