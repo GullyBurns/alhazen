@@ -1,9 +1,12 @@
 # Gobtown: Founding Era — Design Spec
 
-**Date:** 2026-07-26 (rev. 2 — race stats sourced from the rulebook; scenario reworked)
+**Date:** 2026-07-26 (rev. 3 — retargeted to CF core; single-axis alignment)
 **Campaign:** `goblinpak` — `myth-campaign-f0745885c38a` (TypeDB `alh_mythras`)
-**System:** Mythras Classic Fantasy Imperative (CFI)
+**System:** Mythras **Classic Fantasy** (TDM500 core)
 **Status:** Draft for review
+
+> **This is a chapter, not the project.** GoblinPack is a full supplement; Gobtown is one setting
+> inside Part Three. Parent spec: [`2026-07-26-goblinpack-supplement-design.md`](2026-07-26-goblinpack-supplement-design.md)
 
 **Source note.** All race numbers in §5 are transcribed from *Classic Fantasy* (TDM500) Chapter 11,
 extracted from the user's own copy. Full extraction with page/line citations:
@@ -15,7 +18,7 @@ extracted from the user's own copy. Full extraction with page/line citations:
 
 GoblinPack is a Classic Fantasy supplement in which goblinoids are protagonists rather than
 battle-fodder. This spec covers the **founding era** of Gobtown: a settlement roughly eight
-years old, a few hundred souls in a cave network in a remote northern pass, which everyone
+years old: a single large hive of 50-100 goblinoids in a cave network in a remote northern pass, which everyone
 including most of its own residents expects to fail.
 
 The design thesis, from Haidt's moral foundations work: goblinoids are not immoral, they
@@ -111,7 +114,7 @@ notation in an unreadable script. Objects left overnight are found arranged in g
 patterns by morning.
 
 The water carries the harmony through the settlement — drunk, bathed in, irrigating the fungus
-beds. This answers how a hidden cave feeds several hundred people: **it feeds them because the
+beds. This answers how a hidden cave feeds a hundred people at all: **it feeds them because the
 god is in the water.** Cutting the water is cutting the god.
 
 ### 4.2 The four-layer irony
@@ -172,23 +175,15 @@ is the campaign.
 
 ### 5.2 Which rules format to write in
 
-The books contain **two incompatible PC race formats**:
+**Decided: CF core (TDM500), Format 1.** Reversed from rev. 2, which targeted the Imperative SRD.
 
-| | Format 1 — CF core (TDM500 Ch. 2) | Format 2 — CFI SRD (ORC-licensed) |
-|---|---|---|
-| Alignment | Single-axis Moral Philosophy (Good/Neutral/Evil) | **Two-axis: Ethical Code + Moral Code** |
-| Vision trait | Infravision | **Darkvision** |
-| Free Skills line | implicit | **explicit** |
-| Literacy | not addressed in race entry | **explicit Illiterate rule** |
-| NPC stat block | included in race entry | absent |
+The deciding evidence is the supplement's own class list, which contains **Bard** and
+**Thief-Acrobat** — present in CF core, absent from the four-class Imperative. Targeting CFI would
+have silently deleted two of the eight archetypes. See the parent spec §3.
 
-**Decision: write in Format 2 (CFI SRD).** Three reasons — it matches the campaign's CFI setting
-and the 348-piece rules graph already loaded in `alh_mythras`; it carries the two-axis alignment
-the design in §5.7 depends on; and it is **ORC-licensed**, which means goblinoid race write-ups
-built against it are publishable without TDM clearance.
-
-Terminology consequence: creature entries say *Infravision*; PC entries say *Darkvision*. Port
-accordingly.
+Consequences carried through this document: **single-axis Moral Philosophy** rather than two-axis
+alignment (§5.8), **Infravision** rather than Darkvision, and no ORC license. The 348 rule pieces
+loaded in `alh_mythras` are Imperative and now diverge from the target system — see parent spec §9.
 
 ### 5.3 The races (as printed in TDM500 Ch. 11)
 
@@ -354,33 +349,54 @@ are building, and **the first child to come of age with it is a campaign milesto
 their targets are fellow settlers, because the Concord has quietly redrawn who is fair game.
 Players will notice their passions sliding and will not be told why.
 
-### 5.8 The alignment rider
+### 5.8 The alignment rider — and why it is not a house rule
 
-Goblinoid PCs are Evil. The Concord does not make anyone Good — it **redraws the boundary of who
-counts as fair game** to include fellow settlers.
+In CF core, **Moral Philosophy** is a single axis (Good / Neutral / Evil) plus one or two defining
+traits, starting at **30% + POW×2**, and it is the *first Passion every character has*. The core
+book then supplies this rule verbatim:
 
-A Gobtown goblin is still Evil by any Valdenmark cleric's reckoning: cruel to outsiders,
-contemptuous of weakness, delighted by others' misfortune. He simply does not rob his neighbours
-any more, and **could not tell you why not.** That is the angel's work expressed as an alignment
-rule, and it is the most important mechanical statement in this document.
+> "if the chosen philosophy is reduced to 0, then a new one replaces it at base level, per the
+> character's recent actions."
 
-The SRD's Evil trait list (Abusive, Cruel, Domineering, Enjoys Harming Innocents, Hates Good,
-Merciless, Sadistic, Slaver, Spiteful) is used unchanged. Only the *target set* narrows.
+**That is the Concord, already written.** No house rule is required. The angel's influence causes a
+settler's Evil to wane; at zero it is *replaced* according to recent conduct — which in Gobtown
+means **Neutral**. And CF's Neutral is exactly the target state: "the same compunctions against
+killing innocent creatures that a Good character would have, but lack the commitment to make
+sacrifices to protect or help others." Still Greedy, Dishonest, Self-centred, Vain. No longer
+Cruel, Slaver, Cannibalistic.
 
-Ethical axis drifts Lawful under the Concord. Drakmoor is Lawful Evil and drifting further —
-which he experiences as exhaustion.
+**Civilisation without redemption.** Nobody in Gobtown is being made good. They are being made
+*ordinary*, which is stranger and far more unsettling — and Ghazrek is correct to regard it as a
+death. He has watched people he bled beside stop being themselves, and the only person who could
+explain why performs a private ritual at dawn and will not say what it is.
+
+Evil traits available (core Passions Table): Betrayer, Bloodthirsty, Cannibalistic, Chaotic, Cruel,
+Hateful, Heartless, Murderous, Sadistic, Slaver, Spiteful, Wicked. Neutral traits: Conceited,
+Dishonest, Egotistic, Greedy, Independent, Lack of morality, Pompous, Self-centred, Vain,
+Well balanced.
+
+**Read the roster's Moral Philosophy column as a progress bar.** Ghazrek 62 and rising; Vharza 44;
+Ozmek 33 and nearly gone. Drakmoor 39, against a base of 58 — eight years of dawn meditation, and
+he has no idea it is happening to him.
 
 ### 5.9 Classes
 
-| CFI class | Goblinoid expressions |
-|---|---|
-| Fighter | warrior, wolf-rider, beast handler, pit-fighter |
-| Rogue | sneak, agent, hunter, scout, acrobat |
-| Cleric | priest, shaman, Prevaricator (Vykthar) |
-| Magic-User | hedge-wizard, alchemist, ritualist |
+Full CF class list applies. See parent spec §5 for the mapping and the two new classes
+(**Wolf Rider** and **Merchant / Crafter / Miner**).
 
-Merchant/crafter/miner concepts are Professional skill loadouts, not classes. **Druid is
-unavailable** to goblinoid races, per the book's own conversion note; use Cleric.
+| CF class | Goblinoid expressions |
+|---|---|
+| Fighter | warrior, pit-fighter, chief's fist |
+| Thief | sneak, agent, hunter, scout |
+| Thief-Acrobat | tunnel-runner, roof-work |
+| Cleric | priest, shaman, Prevaricator (Vykthar — pending, parent §5.2) |
+| Magic-User | hedge-wizard, alchemist, ritualist |
+| Bard | entertainer, jester, boast-singer |
+| **Wolf Rider** 🆕 | beast handler — *a Kazhrun class, near-useless in Khorvenn's tunnels* |
+| **Crafter / Miner** 🆕 | *the Gobtown class; barely exists in the tribal lands* |
+
+**Closed to goblinoids:** Paladin (Lawful Good unreachable) and Druid, per the book's own note;
+use Cleric.
 
 **Restriction:** no PC may be a cleric of Ehrendil Beldroth. Obviously.
 
@@ -518,8 +534,11 @@ Target: `myth-campaign-f0745885c38a` in `alh_mythras`.
 
 ## 8. Open questions
 
-1. **Population ceiling.** Prior instinct was 300–400 for a settlement that must stay hidden;
-   remoteness argues for the low end. Needs a number before "The Emissary" is run.
+1. ~~**Population ceiling.**~~ **Resolved: 50-100 total.** A single large hive, not a town. At
+   this scale everyone knows everyone, Thekla can plausibly speak to the *entire settlement* in a
+   week, and they sit right at the 80-inhabitant mark Drakmoor himself identified as the point of
+   no return. Every trade is one or two people deep: if the only competent stone-cutter dies, the
+   tunnels stop. This is a scenario generator, not just a number.
 2. **Who carved Khorvenn?** The caves predate Drakmoor. Either Ehrendil placed the spirit in
    anticipation, or it is a much older site repurposed — the second is more interesting and asks
    who cut the musical notation into the walls.
