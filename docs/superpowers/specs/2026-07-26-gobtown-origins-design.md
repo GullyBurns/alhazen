@@ -363,13 +363,48 @@ unavailable** to goblinoid races, per the book's own conversion note; use Cleric
 
 ---
 
-## 6. The scenario: "The Emissary"
+## 6. The opening arc
 
-> **Rev. 1 discarded a scenario built on a pilgrim the party had to keep alive to avoid human
-> reprisals. That was wrong.** Goblinoids do not fear retribution and would eat her. The
-> constraint was human prudence smuggled into a goblinoid setting — exactly the failure mode
-> §1's design test exists to catch. The replacement generates its pressure from goblinoid
-> virtues instead.
+> **Rev. 1 built a scenario on a pilgrim the party had to keep alive to avoid human reprisals.
+> That was wrong** — goblinoids do not fear retribution, and the constraint was human prudence
+> smuggled into a goblinoid setting, exactly the failure mode §1's design test exists to catch.
+> The cleric survives as **the cold open**, reframed; the campaign proper begins with Thekla.
+
+### 6.0 Cold open — "The Wrong Cathedral"
+
+**The situation, not the script.** A cleric of Ehrendil Beldroth comes over the pass. She felt a
+manifestation of her god — for her order, the event of a lifetime — and she has walked for months
+toward it, expecting what that promises: a hidden grove, an elven ruin, a choir, a spring in a
+cathedral of light. Something lovely.
+
+She finds a hole in a mountain that smells of wet stone and old meat. Fungus beds. Bones.
+Several dozen goblinoids holding knives and appraising her robe.
+
+**And the presence is still there, undiminished.** That is the joke and the theological crisis in
+one image: her faith has brought her unerringly to a goblin warren and told her it is holy.
+
+**The scene's best beat.** She asks them where it is — in Elvish, then in Common, with rising
+desperation. *They do not understand the question.* They are living on top of the greatest
+manifestation of their age and have no idea, and cannot be made to care. She knows something they
+do not; they hold every card. Neither can use the advantage.
+
+**Her fate is open.** This is a situation, not a scripted killing. Eating her is available and
+entirely in character — but so is ransoming her, hiding her, ignoring her, or (the most
+interesting outcome) **letting her stay**, because a cleric whose god is demonstrably present has
+every theological reason to remain and none to report it. That version puts the only person in
+Gobtown who understands what is actually happening inside the walls, permanently.
+
+**The mechanical reveal.** The Concord does not protect her — she is not a settler. But one or two
+PCs hesitate anyway and cannot say why. That is the players' first evidence that something in the
+water is working on them: this felt faintly wrong, and it never has before. Nobody explains it.
+
+**Unresolved thread — the angel's silence.** It sensed her coming days out and said nothing.
+Whether Drakmoor realises this, whether he was warned and chose, and whether the angel's quiet was
+calculation or cowardice, is deliberately left open here. Settle it in play; it determines whether
+the angel's shift from resentment to warmth reads as affection or as the conduct of someone who
+has already paid for this experiment and cannot walk away.
+
+**Whatever happens becomes the thing that cannot be said** — which is what loads the next scenario.
 
 ### 6.1 The party — the Fixers
 
@@ -382,9 +417,13 @@ Each Fixer needs: race, class, why they fled the Kazhrun, and what they owe Drak
 
 ### 6.2 The situation
 
-**Thekla Morvani walks into Gobtown.** She did not follow a map — a Prevaricator follows tales,
-and a rumour of a chief who makes tribes cooperate was too good to ignore. She came to see
-whether the story is true.
+**Thekla Morvani walks into Gobtown**, days or weeks after the cleric. She did not follow a map —
+a Prevaricator follows tales, and a rumour of a chief who makes tribes cooperate was too good to
+ignore. She came to see whether the story is true.
+
+She arrives into the aftermath of §6.0. Whatever the party did with the cleric is now the best
+story in Gobtown and the one story that must never be told — and a professional collector of
+exactly this kind of material is sitting by the fire, buying drinks.
 
 **Why they cannot simply eat her.** Two reasons, both native to goblinoid culture:
 
@@ -448,7 +487,7 @@ Target: `myth-campaign-f0745885c38a` in `alh_mythras`.
    Morvani (half-orc); Duke Aldric Kessarin; a traditionalist ringleader.
 6. **New factions** — the surviving Ironspear, the traditionalists, Valdenmark, the Kazhrun
    tribes, the mixed-heritage settlers.
-7. **Scenario** — "The Emissary" as gm-visibility lore.
+7. **Scenarios** — "The Wrong Cathedral" (cold open) and "The Emissary" as gm-visibility lore.
 8. **Templates** — spawnable stat blocks for goblin/hobgoblin/orc/bugbear using the real
    Chapter 11 numbers, replacing the invented ones seeded on 2026-07-25.
 
