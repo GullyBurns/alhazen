@@ -218,10 +218,33 @@ Every goblinoid shares POW `3d6 (11)` and CHA `2d6 (7)`. Magic Points 11 across 
   traits, Swim 66%, and 20 ft underwater movement. *A Koolinth PC is mechanically a hobgoblin
   who can swim into the Wellspring.*
 - **Orog** — variant of **Orc** ("great orcs", 6–6½ ft, possibly part ogre). Overrides STR
-  `2d6+10`, CON `3d6+6`, SIZ `1d6+12`, DEX `2d6+2` (**the book prints no averages for these — do
-  not compute them into the Points Build column without flagging**); +10% to Athletics, Brawn,
-  Endurance, Unarmed and Combat Style; 2 points of tough skin. "Treated in all other ways as
-  orcs." Rare — roughly one per ten orc warriors.
+  `2d6+10`, CON `3d6+6`, SIZ `1d6+12`, DEX `2d6+2` (averages 17 / 17 / 16 / 9, rounding the half
+  up as the book does for Hobgoblin CON and SIZ); INT, POW and CHA inherited from Orc; +10% to
+  Athletics, Brawn, Endurance, Unarmed and Combat Style; 2 points of tough skin **on top of**
+  worn armour. Rare — roughly one per ten orc warriors.
+
+  **Derived attributes must be recomputed**, because Damage Modifier reads off STR+SIZ and hit
+  points off CON+SIZ, and the variant changes all three. "Treated in all other ways as orcs"
+  governs the non-derived material. Verified: the derivation reproduces every printed Damage
+  Modifier and Action Point value for all six statted goblinoids exactly.
+
+  | | Orc | Orog | |
+  |---|---|---|---|
+  | STR+SIZ | 28 | **33** | |
+  | Damage Modifier | +1d2 | **+1d4** | one step up |
+  | CON+SIZ | 27 | **33** | |
+  | HP — Head / Chest / Abdomen / Arm / Leg | 6 / 8 / 7 / 5 / 6 | **7 / 9 / 8 / 6 / 7** | +1 per location |
+  | DEX+INT | 22 | 20 | |
+  | Action Points | 2 | **2** | unchanged |
+  | Initiative (DEX+INT)/2 | 11 | **10** | *one slower* |
+  | Magic Points (POW) | 11 | 11 | unchanged |
+
+  The initiative drop matters: an orog is stronger, tougher and harder to kill, but **acts
+  later** than a common orc. That is a genuine trade-off rather than a straight upgrade, and it
+  is worth playing up — orogs hit like a falling rock and are always half a beat behind.
+
+  *Rounding note:* if the half-points rounded down instead (CON 16, SIZ 15), both results are
+  unchanged — STR+SIZ 32 is still +1d4 and CON+SIZ 31 is still the same HP column.
 
 ### 5.4 Half-breeds and mixed heritage
 
@@ -505,9 +528,8 @@ Target: `myth-campaign-f0745885c38a` in `alh_mythras`.
    theologically contested; that is a chapter in itself.
 4. **Does the angel have a name?** It has a voice and comic timing but no name in any source. It
    may refuse to give one, which is characterful.
-5. **Orog derived attributes.** The book prints no averages for the overridden characteristics and
-   says orogs are "treated in all other ways as orcs" — leaving it ambiguous whether Damage
-   Modifier, Action Points and hit-point totals should be recomputed from the higher values. House
-   ruling needed; recomputing is the defensible reading.
+5. ~~**Orog derived attributes.**~~ **Resolved** — not a house ruling. Damage Modifier derives
+   from STR+SIZ and hit points from CON+SIZ, so overriding those characteristics necessarily
+   changes both. Recomputed in §5.3 and validated against all six printed goblinoid stat blocks.
 6. **Proxy names** remain provisional. Kazhrun, Valdenmark, Kessarin, Khorvenn all swappable at no
    cost until the lore is written.
