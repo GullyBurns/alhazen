@@ -171,6 +171,86 @@ recorded as the third, which is why Thekla is extraordinary.
 
 ---
 
+## 5A. The CHA re-baseline — the supplement's signature rule
+
+**Decided 2026-07-26.** This is the mechanical statement of the whole supplement, and it is a
+*decomposition of the printed numbers rather than an invention*.
+
+### The evidence
+
+Across the six statted goblinoids, **CHA is the only characteristic that is uniformly floored.**
+
+| | Goblin | Hobgoblin | Orc | Bugbear | Gnoll |
+|---|---|---|---|---|---|
+| STR | 8 | 13 | 14 | 19 | 15 |
+| SIZ | 8 | 17 | 14 | 21 | 20 |
+| INT | 12 | 13 | 11 | 10 | 10 |
+| **CHA** | **7** | **7** | **7** | **7** | **7** |
+
+Strength spans 8–19, size 8–21, intellect 10–13. Every species is differentiated on every axis
+except one, where all five collapse to an identical `2d6`. That is not a physiological observation.
+**It is a measurement taken from outside.**
+
+### The rule
+
+> **Goblinoid CHA is `3d6`.** Apply **−4 CHA** for all purposes when dealing with a culture not
+> your own. The penalty is **symmetric**: non-goblinoids take the same −4 toward goblinoids.
+
+`3d6` averages 11. Less 4 is 7 — **exactly the printed value.** A GM running vanilla Classic
+Fantasy sees an unchanged goblin. The book is not wrong; it is *incomplete*, having recorded
+goblinoids as their enemies experience them.
+
+Mutual incomprehension, not goblinoid deficiency: a human noble is as tongue-tied in a warren as a
+goblin is at court. "Everyone hates us" becomes a two-way mechanical fact rather than a complaint.
+
+### What it repairs
+
+CHA drives Influence (CHA×2), Deceit and Commerce (INT+CHA), Sing (POW+CHA), Dance, Courtesy,
+Native Tongue, and the Experience Modifier.
+
+1. **The learning penalty.** Experience Modifier is +1 at CHA 13–18. At `2d6` a goblinoid **caps at
+   12** — so under the printed numbers no goblinoid of any species could ever have a positive
+   learning modifier, while humans routinely do. The re-baseline removes a quiet claim that
+   goblinoids are worse at learning.
+2. **Vykthar's prerequisite.** CHA 14 was unreachable at `2d6` (max 12) — by RAW nobody could join
+   the cult of the goddess of goblinoid storytelling. At `3d6` it is reachable, and reachable
+   precisely by those compelling *among their own people*, which is what a boast-singer is. The
+   requirement was never broken; we were measuring with the wrong ruler. **Closes open question 2.**
+3. **The goblinoid Bard becomes viable** — the first class on the v0 list, previously impossible.
+4. **Thekla Morvani, explained.** Raised across both cultures, she takes **no penalty in either
+   direction**. In any room containing both species she is functionally the most charismatic person
+   present — not because her CHA is high, but because everyone else's collapses. That is why a duke
+   who despises goblinoids keeps one at his elbow, and it is a far better warrant for the narrator
+   than "she is persuasive."
+
+### Scope note
+
+Applies to CHA only. The other characteristics are differentiated across species and show no sign
+of the same flattening, so there is no evidence to justify extending the treatment.
+
+---
+
+## 5B. Why goblinoid classes are structurally different
+
+Human and demi-human classes are **vocational**: you trained, you joined, you swore an oath.
+Goblinoid classes are **functional**, following directly from the first virtue — *to be valued in a
+goblinoid community is primarily utilitarian: do something well and you may live a little longer.*
+Nobody trains a goblin. A goblin becomes useful, or dies.
+
+| | Demi-human classes | Goblinoid classes |
+|---|---|---|
+| Entry | training, guild, apprenticeship | demonstrated usefulness |
+| Oaths | sworn, binding, class-defining | none — cult *favour* instead, which is withdrawn not broken |
+| Tenure | permanent once earned | **provisional; lost when your function is not needed** |
+| Naming | vocation (Fighter, Cleric) | function (Wolf Rider, Crafter, Boast-singer) |
+
+**Provisional tenure is the load-bearing difference.** A class you can lose turns the Wolf Rider's
+obsolescence in Khorvenn's tunnels and Ghazrek's grievance into the same mechanic, and it makes
+retraining — Experience Rolls spent on new Professional skills — a status question rather than a
+bookkeeping one. A traditionalist is simply someone who refuses to spend them.
+
+---
+
 ## 6. Part Two — Equipment and Magic (seed only)
 
 The one genuinely original idea here is **anti-craftsmanship**, implicit in Grottendacz's doctrine:
@@ -253,7 +333,8 @@ correctly regard it as a death.
 ## 9. Open questions
 
 1. **Vykthar: Cleric or Bard?** (§5.2) Blocks Thekla's final sheet and the cult chapter.
-2. **Vykthar's CHA 14 prerequisite** is unreachable for the races it accepts (§5.3).
+2. ~~**Vykthar's CHA 14 prerequisite**~~ **Resolved by the CHA re-baseline** (§5A) — reachable at
+   `3d6`, and reachable exactly by those compelling among their own people.
 3. **Load CF core rules into the graph.** The 348 loaded pieces are Imperative and now diverge from
    the target system.
 4. **Origins and Mythology** needs writing from a one-line seed (§4.2).

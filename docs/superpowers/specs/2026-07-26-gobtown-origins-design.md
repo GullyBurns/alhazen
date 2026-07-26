@@ -198,13 +198,18 @@ table in rev. 1 entirely.**
 | DEX | 4d6 (14) | 3d6 (11) | 3d6 (11) | 3d6 (11) |
 | INT | 2d6+5 (12) | 2d6+6 (13) | 2d6+4 (11) | 2d6+3 (10) |
 | POW | 3d6 (11) | 3d6 (11) | 3d6 (11) | 3d6 (11) |
-| CHA | 2d6 (7) | 2d6 (7) | 2d6 (7) | 2d6 (7) |
+| CHA | **3d6 (11)** | **3d6 (11)** | **3d6 (11)** | **3d6 (11)** |
 | Damage Mod | −1d2 | +1d2 | +1d2 | +1d6 |
 | Movement | 15 ft | 15 ft | 20 ft | 15 ft |
 | Lifespan | ~50 yrs | ~60 yrs | ~40 yrs | not given |
 | Traits | Darkvision, **Light Sensitive** | Darkvision, **Tunnel Sense** | Darkvision, **Light Sensitive** | Darkvision |
 
-Every goblinoid shares POW `3d6 (11)` and CHA `2d6 (7)`. Magic Points 11 across the board.
+Every goblinoid shares POW `3d6 (11)`. Magic Points 11 across the board.
+
+> **CHA is re-baselined from the printed `2d6`** — see parent spec §5A. Goblinoid CHA is `3d6`,
+> with a symmetric **−4 when dealing with any culture not your own**, which reproduces the printed
+> `2d6 (7)` exactly as seen from outside. In Gobtown, among their own, these are articulate and
+> funny people; the moment Thekla or a Valdenmark surveyor walks in, they are not.
 
 **Variants, written as deltas exactly as the book writes them:**
 
