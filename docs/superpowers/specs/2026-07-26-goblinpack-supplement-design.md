@@ -353,11 +353,46 @@ Light armour only — anything heavier and the wolf will not carry you far enoug
 - **The Long Ride** (Rank 4). Mounted travel at forced pace without Endurance penalty for a number
   of days equal to CON/3.
 
-> **Obsolescence is a feature.** A Wolf Rider needs open ground and a wolf. In Khorvenn's galleries
-> he is a man with a large dog in a corridor: *Ride-By*, *The Long Ride* and most of *Pack Tactics*
-> are unusable underground, and the wolf itself is a mouth that eats meat the settlement cannot
-> spare. This is the mechanical root of Ghazrek's grievance, and he is not wrong — his class does
-> not work here.
+> **This class is Gobtown's outer wall.** The settlement survives by not being found, and not
+> being found requires knowing who is coming. The outriders hold the approaches — the pass mouth,
+> the goat tracks, the lower valleys, the road where caravans move — and they are away for days at
+> a stretch. Every talent above works exactly as written, because open country is where these
+> characters actually spend their working lives. Khorvenn's galleries are where they sleep.
+
+**What is constrained is permission, not capability.** An outrider sees a fat merchant train on the
+low road and is forbidden to touch it, because a raid brings a punitive expedition and the whole
+experiment ends. He has the strength to take and standing orders not to.
+
+**That is Ghazrek's grievance, and it is far worse than uselessness.** He is a warrior employed as
+a watchman. He does his job perfectly and it earns him nothing, because *Be The Biggest Bastard You
+Can* cannot be satisfied by withdrawing quietly and reporting accurately, and Vykthar has no song
+for a man who watched. His passion is unexercisable in his own profession. A goblinoid whose
+defining virtue has no outlet is not merely frustrated — by his own culture's reckoning he is
+becoming nobody.
+
+### 5C.2a The dosage problem — why the outriders are the traditionalists
+
+**The Concord is in the water** (Gobtown chapter §4). Outriders spend days at a time away from it,
+carrying skins filled before they left and drinking from streams once those run out.
+
+They come back **edgy, quarrelsome, and hungry in the wrong way.** The decay clock from the Gobtown
+chapter runs on individuals as well as the settlement, and the outriders are the only residents who
+routinely trigger it.
+
+The consequence is a faction that assembles itself without anyone deciding to found one:
+
+- The outriders are the **least civilised goblinoids in Gobtown** — not by conviction, but by
+  *exposure*. They are the least-dosed members of the population.
+- They are also the ones with **weapons, mounts, mobility, and knowledge of every route in and out**.
+- They have the **best reason to distrust the dawn ritual**, since they feel the difference between
+  being home and being away most sharply, and nobody has ever explained it to them.
+- And **none of them understands why they feel this way**, including Ghazrek. They experience it as
+  clarity — as being the only ones who have not gone soft. From inside, waning is invisible; what
+  you notice is other people changing.
+
+> **This is the traditionalist faction, and it is a public-health problem wearing an ideology.**
+> Drakmoor cannot fix it without explaining the water. Rotating outriders home more often would
+> work, and he cannot order it without giving a reason.
 
 ### 5C.3 Crafter / Miner 🆕
 
@@ -410,12 +445,18 @@ the wrong way round. No armour restriction — you already work in it.
 
 Following §5B, class is **provisional**. A character whose function is no longer needed may retrain
 by spending **Experience Rolls** on the new class's Prerequisite Skills; rank is recalculated
-against the new ladder and will usually drop. A Wolf Rider who becomes a Digger starts at Rank 0 or
-1 and is publicly, visibly demoted.
+against the new ladder and will usually drop, leaving the character publicly demoted.
 
-**That humiliation is the point.** Retraining costs status in a society that allocates status by
-usefulness, which is why traditionalists refuse — and why the ones who accept it are the ones
-building something. Ghazrek has the Experience Rolls. He will not spend them.
+**Note what Gobtown does and does not make obsolete.** No class here is useless — the settlement
+needs outriders, diggers, singers and fighters, and needs them all badly at a population of a
+hundred. What changed is not which skills are wanted but **which skills earn status**. Raiding
+produced loot, songs and bragging rights; scouting produces a report. Mining keeps everyone alive
+and produces nothing anyone will sing about.
+
+**So the friction is a reward-structure problem, not a competence problem**, which is why it cannot
+be solved by retraining and why it festers. Ghazrek does not need new skills. He needs his existing
+ones to mean what they used to mean, and Gobtown cannot give him that without ceasing to be
+Gobtown.
 
 ---
 

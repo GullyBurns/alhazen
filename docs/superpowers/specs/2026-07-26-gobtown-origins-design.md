@@ -397,7 +397,7 @@ Full CF class list applies. See parent spec §5 for the mapping and the two new 
 | Cleric | priest, shaman, Prevaricator (Vykthar — pending, parent §5.2) |
 | Magic-User | hedge-wizard, alchemist, ritualist |
 | Bard | entertainer, jester, boast-singer |
-| **Wolf Rider** 🆕 | beast handler — *a Kazhrun class, near-useless in Khorvenn's tunnels* |
+| **Wolf Rider** 🆕 | outrider — holds the approaches; the reason Gobtown has not been found |
 | **Crafter / Miner** 🆕 | *the Gobtown class; barely exists in the tribal lands* |
 
 **Closed to goblinoids:** Paladin (Lawful Good unreachable) and Druid, per the book's own note;
