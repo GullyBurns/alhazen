@@ -44,9 +44,9 @@ Skeleton follows v0's table of contents. Status is honest: most of this is not w
 | | Half Breeds and Mixed Heritage | ✅ **designed** |
 | | Relations with Giant-Kin | ⛔ not started |
 | **Two** | Character Creation | 🟡 races + cultures done; class packages outstanding |
-| | Goblinoid Character Classes | 🟡 **decided, not written** — see §5 |
+| | Goblinoid Character Classes | 🟡 3 of 8 drafted (§5C): Prevaricator Bard, Wolf Rider, Crafter |
 | | Organizations and Cults | 🟡 10 cults digested; theological politics outstanding |
-| | Equipment and Magic | ⛔ **seed only** — anti-craftsmanship, see §6 |
+| | Equipment and Magic | 🟡 anti-craftsmanship now has a mechanism (§5C.3 *Fast and Filthy*) |
 | **Three** | Goblinoid Territories | 🟡 Kazhrun sketched, tribal lands outstanding |
 | | Tribal Lands | ⛔ not started |
 | | **GobTown** | ✅ **full chapter spec + database populated** |
@@ -251,6 +251,174 @@ bookkeeping one. A traditionalist is simply someone who refuses to spend them.
 
 ---
 
+## 5C. Class drafts
+
+Written against the CF class template (prose → weapon/armour restriction → Standard Skills →
+Professional Skills → Combat Style → Rank Structure → Prerequisite Skills → Abilities & Talents).
+The rank ladder follows the book's own progression: **5 skills @50%, 5 @70%, 4 @90%, 3 @110%,
+2 @130%**, with **+1 Luck Point per Rank**.
+
+### 5C.1 Bard — the Prevaricator Order (Vykthar)
+
+**Decided: Vykthar's clergy are Bards, not Clerics.** The chassis fits without modification —
+Oratory, Sing, Influence, Acting, Seduction, Sleight, and a talent ladder ending in Inspiration is
+a description of a boast-singer. The book already splits bards into an **Arcane College** and a
+**Druidic Order**, each with its own Professional list and magical source; GoblinPack adds a third.
+
+> **The Prevaricator Order.** Where civilised bards attend colleges and druidic bards keep The Old
+> Ways, Vykthar's boast-singers hold that a deed unremembered did not happen, and that a deed
+> remembered *badly* is a theft. They are the only institution in goblinoid society that reliably
+> outlives the chief who founded it, because they are the ones who decide what he was.
+
+**Standard Skills:** Athletics, Combat Style (Prevaricator), Deceit, Evade, Influence, Insight,
+Locale, Sing, Stealth
+
+**Professional Skills (Prevaricator):** Acting, Boast, Carousing, Channel, Lore (Goblinoid
+Histories), Musicianship (All), Oratory, Piety (Vykthar), Seduction, Streetwise
+
+Max 3 Professional skills and no extra Skill Points, as per all bards — master of none.
+
+**Combat Style (Prevaricator):** club, dagger, javelin, knife, shortsword, sling, spear, staff.
+Light armour only; a Prevaricator who cannot be heard is not working.
+
+**Divine casting** via Piety (Vykthar), on the druidic-bard pattern. Starting Rank 1 spells equal to
+1/20th Piety. **Spheres:** All, Charm, Protection — matching v0's cult entry.
+
+| Rank | Title | Max Spell | Prerequisites | Luck |
+|---|---|---|---|---|
+| 0 | Hanger-On | — | — | — |
+| 1 | Listener | Rank 1 | 5 skills at 50% | +1 |
+| 2 | Braggard | Rank 1 | 5 skills at 70% | +2 |
+| 3 | Warsinger | Rank 2 | 4 skills at 90% | +3 |
+| 4 | Scarkeeper | Rank 2 | 3 skills at 110% | +4 |
+| 5 | Grand Prevaricator | Rank 3 | 2 skills at 130% | +5 |
+
+**Prerequisite Skills:** Influence, Oratory, Piety (Vykthar), Sing, and either Boast or Acting.
+
+**Talents.** *Inspiration* and *Artful Dodger* as per the core Bard. Plus:
+
+- **Safe Conduct** (Rank 1). Vykthar extends protection to any audience, *including non-goblinoids*,
+  so that her stories may be heard in safety. While a Prevaricator is actively telling, violence
+  against the audience is sacrilege. This does not stop anyone — it makes them pay for it, and every
+  goblinoid present knows the price.
+- **The Version That Sticks** (Rank 2). Spend 3 Magic Points and succeed at Oratory to establish
+  your account of an event as the one the community remembers. Contradicting witnesses must overcome
+  your Oratory with an opposed roll to be believed, *even when they are telling the truth*.
+- **Name The Fool** (Rank 3). Name a target in a tale before an audience. Their Influence and
+  Courtesy operate one grade harder within that community until they do something worth retelling.
+  Goblinoid society has no legal punishment worse than this.
+- **Truthkeeper** (Rank 4, optional, secret). Access to the cult's hidden archives and the coded
+  scripts that maintain them. Members pose as ordinary storytellers while preserving histories that
+  would be destroyed if found. *Taking this talent is a GM-facing commitment, not a public rank.*
+
+> **Thekla Morvani is Rank 3 (Warsinger) and uses the Rank 5 title at the Valdenmark court.** She
+> has not earned it. Inflating your own legend is not a violation of Vykthar's doctrine — it is an
+> act of worship, and the only sin is being dull or getting caught.
+
+### 5C.2 Wolf Rider 🆕
+
+The Kazhrun class. Goblins are canonically dire-wolf cavalry and no CF class covers mounted
+beast-partnership; the Ranger comes closest and is wrong in every particular that matters.
+
+**Standard Skills:** Athletics, Combat Style (Wolf Rider), Endurance, Evade, Locale, Perception,
+Ride, Survival, Track
+
+**Professional Skills:** Animal Training, Commerce, Craft (Harness), Healing, Lore (Beasts),
+Navigate, Streetwise, Survival (Mountains)
+
+**Combat Style (Wolf Rider):** javelin, lance (light), net, shortbow, shortsword, sling, spear.
+Light armour only — anything heavier and the wolf will not carry you far enough to matter.
+
+| Rank | Title | Prerequisites | Luck |
+|---|---|---|---|
+| 0 | Whelp-tender | — | — |
+| 1 | Outrider | 5 skills at 50% | +1 |
+| 2 | Pack-second | 5 skills at 70% | +2 |
+| 3 | Wolf Rider | 4 skills at 90% | +3 |
+| 4 | Pack-leader | 3 skills at 110% | +4 |
+| 5 | Wolf-mother / Wolf-father | 2 skills at 130% | +5 |
+
+**Prerequisite Skills:** Animal Training, Athletics, Perception, Ride, Track.
+
+**Talents.**
+
+- **Bonded Mount** (Rank 1). A dire wolf companion with its own stat block. It is not equipment; it
+  has passions and will act on them. If it dies you lose all Wolf Rider talents until you raise
+  another from a whelp, which takes a season.
+- **Ride-By** (Rank 1). Move, attack and move again in one turn without granting a free attack,
+  provided the wolf ends outside engagement range.
+- **Pack Tactics** (Rank 2). When two or more Wolf Riders engage the same target, each gains an
+  augment. Goblinoids who cannot cooperate get nothing from this talent, which is exactly the point.
+- **Speak Wolf** (Rank 3). Not magic — fluency. Communicate complex intent to any canid.
+- **The Long Ride** (Rank 4). Mounted travel at forced pace without Endurance penalty for a number
+  of days equal to CON/3.
+
+> **Obsolescence is a feature.** A Wolf Rider needs open ground and a wolf. In Khorvenn's galleries
+> he is a man with a large dog in a corridor: *Ride-By*, *The Long Ride* and most of *Pack Tactics*
+> are unusable underground, and the wolf itself is a mouth that eats meat the settlement cannot
+> spare. This is the mechanical root of Ghazrek's grievance, and he is not wrong — his class does
+> not work here.
+
+### 5C.3 Crafter / Miner 🆕
+
+The Gobtown class, and the one that barely exists in the tribal lands. No CF class covers the
+productive civilian because adventurers do not have jobs. Patron: **Grottendacz** — build 'em fast,
+and if they break, so what.
+
+**Standard Skills:** Athletics, Brawn, Combat Style (Crafter), Endurance, Locale, Perception,
+Willpower, and either Evade or Swim
+
+**Professional Skills:** Commerce, Craft (any two), Engineering, Lore (Minerals), Mechanisms,
+Navigate (Underground), Piety (Grottendacz), Survival
+
+**Combat Style (Crafter):** hammer, mattock, pick, shortsword, shield, sling, staff. Tools, held
+the wrong way round. No armour restriction — you already work in it.
+
+| Rank | Title | Prerequisites | Luck |
+|---|---|---|---|
+| 0 | Hand | — | — |
+| 1 | Digger | 5 skills at 50% | +1 |
+| 2 | Shaper | 5 skills at 70% | +2 |
+| 3 | Crafter | 4 skills at 90% | +3 |
+| 4 | Master of Works | 3 skills at 110% | +4 |
+| 5 | Deepwright | 2 skills at 130% | +5 |
+
+**Prerequisite Skills:** Brawn, Craft (chosen), Engineering, Lore (Minerals), Mechanisms.
+
+**Talents.**
+
+- **Fast and Filthy** (Rank 1). *This is the anti-craftsmanship rule, and it belongs here.* Produce
+  any item you could normally craft in **one quarter** the time. The result has **half AP and half
+  HP**, and **breaks outright on a fumble**. Goblinoids do not regard this as inferior work. It is
+  correct work: the thing existed when it was needed, and a spear that survives one battle has
+  served its whole purpose.
+- **Read the Rock** (Rank 1). Assess structural soundness, load-bearing walls, gas pockets and
+  collapse risk at a glance. In Khorvenn this is the difference between a settlement and a grave.
+- **Improvise** (Rank 2). Substitute available junk for proper materials at one grade harder, with
+  no quality loss beyond what *Fast and Filthy* already imposes.
+- **Field Repair** (Rank 3). Restore a broken item to working order in minutes rather than hours.
+  Given the above, this talent sees constant use.
+- **Deep Sense** (Rank 4). Navigate unfamiliar tunnel systems without light and without becoming
+  lost; know your depth and bearing.
+
+> **This class is the settlement.** At 50–100 people every trade is one or two deep. Gobtown has
+> perhaps two competent Crafters, and if both are lost the tunnels stop being maintained, the
+> cisterns silt, and the fungus beds fail within a season. A traditionalist who sneers at diggers is
+> sneering at the reason he ate this morning.
+
+### 5C.4 Retraining and provisional tenure
+
+Following §5B, class is **provisional**. A character whose function is no longer needed may retrain
+by spending **Experience Rolls** on the new class's Prerequisite Skills; rank is recalculated
+against the new ladder and will usually drop. A Wolf Rider who becomes a Digger starts at Rank 0 or
+1 and is publicly, visibly demoted.
+
+**That humiliation is the point.** Retraining costs status in a society that allocates status by
+usefulness, which is why traditionalists refuse — and why the ones who accept it are the ones
+building something. Ghazrek has the Experience Rolls. He will not spend them.
+
+---
+
 ## 6. Part Two — Equipment and Magic (seed only)
 
 The one genuinely original idea here is **anti-craftsmanship**, implicit in Grottendacz's doctrine:
@@ -332,7 +500,8 @@ correctly regard it as a death.
 
 ## 9. Open questions
 
-1. **Vykthar: Cleric or Bard?** (§5.2) Blocks Thekla's final sheet and the cult chapter.
+1. ~~**Vykthar: Cleric or Bard?**~~ **Resolved: Bard**, as a third bardic order alongside the
+   Arcane College and the Druidic Order. Drafted at §5C.1.
 2. ~~**Vykthar's CHA 14 prerequisite**~~ **Resolved by the CHA re-baseline** (§5A) — reachable at
    `3d6`, and reachable exactly by those compelling among their own people.
 3. **Load CF core rules into the graph.** The 348 loaded pieces are Imperative and now diverge from
