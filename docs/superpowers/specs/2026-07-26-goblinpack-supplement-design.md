@@ -485,7 +485,7 @@ From v0 and the game-types document, reconciled:
 | Reverse dungeoneering — adventurers attack *your* home | *Leverage* | catalogued |
 | In the service of the dark lord — disposable PCs, insane overlord | *Paranoia* / *Better Call Saul* | catalogued |
 | Crime capers | *Ocean's Eleven* / Guy Ritchie | catalogued |
-| War — military campaign against smug elves and humans | — | catalogued |
+| War — military campaign against smug elves and humans | — | 🟡 **the Standing and the Tithe** drafted in the Gobtown chapter §4.5 — goblinoid units that hold formation, obey cross-species orders and retrieve their wounded |
 | **Goblinball** — the closest thing to a recreational sport | — | ⛔ **undeveloped, and a shame** |
 
 ### 7.2 Territories

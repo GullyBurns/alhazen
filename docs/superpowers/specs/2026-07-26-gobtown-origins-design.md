@@ -150,6 +150,88 @@ Within Gobtown:
 
 Players feel the divine presence through their own dice long before anyone explains it.
 
+### 4.5 What the Concord actually buys — the Standing, and the Tithe
+
+The harmony is usually described in domestic terms: food shared, guards alert, nobody knifed over
+grain. Its largest effect is military, and it is the thing Drakmoor originally dreamed of.
+
+#### The problem it solves
+
+His founding insight was arithmetic. Goblinoid martial superiority means nothing when more energy
+goes into fighting each other than the enemy. Individual tribes are formidable; **no tribe can
+sustain a coordinated campaign.** Warbands rout when the leader falls, break off mid-fight to loot,
+refuse orders from another species, and abandon their wounded as a matter of course.
+
+A Concord-affected force does none of that.
+
+#### The Standing
+
+The military expression of the Concord. Applies to units composed of Gobtown residents:
+
+- **No mid-fight looting.** The most reliable way to beat a goblinoid warband is to drop something
+  shiny in front of it. Gobtown units do not break off.
+- **Cross-species orders are obeyed.** A goblin sergeant is followed by orcs. In the Kazhrun this
+  is not merely rare, it is unheard of.
+- **Morale.** Willpower rolls to resist rout run **one grade easier**, and a unit that loses its
+  commander does not disintegrate — someone else picks it up.
+- **The wounded come home.** Goblinoids do not retrieve casualties. Gobtown does, and the effect
+  compounds: veterans accumulate instead of being spent.
+
+Mechanically, treat a Gobtown unit as possessing formation training plus the standard Concord
+augment on coordinated actions.
+
+**Strategic consequence: Gobtown's twenty-odd fighting adults are worth a Kazhrun warband of a
+hundred.** This is how a settlement of fifty to a hundred souls holds a pass at all, and the GM
+should let the players discover it by watching a fight go inexplicably well.
+
+#### The Tithe — restraint in raiding
+
+They do raid. Minimally, far from home, and under a doctrine Drakmoor received as advice and
+implemented as law:
+
+1. **Take a third.** Leave the rest, and leave the place *working*.
+2. **Leave no witness who saw a goblinoid.** Witnesses are acceptable — provided they saw bandits.
+3. **Never the same target twice in living memory**, and never within four days' travel of the pass.
+4. **No burning.** Fire is a signal that carries for thirty miles.
+
+Where the Kazhrun tribes strip-mine, Gobtown **farms**. A village raided under the Tithe recovers
+and is worth visiting again in a decade; a village hit by a Kazhrun warband is a ruin, a grudge and
+a punitive expedition. Over eight years the difference compounds into the settlement's entire
+economy — and into the fact that nobody is looking for them.
+
+#### The trap
+
+**This is the single most likely thing to expose Gobtown, and it is a virtue.**
+
+A warband that does not loot is not a warband. Discipline is *evidence*. A Valdenmark officer who
+files an unremarkable report — *they withdrew in good order, carried their wounded off, took a
+portion of the grain and burned nothing* — has described something impossible without knowing it.
+And Thekla Morvani, who has spent six years explaining to a duke exactly what goblinoid raiders do,
+would read that report in a heartbeat.
+
+The Wellspring's best-hidden secret is not in the deep chamber. It is in the paperwork.
+
+#### Drakmoor got precisely what he asked for
+
+His dreams in the singing caves were of goblinoid tribes moving in coordination, strength
+supporting cunning supporting strategy, unified forces that could build or crush. **He has built
+exactly that, in miniature, and can never deploy it** — because using the army reveals the army.
+The angel handed him the thing he wanted most and made it unusable, and it is not clear even to the
+angel whether that was mercy or method.
+
+#### And Ghazrek can see it
+
+He commands the best-drilled goblinoid force in the history of the Kazhrun, and he wants the old
+ways back. His pride and his grievance are the same fact seen from two sides, and he has never
+put the contradiction into words because doing so would require conceding that the new way works.
+
+**Note the fault line, though.** His outriders are the least-dosed members of the settlement
+(§5C.2a in the supplement spec) — so the unit that meets every stranger *first* is the one least
+reliably bound by the Standing. The first outsiders to encounter Gobtown will meet its worst-
+disciplined troops, commanded by the man least invested in restraint, several days' ride from the
+water that would have made them behave.
+
+
 ### 4.4 Discovery vectors
 
 - A cleric of Ehrendil senses **one** presence, unmistakably, at considerable range.
