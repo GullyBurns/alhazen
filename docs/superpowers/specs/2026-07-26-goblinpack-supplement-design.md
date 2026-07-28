@@ -38,7 +38,7 @@ Skeleton follows v0's table of contents. Status is honest: most of this is not w
 | Part | Chapter | Status |
 |---|---|---|
 | **One** | Overview & Introduction | ✅ framing + Thekla's voice settled |
-| | Good and Evil for Goblinoids | ✅ **designed** — five virtues, contextual hatred, Evil-is-not-psychopathy |
+| | Good and Evil for Goblinoids | ✅ **designed + playtested** — five virtues, contextual hatred, Evil-is-not-psychopathy; waning record from play (§4.1a) |
 | | Origins and Mythology | ⛔ **seed only** — see §4 |
 | | Goblinoid Races | ✅ **designed** — six races, real stats, conversion method |
 | | Half Breeds and Mixed Heritage | ✅ **designed** |
@@ -102,6 +102,45 @@ Two load-bearing clarifications, both from the user's design notes:
 
 Goblinoids reject the label "evil" as effete elvish propaganda, and given the historical conduct
 of elves and humans toward them, the reader is not obliged to disagree.
+
+### 4.1a The moral psychology in play — the waning record
+
+Playtest lore from the goblinpak campaign (sessions 1–3), now canon. This is the §4.1 design and
+the §5C.2a dosage mechanic producing table results, and it belongs in the supplement as the worked
+example of how Moral Philosophy runs for goblinoid characters.
+
+**Moral Philosophy is a passion, and the Concord erodes it.** CF core: base 30 + POW×2; if reduced
+to 0, a new philosophy replaces it per recent actions. Three data points from Khorvenn, year 8:
+
+| Character | Moral Philosophy | Base | Current | Why |
+|---|---|---|---|---|
+| Drakmoor (chief) | Evil (Heartless and Slaver) | 58 | **39** | Eight years of the dawn ritual — most-dosed resident |
+| Ozmek (Fixer) | Evil (Spiteful) | 52 | **33** | Settlement resident; closest of the Fixers to losing it entirely |
+| Vek (PC, wolf-rider) | Evil (Bloodthirsty and Spiteful) | 54 | **54** | Entirely unwaned — away from the water more than anyone his age |
+
+Rules of the record:
+
+- **Waning is invisible from inside.** Nobody experiences their number dropping. Drakmoor
+  experiences his as *exhaustion*; the outriders experience everyone else's as *going soft*. The
+  least-dosed character in the settlement is mechanically its least civilised — and reads himself
+  as the only one still seeing clearly.
+- **The Evil passion never produces mercy — it produces reclassification.** The played proof: Vek
+  speared an unarmed cleric from behind, then saved her life — not out of pity, but because his
+  wolf sat down beside her and the only category his culture offered for "thing I will now protect"
+  was *property*. Every humane act that followed ("she's ours now", the infirmary, the speech at
+  the cave mouth) came from moving one person from *meat* to *mine*, and he would be insulted to
+  hear it called kindness. The five virtues stayed fully intact throughout. **This is the pattern
+  GMs should run:** under the Concord, goblinoids do not soften their values; they widen the circle
+  of who counts as *ours*, one grudging reclassification at a time.
+- **New passions form as chains of possession.** Vek's passion for the cleric wrote itself as *The
+  Healer Is Mine (And I Am Vosh's)* — attachment expressed as ownership, ownership embedded in a
+  hierarchy of belonging. Goblinoid passions about people should take this shape; "I love X" is an
+  elvish sentence.
+- **Replacement is not redemption, and it is mourned.** When Evil hits 0 it is replaced per recent
+  actions — in the Concord's gravity, with Neutral (still greedy, dishonest, self-centred; no
+  longer cruel or enslaving). A traditionalist would call that a death, and from inside the culture
+  he is not entirely wrong. Ozmek is the settlement's live case: at 33 and falling, closest to the
+  threshold, and nobody — including Ozmek — knows what is coming.
 
 ### 4.2 Seed only: Origins and Mythology
 
