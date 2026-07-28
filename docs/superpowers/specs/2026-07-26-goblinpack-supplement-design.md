@@ -43,7 +43,7 @@ Skeleton follows v0's table of contents. Status is honest: most of this is not w
 | | Goblinoid Races | ✅ **designed** — six races, real stats, conversion method |
 | | Half Breeds and Mixed Heritage | ✅ **designed** |
 | | Relations with Giant-Kin | ⛔ not started |
-| **Two** | Character Creation | 🟡 races + cultures done; class packages outstanding |
+| **Two** | Character Creation | 🟡 races + cultures done; **CHA re-baseline designed + playtested (§5A)**; class packages outstanding |
 | | Goblinoid Character Classes | 🟡 3 of 8 drafted (§5C): Prevaricator Bard, Wolf Rider, Crafter |
 | | Organizations and Cults | 🟡 10 cults digested; theological politics outstanding |
 | | Equipment and Magic | 🟡 anti-craftsmanship now has a mechanism (§5C.3 *Fast and Filthy*) |
@@ -266,6 +266,36 @@ Native Tongue, and the Experience Modifier.
 
 Applies to CHA only. The other characteristics are differentiated across species and show no sign
 of the same flattening, so there is no evidence to justify extending the treatment.
+
+### The re-baseline in play (sessions 1–3)
+
+The rule was not a paper decision; it was built into Vek's sheet and ran at the table across the
+first three sessions. What play established, for GMs adopting it:
+
+- **The two numbers live on one line.** Vek's CHA is recorded as **12** — his rating *among his own
+  people*. Against a caravan guard, a duke's man, or Sister Ilenne it is **8** (12 − 4). Both are
+  the same characteristic seen from two sides; the sheet carries the 12 and the GM subtracts the 4
+  at the moment of a cross-culture roll. Never write the 8 down as if it were the goblin.
+- **The floor is real, not gifted.** At CHA 12 Vek's **Experience Modifier is still 0** — the `3d6`
+  re-baseline makes the +1 band *reachable* (CHA 13+), it does not hand it over. This matters: the
+  rule repairs a systematic slander (no goblinoid could ever clear the band) without making
+  goblinoids quietly better learners than the numbers earn. A goblinoid who wants the modifier still
+  has to have rolled for it.
+- **Within-culture speech pays full price.** When Vek stood on the rock and shouted the settlement
+  down ("OI!!! GOBBOS!…"), that was an Influence roll *among his own people* — **no penalty**, the
+  full **27** (CHA 12 × 2 = 24, +3 house-ruled from experience). The identical speech aimed at
+  Ilenne or at the duke's emissary would resolve at an effective CHA of 8. **The stage a goblinoid
+  is most persuasive on is the one facing inward** — which is exactly what a boast-singer, an
+  Outrider rallying the line, or a chief holding a warren together actually does.
+- **The penalty is a two-way fact, and the table felt it.** Ilenne, a human cleric dropped into
+  Khorvenn, is as tongue-tied among the gobbos as they are at court — her −4 toward them and theirs
+  toward her are the *same* wall from opposite sides. "Everyone hates us" stops being a passion the
+  players recite and becomes a number that bites in both directions every time an outsider is in the
+  room. This is the mechanical spine under the whole "Wrong Cathedral" premise.
+
+**GM guidance:** carry CHA as the in-culture value, apply −4 the instant a roll crosses the cultural
+line (either direction), and let players feel the difference between rallying their own and
+bargaining with the enemy. That felt gap *is* the supplement.
 
 ---
 
