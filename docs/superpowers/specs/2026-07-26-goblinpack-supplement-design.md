@@ -45,7 +45,7 @@ Skeleton follows v0's table of contents. Status is honest: most of this is not w
 | | Relations with Giant-Kin | ⛔ not started |
 | **Two** | Character Creation | 🟡 races + cultures done; **CHA re-baseline designed + playtested (§5A)**; class packages outstanding |
 | | Goblinoid Character Classes | 🟡 3 of 8 drafted (§5C): Prevaricator Bard, Wolf Rider, Crafter |
-| | Organizations and Cults | 🟡 10 cults digested; theological politics outstanding |
+| | Organizations and Cults | 🟡 10 cults digested; **Vrakvenn written + playtested (§5D)**; theological politics outstanding |
 | | Equipment and Magic | 🟡 anti-craftsmanship now has a mechanism (§5C.3 *Fast and Filthy*) |
 | **Three** | Goblinoid Territories | 🟡 Kazhrun sketched, tribal lands outstanding |
 | | Tribal Lands | ⛔ not started |
@@ -526,6 +526,124 @@ and produces nothing anyone will sing about.
 be solved by retraining and why it festers. Ghazrek does not need new skills. He needs his existing
 ones to mean what they used to mean, and Gobtown cannot give him that without ceasing to be
 Gobtown.
+
+---
+
+## 5D. The Cult of Vrakvenn the Wolf-Singer 🆕
+
+**Founded in play, session 6.** This is the supplement's second signature piece after the CHA
+re-baseline, and like that rule it was *discovered* rather than designed — it fell out of a PC with
+INT 8 being physically unable to learn an elven rite.
+
+> **The claim.** The elves say his name is Ehrendil Beldroth and that goblinoids have stolen him.
+> The cult's position is that the elves only ever *put their name on him like a mark on a sack* —
+> that he sat in their stone halls for a thousand years being sung the same song every night, and
+> **left**. A god who walks out on the elves is not an elf god. They did not lose him. He *went*.
+
+### The doctrine, and why it is unlike any other cult in the book
+
+Every other faith in Classic Fantasy is founded on **transmission** — the rite is old, it is correct,
+and the priest's job is to perform it without error. Vrakvenn inverts every part of that:
+
+| Ordinary cult | Vrakvenn |
+|---|---|
+| The rite is ancient and fixed | The rite is **made new every time**; repetition is the sin |
+| Correct performance matters | Performance quality is **irrelevant** — the first three tellers were all terrible |
+| The priest performs *for* the congregation | The priest performs *at* them and **they finish it** |
+| Sacrifice is given up | The god **refuses payment** and gives back |
+| Worship is human/demi-human | **Wolves take part in the responses** |
+
+The theology in one line: **he is the maker and the singer, so what he wants is what is *made* and
+what is *sung*.** He does not want blood, gold, or obedience. He wants a thing that did not exist
+before, sung badly, by a room.
+
+**The Gap.** The god's own voice in the deep water rises at the end and leaves a silence. It has
+done this, unanswered, for longer than anyone can date. Every rite therefore *leaves the gap* — and
+the congregation fills it. This is not a stylistic choice. It is the entire mechanism of the faith:
+**a single voice is not worship, it is a man muttering in a cave.**
+
+### The three sins
+
+1. **Singing it the same way twice.** A boast repeated word-for-word is a dead thing offered to a
+   god of making. Lay members are expected to *change it*, and improving on the truth is worship,
+   not deceit — the doctrinal overlap with Vykthar's Prevaricators is deliberate and unresolved.
+2. **Worshipping alone.** Solitary devotion is not merely ineffective, it is the specific error that
+   nearly killed Magnificus Drakmoor: eight years of private transaction with a god who was asking
+   for a chorus. Any rite performed by one voice is void.
+3. **Paying in blood.** Formally heretical, and named as such *because the founder did it* for eight
+   years in good faith. The cult's origin story is its chief prohibition.
+
+### Rite of the Fire
+
+Performed at the settlement fire, not in any built temple. Four movements:
+
+1. **The Spit.** Any celebrant spits on the stone before naming him. Improvised on the night of the
+   founding and adopted instantly, without discussion. It is the only formal act of reverence in the
+   cult and it is an insult.
+2. **The Naming.** *Vrakvenn* — never the elven name in a goblinoid mouth.
+3. **The Boast.** A newly-composed telling, climbing through runs, delivered from the teller's rock.
+4. **The Refrain.** *"AND WE KEPT HIM."* The room roars it into the gap at the end of every run.
+   Note what this line actually does: eighty voices are not *describing* an event, they are
+   **performing an annexation** — the claim of ownership is the sacrament.
+
+**The wolves answer.** Bonded mounts and picketed dire wolves respond to the refrain unprompted and
+untrained. No one has explained this. Treat it as GM-facing and true.
+
+### Holy sites are water
+
+Vrakvenn is present in **the singing water**: the drowned chamber beneath Khorvenn, the cistern that
+runs off it, and the seep on the north shoulder. There is no shrine, no altar and no building. This
+gives the cult a unique logistical problem — **its holiest place can only be reached by something
+that can swim under a mountain**, which makes an aquatic goblinoid (koolinth) the single most
+important office-holder in the faith, regardless of rank or piety.
+
+### Joining
+
+**Requirements:** POW 9. No CHA minimum — deliberately, and in pointed contrast to Vykthar (§5.3).
+Vrakvenn will take anyone who can be heard, and the founding priest is INT 8 and cannot hold a tune.
+
+**Cult Skills:** Boast, Devotion (Vrakvenn), Influence, Lore (the Keeping), Musicianship, Oratory,
+Sing, **Swim**, Animal Training (dire wolf)
+
+**Spheres:** All, Charm, Healing, Protection — *Healing* because the water closed the founder's
+wounds and refused further payment; *Protection* because the Concord is the observed effect of his
+presence. ⚠ Final sphere list to be checked against the CF cult chapter before publication.
+
+| Rank | Title | Prerequisites | Notes |
+|---|---|---|---|
+| 0 | **Spitter** | Spit, and shout the refrain | Every goblinoid in the settlement, automatically |
+| 1 | **Teller** | Boast 30, Devotion 30 | May compose and deliver a new boast |
+| 2 | **Gap-Keeper** | 4 cult skills at 50% | Knows how to *leave the space* and hold a room in it |
+| 3 | **Room-Raiser** | 4 cult skills at 70% | Can raise a hostile or frightened gallery to the refrain |
+| 4 | **Waterspeaker** | 3 cult skills at 90%, **Swim 60** | May address the pool directly |
+| 5 | **First Voice** | 2 cult skills at 110% | Begins the rite for the whole people |
+
+### Talents
+
+- **The Gap** (Rank 1). Leave a deliberate silence at the end of a run. Any hearer who wishes to
+  join may do so without a roll, however hostile they were a moment before. The refrain is
+  contagious and does not care about your politics.
+- **Kept** (Rank 2). While a rite is in progress, everyone taking part counts as *ours* for as long
+  as they are shouting — including non-goblinoids and animals. A practical and much-abused mechanism
+  for making outsiders temporarily un-killable.
+- **The Made Thing** (Rank 3). Offer something newly made or newly sung. The god answers. What he
+  answers *with* is not under the celebrant's control and never has been.
+- **Wolf-Chorus** (Rank 4). The responses of nearby dire wolves count toward the congregation. A
+  Waterspeaker alone with a wolf-line is not, technically, alone.
+
+### Open design questions
+
+1. **What class are its clergy?** Vykthar's are Bards (§5C.1). Vrakvenn's first priest is a **Wolf
+   Rider with Devotion 24**, and the cult has no clerical class at all — arguably correct for an
+   eight-day-old religion, and arguably the most interesting thing about it. Options: keep it
+   class-agnostic; build a *Roarer* variant on the Bard chassis; or make it the first CF cult whose
+   clergy are defined by **rite-role** (teller, gap-keeper, diver) rather than class.
+2. **The Vykthar overlap.** Both faiths hold that improving on the truth is virtuous. Is the
+   Prevaricator Order a rival, a parent, or the cult's inevitable future institution — the body that
+   will eventually decide what Drakmoor *was*?
+3. **The human problem.** The cult's only trained theologian is a human cleric of Ehrendil who has
+   chosen the god over her church. Nothing in the doctrine forbids this. Everything in goblinoid
+   society does.
 
 ---
 
