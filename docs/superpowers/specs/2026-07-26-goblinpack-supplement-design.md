@@ -641,9 +641,26 @@ presence. ⚠ Final sphere list to be checked against the CF cult chapter before
 2. **The Vykthar overlap.** Both faiths hold that improving on the truth is virtuous. Is the
    Prevaricator Order a rival, a parent, or the cult's inevitable future institution — the body that
    will eventually decide what Drakmoor *was*?
-3. **The human problem.** The cult's only trained theologian is a human cleric of Ehrendil who has
-   chosen the god over her church. Nothing in the doctrine forbids this. Everything in goblinoid
-   society does.
+3. ~~**The human problem.**~~ **Resolved at the table, session 7 — the cult is open to anyone.**
+   Challenged by a human novice asking to spit, Vek refused on racial grounds, and was beaten with
+   his *own founding argument*: the elves never owned him, they only put their name on him, and he
+   walked out of their halls precisely *because they thought he was theirs to keep* — so a priest
+   who rules on **who is allowed** is doing the elf thing and can expect the same result. **You do
+   not get to say who he takes.** The ruling was delivered with a shrug and a wink — *"do what you
+   want, welcome to Gobtown"* — and two doctrines fell out of four seconds of goblin indifference:
+
+   > **Vrakvenn takes who he takes.** Race, species and origin are not qualifications, and this
+   > cannot be walked back without unmaking the cult's own claim to the god.
+   >
+   > **There is no consecrated ground.** Asked *where* she should spit, Vek said "anywhere, it's a
+   > floor, innit." A god who lives in the water under everything does not need you to walk to a
+   > special piece of it.
+
+   **Design note.** This is the cult's structural advantage and its structural danger, and it is why
+   Vrakvenn is a campaign engine rather than a flavour entry. An open cult inside a society whose
+   defining passion is *Everyone Hates Us* will accrue exactly the members that society cannot
+   tolerate — and its first convert is a human who sings better than every goblin in the mountain,
+   in a religion that is entirely sung.
 
 ---
 
